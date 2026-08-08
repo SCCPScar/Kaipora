@@ -1,0 +1,286 @@
+import type { Tab } from '../nav';
+import { todayISO, formatLong, greeting, WEEKDAY_KEYS } from '../../lib/dates';
+import { getTrainingDay } from '../../data/training';
+import { EXERCISES } from '../../data/exercises';
+import { MEALS } from '../../data/diet';
+import { HABITS } from '../../data/habits';
+import {
+  getDay,
+  toggleMeal,
+  getWater,
+  setWater,
+  toggleExercise,
+  setTrainingDone,
+  toggleHabit,
+  getSettings
+} from '../../lib/storage';
+import type { Modality } from '../../lib/types';
+import { refreshActive, switchTab } from '../nav';
+import { openTimerModal } from '../components/timer';
+import { openExerciseModal } from '../components/exerciseModal';
+import { showToast } from '../components/toast';
+
+let modality: Modality = 'academia';
+
+function computeProgress(date: string): { done: number; total: number } {
+  const day = getDay(date);
+  const settings = getSettings();
+  const glassGoal = Math.max(1, Math.round(settings.waterGoalMl / 250));
+  let done = 0;
+  let total = 0;
+
+  total += MEALS.length;
+  done += MEALS.filter((m) => m.options.some((o) => day.meals[o.id])).length;
+
+  total += 1;
+  if (day.water >= glassGoal) done += 1;
+
+  total += 1;
+  if (day.training?.done) done += 1;
+
+  total += HABITS.length;
+  done += HABITS.filter((h) => day.habits[h.id]).length;
+
+  return { done, total };
+}
+
+export const todayTab: Tab = {
+  id: 'hoje',
+  label: 'Hoje',
+  icon: '☀️',
+  render(root: HTMLElement) {
+    const date = todayISO();
+    const settings = getSettings();
+    const day = getDay(date);
+    const now = new Date();
+    const weekdayKey = WEEKDAY_KEYS[now.getDay()] as ReturnType<typeof getTrainingDay>['weekday'];
+    const trainingDay = getTrainingDay(weekdayKey);
+    const workout = trainingDay[modality];
+
+    const { done, total } = computeProgress(date);
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const RING_C = 2 * Math.PI * 32;
+    const offset = RING_C - (pct / 100) * RING_C;
+
+    const glassGoal = Math.max(1, Math.round(settings.waterGoalMl / 250));
+    const mlEach = Math.round(settings.waterGoalMl / glassGoal);
+
+    root.innerHTML = `
+      <div class="ph">
+        <h2>${greeting(now)}, Scarllett</h2>
+        <div class="ph-title">Hoje</div>
+        <div class="ph-sub">${formatLong(now)}</div>
+      </div>
+
+      <div class="hero">
+        <div class="hero-row">
+          <div class="ring-wrap">
+            <svg width="72" height="72" viewBox="0 0 72 72">
+              <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#22d3ee"/>
+              </linearGradient></defs>
+              <circle class="ring-bg" cx="36" cy="36" r="32"/>
+              <circle class="ring-fg" cx="36" cy="36" r="32" stroke-dasharray="${RING_C}" stroke-dashoffset="${offset}"/>
+            </svg>
+            <div class="ring-pct">${pct}%</div>
+          </div>
+          <div class="hero-txt">
+            <strong>Progresso do dia</strong>
+            <span>${done} de ${total} itens concluídos</span>
+            <span>Foco: recomposição corporal, não só a balança 🌱</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wcard">
+        <div class="wcard-top">
+          <div class="wcard-lbl">💧 Água de hoje</div>
+          <div class="wcard-ml" id="wml">${day.water * mlEach} / ${settings.waterGoalMl} ml</div>
+        </div>
+        <div class="glasses" id="glasses"></div>
+        <div class="wbar"><div class="wbar-fill" style="width:${Math.min(100, (day.water / glassGoal) * 100)}%"></div></div>
+        <div class="wbtns">
+          <button class="wbtn" id="water-minus">− Copo</button>
+          <button class="wbtn" id="water-plus">+ Copo</button>
+        </div>
+      </div>
+
+      <section id="training-card">
+        <div class="sec-title">
+          <span>💪 Treino de hoje — ${trainingDay.label}</span>
+          <span class="pill">${workout.focus}</span>
+        </div>
+        <div class="modality-switch">
+          <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-modality="academia">🏋️ Academia</button>
+          <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-modality="casa">🏠 Casa</button>
+        </div>
+        <div id="today-exercises"></div>
+        <div class="sub-row" style="justify-content:space-between">
+          <label style="display:flex;align-items:center;gap:8px;margin:0;text-transform:none;font-size:12.5px;color:var(--text-dim)">
+            <span class="switch"><input type="checkbox" id="training-done" ${day.training?.done ? 'checked' : ''}/><span class="slider"></span></span>
+            Marcar treino de hoje como concluído
+          </label>
+        </div>
+      </section>
+
+      <section id="meals-card"></section>
+
+      <section>
+        <div class="sec-title">🌾 Hábitos de hoje</div>
+        <div id="habits-list"></div>
+      </section>
+    `;
+
+    renderGlasses(root, day.water, glassGoal);
+    renderExercises(root, workout, date);
+    renderMeals(root, date, day);
+    renderHabits(root, date, day);
+    wireEvents(root, date, glassGoal, workout, weekdayKey);
+  }
+};
+
+function renderGlasses(root: HTMLElement, water: number, goal: number) {
+  const el = root.querySelector('#glasses') as HTMLElement;
+  let html = '';
+  for (let i = 0; i < goal; i++) {
+    html += `<div class="glass ${i < water ? 'full' : ''}" data-glass="${i}"></div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderExercises(root: HTMLElement, workout: ReturnType<typeof getTrainingDay>['academia'], date: string) {
+  const el = root.querySelector('#today-exercises') as HTMLElement;
+  const doneList = getDay(date).exercisesDone[workout.id] ?? [];
+  el.innerHTML = workout.exercises
+    .map((we) => {
+      const ex = EXERCISES[we.exerciseId];
+      if (!ex) return '';
+      const isDone = doneList.includes(we.exerciseId);
+      return `
+      <div class="ex-row ${isDone ? 'done' : ''}" data-exercise="${we.exerciseId}">
+        <div class="ex-main" data-select="${we.exerciseId}">
+          <strong>${ex.name}</strong>
+          <small>${we.sets}x ${we.reps} · descanso ${we.restSeconds}s${we.note ? ' · ' + we.note : ''}</small>
+          ${ex.gluteFocus ? '<span class="gluteo-tag">🔥 Glúteos</span>' : ''}
+        </div>
+        <div class="ex-actions">
+          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">ℹ️</button>
+          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">⏱</button>
+        </div>
+      </div>`;
+    })
+    .join('');
+}
+
+function renderMeals(root: HTMLElement, date: string, day: ReturnType<typeof getDay>) {
+  const el = root.querySelector('#meals-card') as HTMLElement;
+  el.innerHTML = MEALS.map((meal) => {
+    const totalKcal = meal.options.reduce((s, o) => (day.meals[o.id] ? s + o.kcal : s), 0);
+    const totalP = meal.options.reduce((s, o) => (day.meals[o.id] ? s + o.protein : s), 0);
+    return `
+    <div style="border-bottom:1px solid var(--border)">
+      <div class="sec-title"><span>${meal.name} · ${meal.time}</span><span class="badge-k">~${meal.targetKcal} kcal</span></div>
+      ${meal.options
+        .map(
+          (o) => `
+        <div class="row ${day.meals[o.id] ? 'done' : ''}" data-meal="${meal.id}" data-option="${o.id}">
+          <div class="chk">✓</div>
+          <div class="rtxt"><strong>${o.emoji} ${o.label}</strong><small>${o.desc}</small></div>
+          <span class="kcal">${o.kcal} kcal</span>
+        </div>`
+        )
+        .join('')}
+      ${totalKcal > 0 ? `<div class="sub-row"><span class="badge-p">🥩 ${totalP}g prot</span><span class="badge-k">🔥 ${totalKcal} kcal</span></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderHabits(root: HTMLElement, date: string, day: ReturnType<typeof getDay>) {
+  const el = root.querySelector('#habits-list') as HTMLElement;
+  el.innerHTML = HABITS.map(
+    (h) => `
+    <div class="row ${day.habits[h.id] ? 'done' : ''}" data-habit="${h.id}">
+      <div class="chk">✓</div>
+      <div class="rtxt"><strong>${h.emoji} ${h.label}</strong></div>
+    </div>`
+  ).join('');
+}
+
+function wireEvents(
+  root: HTMLElement,
+  date: string,
+  glassGoal: number,
+  workout: ReturnType<typeof getTrainingDay>['academia'],
+  weekdayKey: ReturnType<typeof getTrainingDay>['weekday']
+) {
+  root.querySelector('#water-plus')?.addEventListener('click', () => {
+    const cur = getWater(date);
+    if (cur < glassGoal + 4) setWater(date, cur + 1);
+    refreshActive();
+  });
+  root.querySelector('#water-minus')?.addEventListener('click', () => {
+    const cur = getWater(date);
+    if (cur > 0) setWater(date, cur - 1);
+    refreshActive();
+  });
+  root.querySelector('#glasses')?.addEventListener('click', (e) => {
+    const target = (e.target as HTMLElement).closest<HTMLElement>('[data-glass]');
+    if (!target) return;
+    const idx = Number(target.dataset.glass);
+    const cur = getWater(date);
+    setWater(date, idx < cur ? idx : idx + 1);
+    refreshActive();
+  });
+
+  root.querySelectorAll('.modality-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      modality = (btn as HTMLElement).dataset.modality as Modality;
+      refreshActive();
+    });
+  });
+
+  root.querySelector('#today-exercises')?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const infoBtn = target.closest<HTMLElement>('[data-info]');
+    const timerBtn = target.closest<HTMLElement>('[data-timer]');
+    const selectArea = target.closest<HTMLElement>('[data-select]');
+    if (infoBtn) {
+      const ex = EXERCISES[infoBtn.dataset.info as string];
+      if (ex) openExerciseModal(ex);
+      return;
+    }
+    if (timerBtn) {
+      openTimerModal(Number(timerBtn.dataset.timer));
+      return;
+    }
+    if (selectArea) {
+      toggleExercise(date, workout.id, selectArea.dataset.select as string);
+      refreshActive();
+    }
+  });
+
+  root.querySelector('#training-done')?.addEventListener('change', (e) => {
+    const checked = (e.target as HTMLInputElement).checked;
+    setTrainingDone(date, modality, workout.id, checked);
+    if (checked) showToast('Treino de hoje registado! 💪');
+    refreshActive();
+  });
+
+  root.querySelector('#meals-card')?.addEventListener('click', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLElement>('[data-meal]');
+    if (!row) return;
+    toggleMeal(date, row.dataset.option as string);
+    refreshActive();
+  });
+
+  root.querySelector('#habits-list')?.addEventListener('click', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLElement>('[data-habit]');
+    if (!row) return;
+    toggleHabit(date, row.dataset.habit as string);
+    refreshActive();
+  });
+
+  void weekdayKey;
+  // shortcut: tapping the hero opens Progresso for quick weight entry
+  root.querySelector('.hero')?.addEventListener('click', () => switchTab('progresso'));
+}
