@@ -1,9 +1,9 @@
 import './style.css';
 import { migrateFromLegacyApp } from './lib/migrate';
 import { registerServiceWorker } from './lib/registerSW';
-import { startBackgroundSync } from './lib/sync';
+import { startBackgroundSync, onAuthChange, fullSync } from './lib/sync';
 import { startReminderLoop } from './lib/notifications';
-import { initNav } from './ui/nav';
+import { initNav, refreshActive } from './ui/nav';
 import { todayTab } from './ui/tabs/today';
 import { trainingTab } from './ui/tabs/training';
 import { dietTab } from './ui/tabs/diet';
@@ -26,7 +26,24 @@ registerServiceWorker();
 startReminderLoop();
 startBackgroundSync((result) => {
   if (!result.ok) return;
-  if (result.pushed > 0 || result.pulled > 0) showToast('Dados sincronizados ☁️');
+  if (result.pushed > 0 || result.pulled > 0) {
+    refreshActive();
+    showToast('Dados sincronizados ☁️');
+  }
+});
+
+// After a magic-link sign-in (which lands back on this page with a fresh
+// session), sync immediately instead of waiting for the next timer tick, and
+// refresh whatever tab is on screen so the account state shows up right away.
+let wasSignedIn = false;
+onAuthChange((signedIn) => {
+  if (signedIn && !wasSignedIn) {
+    void fullSync().then((result) => {
+      if (result.ok && (result.pushed > 0 || result.pulled > 0)) showToast('Dados sincronizados ☁️');
+    });
+  }
+  wasSignedIn = signedIn;
+  refreshActive();
 });
 
 if (migrated) {

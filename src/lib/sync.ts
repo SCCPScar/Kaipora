@@ -1,10 +1,15 @@
 import { supabase, isCloudConfigured } from './supabaseClient';
 import { allKeys, rawGet, rawSet } from './storage';
-import { lastSyncedAt, setLastSyncedAt, touchedAt } from './meta';
+import type { DayRecord, WeightEntry, MeasurementEntry, NoteEntry } from './types';
+import type { ExerciseLogEntry } from './storage';
+import { lastSyncedAt, setLastSyncedAt, touchedAt, markTouched } from './meta';
+import { mergeDayRecords, mergeEntryLists } from './merge';
 
 export { isCloudConfigured };
 
 const TABLE = 'user_data';
+const DAY_KEY_RE = /^vp_day_\d{4}-\d{2}-\d{2}$/;
+const LOAD_KEY_RE = /^vp_loads_/;
 
 export type SyncResult =
   | { ok: true; pushed: number; pulled: number }
@@ -37,11 +42,81 @@ export function onAuthChange(cb: (signedIn: boolean) => void): () => void {
 }
 
 /**
- * Pulls remote rows newer than what's stored locally (last-write-wins by
- * timestamp), then pushes every local key touched since the last successful
- * sync. Safe to call repeatedly (on load, on regaining connectivity, on a
- * timer, or from a manual "Sincronizar agora" button) — it's a no-op when
- * cloud sync isn't configured or the user isn't signed in.
+ * Reconciles one pulled row against local state. `since` is the timestamp of
+ * this device's last successful sync — it's what lets us tell "remote hasn't
+ * changed since we last agreed" and "we haven't changed locally either" apart
+ * from an actual concurrent edit, so we only ever fall back to a merge when
+ * both sides genuinely diverged since the last sync.
+ */
+interface Reconciliation {
+  applied: boolean;
+  value: unknown;
+  /** true when `value` is a freshly-computed merge that must be pushed back this cycle. */
+  isMerge: boolean;
+}
+
+function reconcile(key: string, remoteValue: unknown, remoteTs: number, since: number): Reconciliation {
+  const hasLocal = rawGet<unknown>(key, undefined) !== undefined;
+  const localTs = touchedAt(key) ?? 0;
+
+  if (!hasLocal) return { applied: true, value: remoteValue, isMerge: false };
+  if (since > 0 && remoteTs <= since) return { applied: false, value: undefined, isMerge: false }; // remote is old news, local stands
+  if (localTs <= since) return { applied: true, value: remoteValue, isMerge: false }; // we haven't touched it, remote wins cleanly
+
+  // True concurrent conflict: both sides changed since the last sync.
+  const localValue = rawGet<unknown>(key, null);
+  return { applied: true, value: mergeConflicting(key, localValue, remoteValue), isMerge: true };
+}
+
+function mergeConflicting(key: string, local: unknown, remote: unknown): unknown {
+  if (DAY_KEY_RE.test(key)) {
+    return mergeDayRecords(local as DayRecord, remote as DayRecord);
+  }
+  if (key === 'vp_weights') {
+    return mergeEntryLists(
+      local as WeightEntry[],
+      remote as WeightEntry[],
+      (e) => `${e.date}_${e.kg}`,
+      (e) => e.date
+    );
+  }
+  if (key === 'vp_measurements') {
+    return mergeEntryLists(
+      local as MeasurementEntry[],
+      remote as MeasurementEntry[],
+      (e) => `${e.date}_${e.waist}_${e.hip}_${e.thigh}_${e.arm}`,
+      (e) => e.date
+    );
+  }
+  if (key === 'vp_notes') {
+    return mergeEntryLists(
+      local as NoteEntry[],
+      remote as NoteEntry[],
+      (e) => `${e.date}_${e.text}`,
+      (e) => e.date
+    );
+  }
+  if (LOAD_KEY_RE.test(key)) {
+    return mergeEntryLists(
+      local as ExerciseLogEntry[],
+      remote as ExerciseLogEntry[],
+      (e) => `${e.date}_${e.weightKg}_${e.reps}`,
+      (e) => e.date
+    );
+  }
+  // Opaque scalar (settings, ...): no field-level merge possible — the
+  // remote copy is as good a pick as any for this rare, low-stakes case.
+  return remote;
+}
+
+/**
+ * Pulls remote rows, reconciling each against local state (merging only on
+ * genuine concurrent conflicts — see reconcile() above), then pushes every
+ * local key touched since the last successful sync, including any merge
+ * results so the cloud converges too. Safe to call repeatedly (on load, on
+ * regaining connectivity, on a timer, or from a manual "Sincronizar agora"
+ * button) — it's a no-op when cloud sync isn't configured or the user isn't
+ * signed in.
  */
 export async function fullSync(): Promise<SyncResult> {
   if (!supabase) return { ok: false, reason: 'Sincronização cloud não configurada.' };
@@ -50,6 +125,7 @@ export async function fullSync(): Promise<SyncResult> {
   if (!navigator.onLine) return { ok: false, reason: 'Sem ligação à internet.' };
 
   const userId = session.user.id;
+  const since = lastSyncedAt();
   let pulled = 0;
   let pushed = 0;
 
@@ -62,15 +138,19 @@ export async function fullSync(): Promise<SyncResult> {
 
     for (const row of remoteRows ?? []) {
       const remoteTs = new Date(row.updated_at).getTime();
-      const localTs = touchedAt(row.key) ?? 0;
-      const hasLocal = rawGet<unknown>(row.key, undefined) !== undefined;
-      if (!hasLocal || remoteTs > localTs) {
-        rawSet(row.key, row.value);
-        pulled++;
-      }
+      const { applied, value, isMerge } = reconcile(row.key, row.value, remoteTs, since);
+      if (!applied) continue;
+      rawSet(row.key, value);
+      // A pure pull (no local conflict) should carry the remote's real edit
+      // time forward, not "now" — otherwise a later genuine edit from a third
+      // device could be wrongly judged older than this device's pull. A merge
+      // result, by contrast, IS a brand-new local state that must be pushed
+      // back this same cycle, so it keeps the "touched now" that rawSet's
+      // onChange hook already recorded for it.
+      if (!isMerge) markTouched(row.key, remoteTs);
+      pulled++;
     }
 
-    const since = lastSyncedAt();
     const toPush = allKeys().filter((k) => (touchedAt(k) ?? 0) > since || since === 0);
     if (toPush.length) {
       const rows = toPush.map((key) => ({

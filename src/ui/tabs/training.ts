@@ -27,28 +27,36 @@ export const trainingTab: Tab = {
   icon: '💪',
   render(root: HTMLElement) {
     const date = todayISO();
+    // Wrapped in a freshly-created child (rather than delegating straight on
+    // `root`) because `root` itself is a persistent container reused across
+    // renders — only its children are replaced each time. A listener
+    // attached directly to `root` would never get cleaned up and would
+    // stack on every re-render (every toggle/expand/complete action calls
+    // refreshActive()), firing a single tap N times after N renders.
     root.innerHTML = `
-      <div class="ph">
-        <h2>Treino</h2>
-        <div class="ph-title">Academia + Casa</div>
-        <div class="ph-sub">Toca no dia para abrir · ⏱ = descanso · ℹ️ = como fazer</div>
-      </div>
-      <div class="alert"><span>🌾</span><span>Cada dia tem sempre as duas versões — escolhe Academia ou Casa consoante o que fizeres.</span></div>
-      <div id="week-days"></div>
-
-      <section>
-        <div class="sec-title"><span>🔥 Programa Intensivo de Glúteos</span></div>
-        <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-          Trabalho dedicado a glúteo máximo e médio, distribuído ao longo da semana para evitar volume excessivo.
-          Aparece nos dias de pernas (Qua, Qui, Sáb) — aqui tens a lista completa dos treinos que fazem parte do programa.
+      <div id="treino-content">
+        <div class="ph">
+          <h2>Treino</h2>
+          <div class="ph-title">Academia + Casa</div>
+          <div class="ph-sub">Toca no dia para abrir · ⏱ = descanso · ℹ️ = como fazer</div>
         </div>
-        <div id="glute-list"></div>
-      </section>
+        <div class="alert"><span>🌾</span><span>Cada dia tem sempre as duas versões — escolhe Academia ou Casa consoante o que fizeres.</span></div>
+        <div id="week-days"></div>
+
+        <section>
+          <div class="sec-title"><span>🔥 Programa Intensivo de Glúteos</span></div>
+          <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
+            Trabalho dedicado a glúteo máximo e médio, distribuído ao longo da semana para evitar volume excessivo.
+            Aparece nos dias de pernas (Qua, Qui, Sáb) — aqui tens a lista completa dos treinos que fazem parte do programa.
+          </div>
+          <div id="glute-list"></div>
+        </section>
+      </div>
     `;
 
     renderWeek(root, date);
     renderGluteList(root);
-    wireEvents(root, date);
+    wireEvents(root.querySelector('#treino-content') as HTMLElement, date);
   }
 };
 

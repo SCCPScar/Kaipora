@@ -66,4 +66,35 @@ describe('legacy migration', () => {
 
     expect(getWeights()).toEqual([{ kg: 70, date: '2026-02-01' }]);
   });
+
+  it('migrates the old weekly habit grid onto the exact matching calendar day', () => {
+    // 2026-02-01 is a Sunday, so it's a valid week-start key for the old format.
+    // Old format: "{habitIndex}_{dayOfWeekIndex}" -> true, where habitIndex
+    // matches HABITS array order (0=agua) and dayOfWeekIndex is 0=Sunday.
+    localStorage.setItem(
+      'scar_hab_2026-02-01',
+      JSON.stringify({
+        '0_0': true, // agua, Sunday itself (2026-02-01)
+        '3_2': true, // treino, Tuesday (2026-02-03)
+        '4_2': false // sono, Tuesday — not done, must NOT be migrated as true
+      })
+    );
+
+    migrateFromLegacyApp();
+
+    expect(getDay('2026-02-01').habits.agua).toBe(true);
+    expect(getDay('2026-02-03').habits.treino).toBe(true);
+    expect(getDay('2026-02-03').habits.sono).toBeUndefined();
+  });
+
+  it('merges migrated habits into a day record already created by the day/water/exercise migration', () => {
+    localStorage.setItem('scar_day_2026-01-01', JSON.stringify({ pa1: true }));
+    localStorage.setItem('scar_hab_2025-12-28', JSON.stringify({ '2_4': true })); // suplementos, Thursday = 2026-01-01
+
+    migrateFromLegacyApp();
+
+    const record = getDay('2026-01-01');
+    expect(record.meals).toEqual({ pa1: true });
+    expect(record.habits.suplementos).toBe(true);
+  });
 });

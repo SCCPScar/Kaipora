@@ -26,6 +26,8 @@ export const settingsTab: Tab = {
           <div><label>Peso meta (kg)</label><input class="finp" id="s-goalweight" type="number" step="0.5" value="${settings.goalWeightKg}" /></div>
           <div><label>Meta calórica (kcal)</label><input class="finp" id="s-kcal" type="number" step="10" value="${settings.calorieGoal}" /></div>
           <div><label>Meta proteína (g)</label><input class="finp" id="s-protein" type="number" step="5" value="${settings.proteinGoal}" /></div>
+          <div><label>Meta carboidratos (g)</label><input class="finp" id="s-carb" type="number" step="5" value="${settings.carbGoal}" /></div>
+          <div><label>Meta gordura (g)</label><input class="finp" id="s-fat" type="number" step="5" value="${settings.fatGoal}" /></div>
         </div>
         <div class="form-row" style="padding-top:0">
           <button class="btn block" id="s-save-goals">Guardar metas</button>
@@ -143,7 +145,9 @@ function wireEvents(root: HTMLElement) {
       waterGoalMl: Number((root.querySelector('#s-water') as HTMLInputElement).value) || 2000,
       goalWeightKg: Number((root.querySelector('#s-goalweight') as HTMLInputElement).value) || 65,
       calorieGoal: Number((root.querySelector('#s-kcal') as HTMLInputElement).value) || 1615,
-      proteinGoal: Number((root.querySelector('#s-protein') as HTMLInputElement).value) || 135
+      proteinGoal: Number((root.querySelector('#s-protein') as HTMLInputElement).value) || 135,
+      carbGoal: Number((root.querySelector('#s-carb') as HTMLInputElement).value) || 140,
+      fatGoal: Number((root.querySelector('#s-fat') as HTMLInputElement).value) || 55
     });
     showToast('Metas guardadas 🌱');
   });

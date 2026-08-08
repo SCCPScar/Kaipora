@@ -41,12 +41,20 @@ export function rawRemove(key: string): void {
   }
 }
 
-/** Every application-owned key currently in localStorage, for backup/export/sync. */
+/**
+ * Internal bookkeeping keys that live under the same "vp_" prefix but are
+ * NOT user data — they must never be synced to the cloud (a stale
+ * vp_last_synced_at pulled from another device would corrupt this device's
+ * sync cursor) and never included in backups.
+ */
+const INTERNAL_KEYS = new Set([`${PFX}_meta`, `${PFX}_last_synced_at`, `${PFX}_migrated_from_scar`]);
+
+/** Every user-data key currently in localStorage, for backup/export/sync. */
 export function allKeys(): string[] {
   const out: string[] = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
-    if (k && k.startsWith(PFX + '_')) out.push(k);
+    if (k && k.startsWith(PFX + '_') && !INTERNAL_KEYS.has(k)) out.push(k);
   }
   return out;
 }
@@ -206,6 +214,30 @@ export function importBackup(backup: Backup): void {
     throw new Error('Ficheiro de backup inválido.');
   }
   for (const [key, value] of Object.entries(backup.data)) {
-    if (key.startsWith(PFX + '_')) rawSet(key, value);
+    if (key.startsWith(PFX + '_') && !INTERNAL_KEYS.has(key)) rawSet(key, value);
   }
+}
+
+// ---- Exercise load / strength progression ----
+
+export interface ExerciseLogEntry {
+  date: string;
+  weightKg?: number;
+  reps?: number;
+}
+
+export function getExerciseLoads(exerciseId: string): ExerciseLogEntry[] {
+  return rawGet<ExerciseLogEntry[]>(`${PFX}_loads_${exerciseId}`, []);
+}
+
+export function logExerciseLoad(exerciseId: string, entry: ExerciseLogEntry): void {
+  const list = getExerciseLoads(exerciseId);
+  list.unshift(entry);
+  rawSet(`${PFX}_loads_${exerciseId}`, list);
+}
+
+export function deleteExerciseLoad(exerciseId: string, index: number): void {
+  const list = getExerciseLoads(exerciseId);
+  list.splice(index, 1);
+  rawSet(`${PFX}_loads_${exerciseId}`, list);
 }

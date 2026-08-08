@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MEALS, getMeal, getMealOption, substitutesFor } from '../src/data/diet';
+import { MEALS, getMeal, getMealOption, substitutesFor, dailyTotalsForMeals } from '../src/data/diet';
 
 describe('diet data', () => {
   it('has six meal slots covering the whole day', () => {
@@ -46,5 +46,17 @@ describe('diet data', () => {
     const subs = substitutesFor('pa', 'pa1');
     expect(subs.some((o) => o.id === 'pa1')).toBe(false);
     expect(subs.length).toBe((getMeal('pa')?.options.length ?? 0) - 1);
+  });
+
+  it('dailyTotalsForMeals sums only the checked options, across every meal slot', () => {
+    const pa1 = getMealOption('pa', 'pa1')!;
+    const lm2 = getMealOption('lm', 'lm2')!;
+    const totals = dailyTotalsForMeals({ pa1: true, lm2: true, pa2: false });
+    expect(totals.kcal).toBe(pa1.kcal + lm2.kcal);
+    expect(totals.protein).toBe(pa1.protein + lm2.protein);
+  });
+
+  it('dailyTotalsForMeals returns all zeros when nothing is checked', () => {
+    expect(dailyTotalsForMeals({})).toEqual({ kcal: 0, protein: 0, carbs: 0, fat: 0 });
   });
 });

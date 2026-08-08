@@ -31,6 +31,8 @@ export interface Settings {
   waterGoalMl: number;
   calorieGoal: number;
   proteinGoal: number;
+  carbGoal: number;
+  fatGoal: number;
   goalWeightKg: number;
   heightCm: number;
   notificationsEnabled: boolean;
@@ -38,10 +40,14 @@ export interface Settings {
   reducedMotion: boolean;
 }
 
+// carbGoal/fatGoal derived from the average carbs/fat across all options of
+// each meal slot in src/data/diet.ts, the same way calorieGoal/proteinGoal were.
 export const DEFAULT_SETTINGS: Settings = {
   waterGoalMl: 2000,
   calorieGoal: 1615,
   proteinGoal: 135,
+  carbGoal: 140,
+  fatGoal: 55,
   goalWeightKg: 65,
   heightCm: 171,
   notificationsEnabled: false,

@@ -57,6 +57,10 @@ export const progressTab: Tab = {
           <div><label>Coxa</label><input class="finp" id="mco" type="number" placeholder="Ex: 56" /></div>
           <div><label>Braço</label><input class="finp" id="mb" type="number" placeholder="Ex: 28" /></div>
         </div>
+        <div class="form-row">
+          <input class="finp" id="mextra-name" type="text" placeholder="Outra medida (ex: peito)" style="max-width:160px" />
+          <input class="finp" id="mextra-val" type="number" placeholder="cm" style="max-width:90px" />
+        </div>
         <div class="form-row" style="padding-top:0">
           <button class="btn block" id="msave">+ Guardar medidas</button>
         </div>
@@ -125,16 +129,19 @@ function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasur
     return;
   }
   el.innerHTML = list
-    .map(
-      (m, i) => `
+    .map((m, i) => {
+      const extras = Object.entries(m.extra ?? {})
+        .map(([name, val]) => `${name} ${val}cm`)
+        .join(' · ');
+      return `
     <div class="log-item">
       <div class="log-txt">
         <strong>${m.date}</strong>
-        <div class="log-date">Cintura ${m.waist ?? '-'}cm · Quadril ${m.hip ?? '-'}cm · Coxa ${m.thigh ?? '-'}cm · Braço ${m.arm ?? '-'}cm</div>
+        <div class="log-date">Cintura ${m.waist ?? '-'}cm · Quadril ${m.hip ?? '-'}cm · Coxa ${m.thigh ?? '-'}cm · Braço ${m.arm ?? '-'}cm${extras ? ` · ${extras}` : ''}</div>
       </div>
       <button class="log-del" data-del-measurement="${i}">✕</button>
-    </div>`
-    )
+    </div>`;
+    })
     .join('');
 }
 
@@ -170,13 +177,16 @@ function wireEvents(root: HTMLElement) {
     const q = (root.querySelector('#mq') as HTMLInputElement).value;
     const co = (root.querySelector('#mco') as HTMLInputElement).value;
     const b = (root.querySelector('#mb') as HTMLInputElement).value;
-    if (!c && !q && !co && !b) return;
+    const extraName = (root.querySelector('#mextra-name') as HTMLInputElement).value.trim();
+    const extraVal = (root.querySelector('#mextra-val') as HTMLInputElement).value;
+    if (!c && !q && !co && !b && !(extraName && extraVal)) return;
     addMeasurement({
       date: todayISO(),
       waist: c ? parseFloat(c) : undefined,
       hip: q ? parseFloat(q) : undefined,
       thigh: co ? parseFloat(co) : undefined,
-      arm: b ? parseFloat(b) : undefined
+      arm: b ? parseFloat(b) : undefined,
+      extra: extraName && extraVal ? { [extraName]: parseFloat(extraVal) } : undefined
     });
     showToast('Medidas guardadas 🌱');
     refreshActive();

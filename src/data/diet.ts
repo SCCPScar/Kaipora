@@ -4,6 +4,7 @@
 // Cada opção dentro de uma refeição é uma substituição equivalente às restantes —
 // todas ficam dentro de uma banda calórica semelhante ao alvo da refeição.
 import type { Meal } from './types-diet';
+import { dailyTotals } from '../lib/calories';
 
 export const MEALS: Meal[] = [
   {
@@ -433,4 +434,10 @@ export function getMealOption(mealId: string, optionId: string) {
 /** Other options in the same meal slot — all designed to be roughly nutritionally equivalent. */
 export function substitutesFor(mealId: string, optionId: string) {
   return (getMeal(mealId)?.options ?? []).filter((o) => o.id !== optionId);
+}
+
+/** Sums kcal/protein/carbs/fat across every meal option checked for a given day record. */
+export function dailyTotalsForMeals(checkedOptionIds: Record<string, boolean>) {
+  const checked = MEALS.flatMap((meal) => meal.options.filter((o) => checkedOptionIds[o.id]));
+  return dailyTotals(checked);
 }

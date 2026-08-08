@@ -1,5 +1,5 @@
 import type { Tab } from '../nav';
-import { MEALS } from '../../data/diet';
+import { MEALS, dailyTotalsForMeals } from '../../data/diet';
 import { SUPPLEMENTS, DIET_NOTES } from '../../data/types-diet';
 import { getDay, toggleMeal, getSettings } from '../../lib/storage';
 import { todayISO, toISO, addDays } from '../../lib/dates';
@@ -14,20 +14,9 @@ export const dietTab: Tab = {
     const day = getDay(date);
     const settings = getSettings();
 
-    const totals = MEALS.reduce(
-      (acc, meal) => {
-        for (const o of meal.options) {
-          if (day.meals[o.id]) {
-            acc.kcal += o.kcal;
-            acc.protein += o.protein;
-            acc.carbs += o.carbs;
-            acc.fat += o.fat;
-          }
-        }
-        return acc;
-      },
-      { kcal: 0, protein: 0, carbs: 0, fat: 0 }
-    );
+    const totals = dailyTotalsForMeals(day.meals);
+
+    const remaining = settings.calorieGoal - totals.kcal;
 
     root.innerHTML = `
       <div class="ph">
@@ -37,10 +26,14 @@ export const dietTab: Tab = {
       </div>
 
       <div class="stat-row">
-        <div class="stat"><strong>${totals.kcal}</strong><small>kcal hoje</small></div>
+        <div class="stat"><strong>${totals.kcal}</strong><small>consumido</small></div>
         <div class="stat"><strong>${settings.calorieGoal}</strong><small>meta kcal</small></div>
-        <div class="stat"><strong>${totals.protein}g</strong><small>proteína hoje</small></div>
-        <div class="stat"><strong>${settings.proteinGoal}g</strong><small>meta proteína</small></div>
+        <div class="stat"><strong style="color:${remaining < 0 ? 'var(--burgundy-glow)' : 'var(--green)'}">${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? 'restante' : 'acima da meta'}</small></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><strong>${totals.protein}g</strong><small>proteína / ${settings.proteinGoal}g</small></div>
+        <div class="stat"><strong>${totals.carbs}g</strong><small>carboidr. / ${settings.carbGoal}g</small></div>
+        <div class="stat"><strong>${totals.fat}g</strong><small>gordura / ${settings.fatGoal}g</small></div>
       </div>
 
       <div class="alert"><span>⚠️</span><span>Não bebas durante as refeições (30 min antes e depois). Marca o que realmente comeste — as opções de cada refeição são substituições equivalentes entre si.</span></div>
@@ -117,7 +110,7 @@ function renderHistory(root: HTMLElement, date: string) {
     const d = addDays(today, -i);
     const iso = toISO(d);
     const rec = getDay(iso);
-    const kcal = MEALS.reduce((s, m) => s + m.options.reduce((s2, o) => (rec.meals[o.id] ? s2 + o.kcal : s2), 0), 0);
+    const kcal = dailyTotalsForMeals(rec.meals).kcal;
     const anyMarked = MEALS.some((m) => m.options.some((o) => rec.meals[o.id]));
     rows.push(`
       <div class="log-item">

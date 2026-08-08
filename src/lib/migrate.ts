@@ -1,5 +1,7 @@
 import { rawGet, rawSet, PFX } from './storage';
 import type { DayRecord } from './types';
+import { HABITS } from '../data/habits';
+import { toISO, addDays, fromISO } from './dates';
 
 const OLD_PFX = 'scar';
 const MIGRATION_FLAG = `${PFX}_migrated_from_scar`;
@@ -119,6 +121,45 @@ export function migrateFromLegacyApp(): { migrated: boolean; warnings: string[] 
     warnings.push(
       `${dateKeys.size} dia(s) de dados antigos foram migrados. O tipo de treino (Academia/Casa) desses dias antigos foi assumido como "Academia" porque a app original não guardava essa informação.`
     );
+  }
+
+  // Habits: scar_hab_{weekStartISO} -> per-day vp_day_{date}.habits.
+  // Old format tracked one checkbox per habit PER DAY OF THE WEEK
+  // (key "{habitIndex}_{dayOfWeekIndex}"), so it maps exactly onto the new
+  // per-day schema — no approximation needed, unlike the trained-days flag above.
+  let habitDaysMigrated = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key) continue;
+    const weekMatch = key.match(/^scar_hab_(\d{4}-\d{2}-\d{2})$/);
+    if (!weekMatch) continue;
+
+    const weekStart = fromISO(weekMatch[1]);
+    const weekData = rawGet<Record<string, boolean>>(key, {});
+
+    for (const [entryKey, done] of Object.entries(weekData)) {
+      if (!done) continue;
+      const [hStr, diStr] = entryKey.split('_');
+      const habitIndex = Number(hStr);
+      const dayOfWeek = Number(diStr);
+      const habit = HABITS[habitIndex];
+      if (!habit || Number.isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) continue;
+
+      const date = toISO(addDays(weekStart, dayOfWeek));
+      const dayKey = `${PFX}_day_${date}`;
+      const existing = rawGet<DayRecord | null>(dayKey, null);
+      const merged: DayRecord = existing ?? { meals: {}, water: 0, exercisesDone: {}, training: null, habits: {} };
+      if (!merged.habits[habit.id]) {
+        merged.habits[habit.id] = true;
+        rawSet(dayKey, merged);
+        habitDaysMigrated++;
+        touchedAnything = true;
+      }
+    }
+  }
+
+  if (habitDaysMigrated > 0) {
+    warnings.push(`${habitDaysMigrated} registo(s) de hábitos antigos foram migrados para os dias correspondentes.`);
   }
 
   rawSet(MIGRATION_FLAG, true);

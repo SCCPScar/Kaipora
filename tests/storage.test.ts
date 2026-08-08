@@ -20,8 +20,13 @@ import {
   getSettings,
   saveSettings,
   exportBackup,
-  importBackup
+  importBackup,
+  allKeys,
+  getExerciseLoads,
+  logExerciseLoad,
+  deleteExerciseLoad
 } from '../src/lib/storage';
+import { touchedAt } from '../src/lib/meta';
 
 beforeEach(() => {
   localStorage.clear();
@@ -134,5 +139,53 @@ describe('backup export/import', () => {
     // @ts-expect-error intentionally malformed input
     expect(() => importBackup({ notABackup: true })).toThrow();
     expect(getWeights()).toHaveLength(1);
+  });
+
+  it('never includes internal sync bookkeeping keys in a backup', () => {
+    addWeight(75, '2026-01-01'); // this also touches vp_meta and (via meta.ts) leaves a timestamp behind
+    const backup = exportBackup();
+    expect(Object.keys(backup.data)).not.toContain('vp_meta');
+    expect(Object.keys(backup.data)).not.toContain('vp_last_synced_at');
+    expect(Object.keys(backup.data)).not.toContain('vp_migrated_from_scar');
+  });
+});
+
+describe('allKeys', () => {
+  it('excludes internal bookkeeping keys from the syncable/exportable key set', () => {
+    addWeight(75, '2026-01-01');
+    rawSet('vp_last_synced_at', Date.now());
+    rawSet('vp_migrated_from_scar', true);
+    expect(allKeys()).toContain('vp_weights');
+    expect(allKeys()).not.toContain('vp_meta');
+    expect(allKeys()).not.toContain('vp_last_synced_at');
+    expect(allKeys()).not.toContain('vp_migrated_from_scar');
+  });
+});
+
+describe('exercise load tracking', () => {
+  it('logs and lists loads newest first, and deletes by index', () => {
+    logExerciseLoad('hip_thrust', { date: '2026-01-01', weightKg: 40, reps: 12 });
+    logExerciseLoad('hip_thrust', { date: '2026-01-08', weightKg: 45, reps: 10 });
+    expect(getExerciseLoads('hip_thrust').map((l) => l.weightKg)).toEqual([45, 40]);
+
+    deleteExerciseLoad('hip_thrust', 0);
+    expect(getExerciseLoads('hip_thrust').map((l) => l.weightKg)).toEqual([40]);
+  });
+
+  it('keeps load history isolated per exercise', () => {
+    logExerciseLoad('hip_thrust', { date: '2026-01-01', weightKg: 40 });
+    logExerciseLoad('agachamento', { date: '2026-01-01', weightKg: 60 });
+    expect(getExerciseLoads('hip_thrust')).toHaveLength(1);
+    expect(getExerciseLoads('agachamento')).toHaveLength(1);
+  });
+});
+
+describe('change tracking (meta)', () => {
+  it('records a touched timestamp on every write, used by the sync layer', () => {
+    const before = Date.now();
+    addWeight(75, '2026-01-01');
+    const ts = touchedAt('vp_weights');
+    expect(ts).toBeDefined();
+    expect(ts as number).toBeGreaterThanOrEqual(before);
   });
 });

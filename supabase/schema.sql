@@ -34,16 +34,14 @@ create policy "user_data_update_own" on public.user_data
 create policy "user_data_delete_own" on public.user_data
   for delete using (auth.uid() = user_id);
 
--- Mantém updated_at correto em qualquer UPDATE feito fora do cliente.
-create or replace function public.touch_user_data_updated_at()
-returns trigger as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$ language plpgsql;
-
+-- IMPORTANT: updated_at is set by the client on every upsert, from the exact
+-- moment the row's data actually changed locally — it is the timestamp the
+-- app's conflict resolution (last-write-wins / merge) relies on. Do NOT add
+-- a trigger that overwrites it with now() on UPDATE: that would replace the
+-- real edit time with "when this row happened to reach the server", which
+-- silently breaks conflict resolution across devices (a device that was
+-- offline and syncs later could then wrongly appear "newest" and clobber a
+-- genuinely more recent edit from another device). If you previously applied
+-- an earlier version of this schema with such a trigger, drop it:
 drop trigger if exists user_data_touch on public.user_data;
-create trigger user_data_touch
-  before update on public.user_data
-  for each row execute function public.touch_user_data_updated_at();
+drop function if exists public.touch_user_data_updated_at();
