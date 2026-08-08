@@ -1,5 +1,6 @@
-import type { DayRecord, MeasurementEntry, NoteEntry, Settings, WeightEntry, Modality } from './types';
+import type { DayRecord, MeasurementEntry, NoteEntry, Settings, WeightEntry, Modality, Tombstonable } from './types';
 import { DEFAULT_SETTINGS } from './types';
+import { visible, withAdded, withSoftDeleted } from './tombstoneList';
 
 export const PFX = 'vp';
 
@@ -128,57 +129,90 @@ export function toggleHabit(date: string, habitId: string): boolean {
 }
 
 // ---- Weights ----
+// Deletes are soft (tombstoned), never spliced out, so a delete made offline
+// on one device can't be silently undone by a stale copy still held by
+// another device once they sync — see tombstoneList.ts and merge.ts.
 
-export function getWeights(): WeightEntry[] {
+function getWeightsRaw(): WeightEntry[] {
   return rawGet<WeightEntry[]>(`${PFX}_weights`, []);
 }
 
-export function addWeight(kg: number, date: string): void {
-  const list = getWeights();
-  list.unshift({ kg, date });
-  rawSet(`${PFX}_weights`, list);
+export function getWeights(): WeightEntry[] {
+  return visible(getWeightsRaw());
 }
 
-export function deleteWeight(index: number): void {
-  const list = getWeights();
-  list.splice(index, 1);
-  rawSet(`${PFX}_weights`, list);
+export function addWeight(kg: number, date: string): void {
+  rawSet(`${PFX}_weights`, withAdded(getWeightsRaw(), { kg, date }));
+}
+
+export function deleteWeight(visibleIndex: number): void {
+  rawSet(
+    `${PFX}_weights`,
+    withSoftDeleted(getWeightsRaw(), visibleIndex, (a, b) => a.date === b.date && a.kg === b.kg)
+  );
 }
 
 // ---- Measurements ----
 
-export function getMeasurements(): MeasurementEntry[] {
+function getMeasurementsRaw(): MeasurementEntry[] {
   return rawGet<MeasurementEntry[]>(`${PFX}_measurements`, []);
 }
 
-export function addMeasurement(entry: MeasurementEntry): void {
-  const list = getMeasurements();
-  list.unshift(entry);
-  rawSet(`${PFX}_measurements`, list);
+export function getMeasurements(): MeasurementEntry[] {
+  return visible(getMeasurementsRaw());
 }
 
-export function deleteMeasurement(index: number): void {
-  const list = getMeasurements();
-  list.splice(index, 1);
-  rawSet(`${PFX}_measurements`, list);
+function sameMeasurement(a: MeasurementEntry, b: MeasurementEntry): boolean {
+  return (
+    a.date === b.date &&
+    a.waist === b.waist &&
+    a.hip === b.hip &&
+    a.thigh === b.thigh &&
+    a.arm === b.arm &&
+    JSON.stringify(a.extra ?? {}) === JSON.stringify(b.extra ?? {})
+  );
+}
+
+export function addMeasurement(entry: Omit<MeasurementEntry, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_measurements`, withAdded(getMeasurementsRaw(), entry));
+}
+
+export function deleteMeasurement(visibleIndex: number): void {
+  rawSet(`${PFX}_measurements`, withSoftDeleted(getMeasurementsRaw(), visibleIndex, sameMeasurement));
+}
+
+/**
+ * Edits are implemented as tombstone-the-old-entry + add-a-new-one, rather
+ * than mutating fields in place. The sync/merge layer identifies entries by
+ * their content (see merge.ts), so an in-place field change would silently
+ * create a duplicate on the next sync instead of replacing anything — going
+ * through the same soft-delete + add primitives keeps editing exactly as
+ * sync-safe as deleting already is.
+ */
+export function updateMeasurement(visibleIndex: number, next: Omit<MeasurementEntry, 'updatedAt' | 'deleted'>): void {
+  const withDeleted = withSoftDeleted(getMeasurementsRaw(), visibleIndex, sameMeasurement);
+  rawSet(`${PFX}_measurements`, withAdded(withDeleted, next));
 }
 
 // ---- Notes ----
 
-export function getNotes(): NoteEntry[] {
+function getNotesRaw(): NoteEntry[] {
   return rawGet<NoteEntry[]>(`${PFX}_notes`, []);
 }
 
-export function addNote(text: string, date: string): void {
-  const list = getNotes();
-  list.unshift({ text, date });
-  rawSet(`${PFX}_notes`, list);
+export function getNotes(): NoteEntry[] {
+  return visible(getNotesRaw());
 }
 
-export function deleteNote(index: number): void {
-  const list = getNotes();
-  list.splice(index, 1);
-  rawSet(`${PFX}_notes`, list);
+export function addNote(text: string, date: string): void {
+  rawSet(`${PFX}_notes`, withAdded(getNotesRaw(), { text, date }));
+}
+
+export function deleteNote(visibleIndex: number): void {
+  rawSet(
+    `${PFX}_notes`,
+    withSoftDeleted(getNotesRaw(), visibleIndex, (a, b) => a.date === b.date && a.text === b.text)
+  );
 }
 
 // ---- Settings ----
@@ -220,24 +254,33 @@ export function importBackup(backup: Backup): void {
 
 // ---- Exercise load / strength progression ----
 
-export interface ExerciseLogEntry {
+export interface ExerciseLogEntry extends Tombstonable {
   date: string;
-  weightKg?: number;
-  reps?: number;
+  weightKg?: number; // academia: carga
+  reps?: number; // ambos: repetições
+  seconds?: number; // ambos: duração (ex. prancha, exercícios isométricos)
+  note?: string; // casa: variação/dificuldade (ex. "joelhos", "avançado", "elástico vermelho")
 }
 
-export function getExerciseLoads(exerciseId: string): ExerciseLogEntry[] {
+function getExerciseLoadsRaw(exerciseId: string): ExerciseLogEntry[] {
   return rawGet<ExerciseLogEntry[]>(`${PFX}_loads_${exerciseId}`, []);
 }
 
-export function logExerciseLoad(exerciseId: string, entry: ExerciseLogEntry): void {
-  const list = getExerciseLoads(exerciseId);
-  list.unshift(entry);
-  rawSet(`${PFX}_loads_${exerciseId}`, list);
+export function getExerciseLoads(exerciseId: string): ExerciseLogEntry[] {
+  return visible(getExerciseLoadsRaw(exerciseId));
 }
 
-export function deleteExerciseLoad(exerciseId: string, index: number): void {
-  const list = getExerciseLoads(exerciseId);
-  list.splice(index, 1);
-  rawSet(`${PFX}_loads_${exerciseId}`, list);
+export function logExerciseLoad(exerciseId: string, entry: Omit<ExerciseLogEntry, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_loads_${exerciseId}`, withAdded(getExerciseLoadsRaw(exerciseId), entry));
+}
+
+export function deleteExerciseLoad(exerciseId: string, visibleIndex: number): void {
+  rawSet(
+    `${PFX}_loads_${exerciseId}`,
+    withSoftDeleted(
+      getExerciseLoadsRaw(exerciseId),
+      visibleIndex,
+      (a, b) => a.date === b.date && a.weightKg === b.weightKg && a.reps === b.reps && a.seconds === b.seconds && a.note === b.note
+    )
+  );
 }

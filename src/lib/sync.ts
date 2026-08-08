@@ -55,7 +55,13 @@ interface Reconciliation {
   isMerge: boolean;
 }
 
-function reconcile(key: string, remoteValue: unknown, remoteTs: number, since: number): Reconciliation {
+/**
+ * Exported (not just used internally by fullSync) so tests can exercise the
+ * conflict-resolution decision tree directly against seeded localStorage
+ * state, without needing a live Supabase connection to simulate two devices
+ * syncing at different times.
+ */
+export function reconcile(key: string, remoteValue: unknown, remoteTs: number, since: number): Reconciliation {
   const hasLocal = rawGet<unknown>(key, undefined) !== undefined;
   const localTs = touchedAt(key) ?? 0;
 
@@ -100,7 +106,7 @@ function mergeConflicting(key: string, local: unknown, remote: unknown): unknown
     return mergeEntryLists(
       local as ExerciseLogEntry[],
       remote as ExerciseLogEntry[],
-      (e) => `${e.date}_${e.weightKg}_${e.reps}`,
+      (e) => `${e.date}_${e.weightKg}_${e.reps}_${e.seconds}_${e.note}`,
       (e) => e.date
     );
   }

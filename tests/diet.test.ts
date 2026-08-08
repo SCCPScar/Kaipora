@@ -24,6 +24,19 @@ describe('diet data', () => {
     }
   });
 
+  it('keeps kcal internally coherent with its own protein/carbs/fat (4/4/9 kcal-per-gram)', () => {
+    // Catches data-entry mistakes where the listed kcal doesn't match what
+    // the listed macros actually add up to — a >15% mismatch would mean the
+    // numbers shown to the user contradict each other.
+    for (const meal of MEALS) {
+      for (const option of meal.options) {
+        const computed = option.protein * 4 + option.carbs * 4 + option.fat * 9;
+        const diff = Math.abs(computed - option.kcal) / option.kcal;
+        expect(diff, `${meal.id}/${option.id}: kcal=${option.kcal} but macros imply ~${computed}`).toBeLessThanOrEqual(0.15);
+      }
+    }
+  });
+
   it('never includes red meat, matching the existing dietary restriction', () => {
     const redMeatWords = ['vaca', 'bovina', 'porco', 'novilho', 'borrego', 'bife'];
     for (const meal of MEALS) {

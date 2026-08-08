@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { TRAINING_WEEK, getWorkoutById, getGluteWorkouts, getTrainingDay } from '../src/data/training';
 import { EXERCISES } from '../src/data/exercises';
+import { EXERCISE_DIAGRAMS } from '../src/data/exerciseDiagrams';
 
 describe('training plan', () => {
   it('has all seven weekdays, each with both Academia and Casa', () => {
@@ -61,5 +62,31 @@ describe('exercise library', () => {
     const gluteExercises = Object.values(EXERCISES).filter((e) => e.gluteFocus);
     expect(gluteExercises.filter((e) => e.location === 'academia').length).toBeGreaterThanOrEqual(3);
     expect(gluteExercises.filter((e) => e.location === 'casa').length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('exercise diagrams', () => {
+  it('every diagram key matches a real exercise in the library', () => {
+    for (const exerciseId of Object.keys(EXERCISE_DIAGRAMS)) {
+      expect(EXERCISES[exerciseId], `EXERCISE_DIAGRAMS has an entry for unknown exercise "${exerciseId}"`).toBeDefined();
+    }
+  });
+
+  it('every diagram is well-formed SVG markup', () => {
+    for (const [id, svg] of Object.entries(EXERCISE_DIAGRAMS)) {
+      expect(svg.startsWith('<svg'), `diagram for ${id} doesn't start with <svg`).toBe(true);
+      expect(svg.trim().endsWith('</svg>'), `diagram for ${id} doesn't end with </svg>`).toBe(true);
+    }
+  });
+
+  it('covers at least the curated glute + calisthenics + high-risk-form categories', () => {
+    // Documents intent rather than an exact count, so this doesn't need
+    // updating every time a diagram is added — just that coverage isn't
+    // accidentally dropped to zero for these priority categories.
+    const covered = new Set(Object.keys(EXERCISE_DIAGRAMS));
+    expect(covered.has('hip_thrust')).toBe(true); // glutes, academia
+    expect(covered.has('glute_bridge')).toBe(true); // glutes, casa
+    expect(covered.has('plank') || covered.has('prancha')).toBe(true); // common form fault (sagging hips)
+    expect(covered.has('squat') || covered.has('agachamento')).toBe(true); // calisthenics staple
   });
 });

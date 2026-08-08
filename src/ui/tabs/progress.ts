@@ -5,6 +5,7 @@ import {
   deleteWeight,
   getMeasurements,
   addMeasurement,
+  updateMeasurement,
   deleteMeasurement,
   getNotes,
   addNote,
@@ -15,6 +16,8 @@ import { todayISO } from '../../lib/dates';
 import { drawLineChart } from '../components/chart';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
+
+let editingMeasurementIndex: number | null = null;
 
 export const progressTab: Tab = {
   id: 'progresso',
@@ -50,7 +53,10 @@ export const progressTab: Tab = {
       </section>
 
       <section>
-        <div class="sec-title">📏 Medidas (cm)</div>
+        <div class="sec-title">
+          <span>📏 Medidas (cm)</span>
+          ${editingMeasurementIndex !== null ? '<span class="pill">✏️ A editar</span>' : ''}
+        </div>
         <div class="meds-grid">
           <div><label>Cintura</label><input class="finp" id="mc" type="number" placeholder="Ex: 82" /></div>
           <div><label>Quadril / Glúteos</label><input class="finp" id="mq" type="number" placeholder="Ex: 104" /></div>
@@ -62,8 +68,10 @@ export const progressTab: Tab = {
           <input class="finp" id="mextra-val" type="number" placeholder="cm" style="max-width:90px" />
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn block" id="msave">+ Guardar medidas</button>
+          <button class="btn block" id="msave">${editingMeasurementIndex !== null ? '✓ Guardar alterações' : '+ Guardar medidas'}</button>
+          ${editingMeasurementIndex !== null ? '<button class="btn ghost" id="mcancel">Cancelar</button>' : ''}
         </div>
+        <div style="padding:0 16px 4px;font-size:11px;color:var(--text-faint)">Toca num registo abaixo para o editar.</div>
         <div id="mlog"></div>
       </section>
 
@@ -81,6 +89,7 @@ export const progressTab: Tab = {
     renderWeightLog(root, weights);
     renderMeasurements(root, measurements);
     renderNotes(root, notes);
+    prefillMeasurementForm(root, measurements);
     wireEvents(root);
   }
 };
@@ -133,16 +142,35 @@ function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasur
       const extras = Object.entries(m.extra ?? {})
         .map(([name, val]) => `${name} ${val}cm`)
         .join(' · ');
+      const isEditing = i === editingMeasurementIndex;
       return `
-    <div class="log-item">
+    <div class="log-item" data-edit-measurement="${i}" style="cursor:pointer;${isEditing ? 'background:rgba(139,92,246,.12)' : ''}">
       <div class="log-txt">
-        <strong>${m.date}</strong>
+        <strong>${m.date}${isEditing ? ' ✏️' : ''}</strong>
         <div class="log-date">Cintura ${m.waist ?? '-'}cm · Quadril ${m.hip ?? '-'}cm · Coxa ${m.thigh ?? '-'}cm · Braço ${m.arm ?? '-'}cm${extras ? ` · ${extras}` : ''}</div>
       </div>
       <button class="log-del" data-del-measurement="${i}">✕</button>
     </div>`;
     })
     .join('');
+}
+
+function prefillMeasurementForm(root: HTMLElement, measurements: ReturnType<typeof getMeasurements>) {
+  if (editingMeasurementIndex === null) return;
+  const m = measurements[editingMeasurementIndex];
+  if (!m) {
+    editingMeasurementIndex = null;
+    return;
+  }
+  (root.querySelector('#mc') as HTMLInputElement).value = m.waist?.toString() ?? '';
+  (root.querySelector('#mq') as HTMLInputElement).value = m.hip?.toString() ?? '';
+  (root.querySelector('#mco') as HTMLInputElement).value = m.thigh?.toString() ?? '';
+  (root.querySelector('#mb') as HTMLInputElement).value = m.arm?.toString() ?? '';
+  const [extraName, extraVal] = Object.entries(m.extra ?? {})[0] ?? [];
+  if (extraName) {
+    (root.querySelector('#mextra-name') as HTMLInputElement).value = extraName;
+    (root.querySelector('#mextra-val') as HTMLInputElement).value = String(extraVal);
+  }
 }
 
 function renderNotes(root: HTMLElement, list: ReturnType<typeof getNotes>) {
@@ -180,15 +208,29 @@ function wireEvents(root: HTMLElement) {
     const extraName = (root.querySelector('#mextra-name') as HTMLInputElement).value.trim();
     const extraVal = (root.querySelector('#mextra-val') as HTMLInputElement).value;
     if (!c && !q && !co && !b && !(extraName && extraVal)) return;
-    addMeasurement({
-      date: todayISO(),
+    // Editing keeps the original entry's date — only the values change.
+    const originalDate = editingMeasurementIndex !== null ? getMeasurements()[editingMeasurementIndex]?.date : undefined;
+    const values = {
+      date: originalDate ?? todayISO(),
       waist: c ? parseFloat(c) : undefined,
       hip: q ? parseFloat(q) : undefined,
       thigh: co ? parseFloat(co) : undefined,
       arm: b ? parseFloat(b) : undefined,
       extra: extraName && extraVal ? { [extraName]: parseFloat(extraVal) } : undefined
-    });
-    showToast('Medidas guardadas 🌱');
+    };
+    if (editingMeasurementIndex !== null) {
+      updateMeasurement(editingMeasurementIndex, values);
+      editingMeasurementIndex = null;
+      showToast('Medidas atualizadas 🌱');
+    } else {
+      addMeasurement(values);
+      showToast('Medidas guardadas 🌱');
+    }
+    refreshActive();
+  });
+
+  root.querySelector('#mcancel')?.addEventListener('click', () => {
+    editingMeasurementIndex = null;
     refreshActive();
   });
 
@@ -208,11 +250,20 @@ function wireEvents(root: HTMLElement) {
   });
 
   root.querySelector('#mlog')?.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-del-measurement]');
-    if (!btn) return;
-    if (!confirm('Remover este registo de medidas?')) return;
-    deleteMeasurement(Number(btn.dataset.delMeasurement));
-    refreshActive();
+    const target = e.target as HTMLElement;
+    const delBtn = target.closest<HTMLElement>('[data-del-measurement]');
+    if (delBtn) {
+      if (!confirm('Remover este registo de medidas?')) return;
+      deleteMeasurement(Number(delBtn.dataset.delMeasurement));
+      if (editingMeasurementIndex === Number(delBtn.dataset.delMeasurement)) editingMeasurementIndex = null;
+      refreshActive();
+      return;
+    }
+    const row = target.closest<HTMLElement>('[data-edit-measurement]');
+    if (row) {
+      editingMeasurementIndex = Number(row.dataset.editMeasurement);
+      refreshActive();
+    }
   });
 
   root.querySelector('#nlog')?.addEventListener('click', (e) => {

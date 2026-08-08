@@ -15,6 +15,8 @@ import {
   deleteWeight,
   getMeasurements,
   addMeasurement,
+  updateMeasurement,
+  deleteMeasurement,
   getNotes,
   addNote,
   getSettings,
@@ -88,20 +90,57 @@ describe('day records', () => {
 });
 
 describe('weights', () => {
-  it('adds newest weight first and deletes by index', () => {
+  it('adds newest weight first and deletes by (visible) index', () => {
     addWeight(75, '2026-01-01');
     addWeight(74.5, '2026-01-02');
     expect(getWeights().map((w) => w.kg)).toEqual([74.5, 75]);
     deleteWeight(0);
     expect(getWeights().map((w) => w.kg)).toEqual([75]);
   });
+
+  it('soft-deletes (tombstones) instead of physically removing the entry, for sync safety', () => {
+    addWeight(75, '2026-01-01');
+    deleteWeight(0);
+    // Gone from the visible API...
+    expect(getWeights()).toHaveLength(0);
+    // ...but still present in raw storage as a tombstone, not spliced out —
+    // this is what stops a stale remote copy from resurrecting it on sync.
+    const raw = rawGet<{ kg: number; deleted?: boolean; updatedAt?: number }[]>('vp_weights', []);
+    expect(raw).toHaveLength(1);
+    expect(raw[0].deleted).toBe(true);
+    expect(raw[0].updatedAt).toBeDefined();
+  });
 });
 
 describe('measurements & notes', () => {
-  it('stores measurement entries', () => {
-    addMeasurement({ date: '2026-01-01', waist: 82, hip: 104 });
+  it('stores measurement entries, including a custom extra measurement', () => {
+    addMeasurement({ date: '2026-01-01', waist: 82, hip: 104, extra: { peito: 92 } });
     expect(getMeasurements()).toHaveLength(1);
     expect(getMeasurements()[0].waist).toBe(82);
+    expect(getMeasurements()[0].extra).toEqual({ peito: 92 });
+  });
+
+  it('edits a measurement in place (as far as the UI is concerned) without creating a duplicate', () => {
+    addMeasurement({ date: '2026-01-01', waist: 82, hip: 104 });
+    updateMeasurement(0, { date: '2026-01-01', waist: 80, hip: 103 });
+    const list = getMeasurements();
+    expect(list).toHaveLength(1); // not two entries
+    expect(list[0]).toMatchObject({ waist: 80, hip: 103 });
+  });
+
+  it('edit is sync-safe: the old value is tombstoned, not silently mutated', () => {
+    addMeasurement({ date: '2026-01-01', waist: 82, hip: 104 });
+    updateMeasurement(0, { date: '2026-01-01', waist: 80, hip: 103 });
+    const raw = rawGet<{ waist?: number; deleted?: boolean }[]>('vp_measurements', []);
+    expect(raw).toHaveLength(2); // old (tombstoned) + new
+    expect(raw.find((e) => e.waist === 82)?.deleted).toBe(true);
+    expect(raw.find((e) => e.waist === 80)?.deleted).toBeFalsy();
+  });
+
+  it('deletes measurement entries', () => {
+    addMeasurement({ date: '2026-01-01', waist: 82 });
+    deleteMeasurement(0);
+    expect(getMeasurements()).toHaveLength(0);
   });
 
   it('stores notes newest first', () => {
@@ -132,6 +171,59 @@ describe('backup export/import', () => {
     importBackup(backup);
     expect(getWeights()).toHaveLength(1);
     expect(getWater('2026-01-01')).toBe(4);
+  });
+
+  it('round-trips every category of data the app persists, with no duplication (EXPORT -> CLEAR -> IMPORT)', () => {
+    // Peso
+    addWeight(75, '2026-01-01');
+    addWeight(74.5, '2026-01-08');
+    // Medidas, incluindo uma medida personalizada
+    addMeasurement({ date: '2026-01-01', waist: 82, hip: 104, extra: { peito: 92 } });
+    // Treinos / progressão (dia + carga de exercício)
+    setTrainingDone('2026-01-01', 'academia', 'qui-academia', true);
+    toggleExercise('2026-01-01', 'qui-academia', 'hip_thrust');
+    logExerciseLoad('hip_thrust', { date: '2026-01-01', weightKg: 40, reps: 10 });
+    // Refeições
+    toggleMeal('2026-01-01', 'pa1');
+    // Água
+    setWater('2026-01-01', 5);
+    // Hábitos
+    toggleHabit('2026-01-01', 'agua');
+    // Notas
+    addNote('Senti-me forte hoje', '2026-01-01');
+    // Configurações
+    saveSettings({ waterGoalMl: 2500, calorieGoal: 1700 });
+
+    const backup = exportBackup();
+    localStorage.clear();
+
+    // Confirm CLEAR actually cleared everything before importing.
+    expect(getWeights()).toHaveLength(0);
+    expect(getMeasurements()).toHaveLength(0);
+
+    importBackup(backup);
+
+    expect(getWeights()).toHaveLength(2);
+    expect(getMeasurements()).toHaveLength(1);
+    expect(getMeasurements()[0].extra).toEqual({ peito: 92 });
+    const day = getDay('2026-01-01');
+    expect(day.training).toEqual({ modality: 'academia', workoutId: 'qui-academia', done: true });
+    expect(day.exercisesDone['qui-academia']).toEqual(['hip_thrust']);
+    expect(day.meals.pa1).toBe(true);
+    expect(day.water).toBe(5);
+    expect(day.habits.agua).toBe(true);
+    expect(getExerciseLoads('hip_thrust')).toHaveLength(1);
+    expect(getExerciseLoads('hip_thrust')[0]).toMatchObject({ weightKg: 40, reps: 10 });
+    expect(getNotes()).toHaveLength(1);
+    expect(getSettings().waterGoalMl).toBe(2500);
+    expect(getSettings().calorieGoal).toBe(1700);
+
+    // Importing the same backup again must not duplicate anything — each
+    // key is a full replace, not an append.
+    importBackup(backup);
+    expect(getWeights()).toHaveLength(2);
+    expect(getMeasurements()).toHaveLength(1);
+    expect(getNotes()).toHaveLength(1);
   });
 
   it('rejects a malformed backup instead of silently wiping data', () => {
@@ -177,6 +269,24 @@ describe('exercise load tracking', () => {
     logExerciseLoad('agachamento', { date: '2026-01-01', weightKg: 60 });
     expect(getExerciseLoads('hip_thrust')).toHaveLength(1);
     expect(getExerciseLoads('agachamento')).toHaveLength(1);
+  });
+
+  it('supports duration and variation notes for calisthenics exercises without a weight', () => {
+    // e.g. plank: no load, just a held duration and a difficulty variation.
+    logExerciseLoad('plank', { date: '2026-01-01', seconds: 30, note: 'joelhos' });
+    logExerciseLoad('plank', { date: '2026-01-08', seconds: 45, note: 'completa' });
+    const loads = getExerciseLoads('plank');
+    expect(loads[0]).toMatchObject({ seconds: 45, note: 'completa' });
+    expect(loads[1]).toMatchObject({ seconds: 30, note: 'joelhos' });
+  });
+
+  it('allows week-over-week comparison — latest vs previous entry are both retrievable in order', () => {
+    logExerciseLoad('agachamento', { date: '2026-01-01', reps: 15 });
+    logExerciseLoad('agachamento', { date: '2026-01-08', reps: 18 });
+    const [latest, previous] = getExerciseLoads('agachamento');
+    expect(latest.reps).toBe(18);
+    expect(previous.reps).toBe(15);
+    expect((latest.reps ?? 0) - (previous.reps ?? 0)).toBe(3); // "semana passada 15, hoje 18"
   });
 });
 

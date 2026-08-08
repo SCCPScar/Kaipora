@@ -1,11 +1,24 @@
 export type Modality = 'academia' | 'casa';
 
-export interface WeightEntry {
+/**
+ * Every append-only, sync-merged list entry (weights, measurements, notes,
+ * exercise loads) carries these two fields so deletions survive sync as
+ * tombstones instead of being resurrected by a stale copy from another
+ * device — see src/lib/tombstoneList.ts and src/lib/merge.ts.
+ */
+export interface Tombstonable {
+  /** epoch ms of the last create/delete of this entry — used to resolve conflicts. */
+  updatedAt?: number;
+  /** true once soft-deleted; entries are never physically removed pre-sync. */
+  deleted?: boolean;
+}
+
+export interface WeightEntry extends Tombstonable {
   date: string; // YYYY-MM-DD
   kg: number;
 }
 
-export interface MeasurementEntry {
+export interface MeasurementEntry extends Tombstonable {
   date: string;
   waist?: number; // cintura
   hip?: number; // quadril / glúteos
@@ -14,7 +27,7 @@ export interface MeasurementEntry {
   extra?: Record<string, number>;
 }
 
-export interface NoteEntry {
+export interface NoteEntry extends Tombstonable {
   date: string;
   text: string;
 }

@@ -2,24 +2,50 @@ import { openModal } from './modal';
 
 const PRESETS = [30, 45, 60, 90, 120];
 
-function beep(): void {
+type AudioContextCtor = typeof AudioContext;
+
+/**
+ * iOS Safari only allows an AudioContext to start producing sound if it was
+ * created (or resumed) directly inside a user-gesture call stack (a tap
+ * handler) — one created later inside a setInterval callback, when the timer
+ * expires, is silently ignored there. So this is created once, right when
+ * the user taps "Iniciar" (a real gesture), and reused/resumed for the beep
+ * at expiry instead of being created fresh at that point.
+ */
+function unlockAudioContext(): AudioContext | undefined {
   try {
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const Ctx = (window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: AudioContextCtor }).webkitAudioContext) as AudioContextCtor | undefined;
+    if (!Ctx) return undefined;
     const ctx = new Ctx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.frequency.value = 880;
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(0.001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.5);
-    osc.onended = () => ctx.close();
+    if (ctx.state === 'suspended') void ctx.resume();
+    return ctx;
   } catch {
-    /* audio unavailable — vibration below still fires */
+    return undefined;
   }
+}
+
+function beep(ctx: AudioContext | undefined): void {
+  try {
+    if (ctx) {
+      if (ctx.state === 'suspended') void ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.value = 880;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.5);
+    }
+  } catch {
+    /* audio unavailable — vibration below still fires where supported */
+  }
+  // navigator.vibrate is not implemented by iOS Safari at all (any iOS
+  // version, standalone or not) — this is a no-op there, Android-only in
+  // practice, which is why the Web Audio beep above is the primary signal.
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
 }
 
@@ -28,6 +54,7 @@ export function openTimerModal(initialSeconds = 60): void {
   let remaining = total;
   let interval: ReturnType<typeof setInterval> | undefined;
   let running = false;
+  let audioCtx: AudioContext | undefined;
 
   const close = openModal(
     `
@@ -53,11 +80,12 @@ export function openTimerModal(initialSeconds = 60): void {
         display.textContent = fmt(remaining);
         if (remaining <= 0) {
           stop();
-          beep();
+          beep(audioCtx);
           display.textContent = fmt(0);
         }
       }
       function start() {
+        if (!audioCtx) audioCtx = unlockAudioContext(); // must happen inside this click handler, not later
         running = true;
         toggleBtn.textContent = 'Pausar';
         interval = setInterval(tick, 1000);
@@ -86,6 +114,7 @@ export function openTimerModal(initialSeconds = 60): void {
       });
       modal.querySelector('[data-close]')?.addEventListener('click', () => {
         stop();
+        void audioCtx?.close();
         close();
       });
     }

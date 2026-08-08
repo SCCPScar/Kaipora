@@ -112,8 +112,10 @@ function renderCloudSection(root: HTMLElement) {
           : `Falhou: ${result.reason}`;
       });
       el.querySelector('#s-signout')?.addEventListener('click', async () => {
+        // main.ts's onAuthChange listener owns the "sessão terminada" toast
+        // and the global refresh; this local refresh just avoids a beat of
+        // lag on the tab that's already open.
         await signOut();
-        showToast('Sessão terminada.');
         refreshActive();
       });
     } else {

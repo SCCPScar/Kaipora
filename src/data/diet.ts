@@ -157,10 +157,10 @@ export const MEALS: Meal[] = [
         emoji: "🐟",
         label: "Pescada grelhada com batata-doce",
         desc: "Pescada ou dourada grelhada (150g) + batata-doce assada (150g) + brócolos (100g) + azeite (5ml)",
-        kcal: 480,
-        protein: 34,
-        carbs: 32,
-        fat: 15
+        kcal: 345,
+        protein: 33,
+        carbs: 37,
+        fat: 7
       },
       {
         id: "al2",
@@ -374,10 +374,10 @@ export const MEALS: Meal[] = [
         emoji: "🍓",
         label: "Skyr com morangos",
         desc: "Skyr ou requeijão magro (100g) + morangos (60g)",
-        kcal: 135,
-        protein: 14,
-        carbs: 10,
-        fat: 2
+        kcal: 90,
+        protein: 12,
+        carbs: 9,
+        fat: 1
       },
       {
         id: "ce3",

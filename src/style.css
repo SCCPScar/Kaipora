@@ -180,7 +180,10 @@ button { font-family: inherit; }
 .btn.block { width: 100%; }
 
 .form-row { display: flex; gap: 8px; padding: 12px 14px; flex-wrap: wrap; }
-.finp { flex: 1; min-width: 100px; background: var(--bg-elevated); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 11px 12px; color: var(--text); font-size: 14px; }
+/* font-size is 16px, not the 14px the rest of the UI uses: iOS Safari
+   auto-zooms the whole viewport on focus for any input under 16px, which
+   maximum-scale=1.0 does not reliably suppress — this is the standard fix. */
+.finp { flex: 1; min-width: 100px; background: var(--bg-elevated); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 11px 12px; color: var(--text); font-size: 16px; }
 .finp:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(139,92,246,.2); }
 .finp::placeholder { color: var(--text-faint); }
 .fsave { background: var(--gradient-main); border: none; border-radius: var(--radius-sm); padding: 0 16px; color: #fff; font-weight: 800; font-size: 13px; cursor: pointer; }

@@ -1,5 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { isCloudConfigured, fullSync, getSession, signInWithEmail, signOut, onAuthChange } from '../src/lib/sync';
+import { addWeight, getWeights } from '../src/lib/storage';
+
+beforeEach(() => {
+  localStorage.clear();
+});
 
 // This test environment never sets VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY,
 // so these assert the app's most important safety property for anyone who
@@ -23,5 +28,11 @@ describe('sync (cloud not configured)', () => {
     await expect(signOut()).resolves.toBeUndefined();
     const unsubscribe = onAuthChange(() => {});
     expect(() => unsubscribe()).not.toThrow();
+  });
+
+  it('signOut never touches local app data — logging out must not be destructive', async () => {
+    addWeight(75, '2026-01-01');
+    await signOut();
+    expect(getWeights()).toEqual([{ kg: 75, date: '2026-01-01', updatedAt: expect.any(Number) }]);
   });
 });

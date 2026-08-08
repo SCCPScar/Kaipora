@@ -32,18 +32,30 @@ startBackgroundSync((result) => {
   }
 });
 
+// Single source of truth for sign-in/out feedback (the Ajustes tab itself
+// only ever shows sync-in-progress status text, not a duplicate toast).
 // After a magic-link sign-in (which lands back on this page with a fresh
-// session), sync immediately instead of waiting for the next timer tick, and
-// refresh whatever tab is on screen so the account state shows up right away.
+// session, or after a manual sign-in/out), sync immediately instead of
+// waiting for the next timer tick, and refresh whatever tab is on screen
+// twice: once right away (so the Ajustes tab reflects "signed in" without
+// delay) and once more when the triggered sync actually finishes (so newly
+// pulled data — not just the auth state — shows up without a manual tab
+// switch).
 let wasSignedIn = false;
 onAuthChange((signedIn) => {
-  if (signedIn && !wasSignedIn) {
-    void fullSync().then((result) => {
-      if (result.ok && (result.pushed > 0 || result.pulled > 0)) showToast('Dados sincronizados ☁️');
-    });
-  }
+  const justSignedIn = signedIn && !wasSignedIn;
+  const justSignedOut = !signedIn && wasSignedIn;
   wasSignedIn = signedIn;
   refreshActive();
+
+  if (justSignedIn) {
+    void fullSync().then((result) => {
+      refreshActive();
+      showToast(result.ok ? 'Sessão iniciada e sincronizada ☁️' : 'Sessão iniciada — sincronização falhou, a tentar novamente em breve.');
+    });
+  } else if (justSignedOut) {
+    showToast('Sessão terminada.');
+  }
 });
 
 if (migrated) {
