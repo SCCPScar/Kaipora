@@ -2,7 +2,7 @@ import type { Tab } from '../nav';
 import { todayISO, formatLong, greeting, WEEKDAY_KEYS } from '../../lib/dates';
 import { getTrainingDay } from '../../data/training';
 import { EXERCISES } from '../../data/exercises';
-import { MEALS } from '../../data/diet';
+import { MEALS, allMealOptions, visibleMealOptions } from '../../data/diet';
 import { HABITS } from '../../data/habits';
 import {
   getDay,
@@ -260,12 +260,14 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
 function renderMeals(root: HTMLElement, date: string, day: ReturnType<typeof getDay>) {
   const el = root.querySelector('#meals-card') as HTMLElement;
   el.innerHTML = MEALS.map((meal) => {
-    const totalKcal = meal.options.reduce((s, o) => (day.meals[o.id] ? s + o.kcal : s), 0);
-    const totalP = meal.options.reduce((s, o) => (day.meals[o.id] ? s + o.protein : s), 0);
+    const allOptions = allMealOptions(meal.id);
+    const visibleOptions = visibleMealOptions(meal.id);
+    const totalKcal = allOptions.reduce((s, o) => (day.meals[o.id] ? s + o.kcal : s), 0);
+    const totalP = allOptions.reduce((s, o) => (day.meals[o.id] ? s + o.protein : s), 0);
     return `
     <div style="border-bottom:1px solid var(--border)">
       <div class="sec-title"><span>${meal.name} · ${meal.time}</span><span class="badge-k">~${meal.targetKcal} kcal</span></div>
-      ${meal.options
+      ${visibleOptions
         .map(
           (o) => `
         <div class="row ${day.meals[o.id] ? 'done' : ''}" data-meal="${meal.id}" data-option="${o.id}">

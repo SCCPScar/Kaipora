@@ -1,5 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { MEALS, getMeal, getMealOption, substitutesFor, dailyTotalsForMeals } from '../src/data/diet';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { MEALS, getMeal, getMealOption, substitutesFor, dailyTotalsForMeals, allMealOptions, visibleMealOptions } from '../src/data/diet';
+import { addCustomFoodOption, deleteCustomFoodOption, toggleHiddenMealOption } from '../src/lib/storage';
+
+beforeEach(() => {
+  localStorage.clear();
+});
 
 describe('diet data', () => {
   it('has six meal slots covering the whole day', () => {
@@ -71,5 +76,40 @@ describe('diet data', () => {
 
   it('dailyTotalsForMeals returns all zeros when nothing is checked', () => {
     expect(dailyTotalsForMeals({})).toEqual({ kcal: 0, protein: 0, carbs: 0, fat: 0 });
+  });
+});
+
+describe('diet: A Minha Dieta (editable overlay on the built-in plan)', () => {
+  it('allMealOptions includes a user-added custom option alongside the built-ins', () => {
+    addCustomFoodOption({ id: 'cf1', mealId: 'pa', label: 'Barrita proteica', desc: '', kcal: 150, protein: 15, carbs: 10, fat: 5 });
+    const options = allMealOptions('pa');
+    expect(options.some((o) => o.id === 'cf1')).toBe(true);
+    expect(options.length).toBe((getMeal('pa')?.options.length ?? 0) + 1);
+  });
+
+  it('visibleMealOptions omits a hidden built-in option but keeps counting it in totals', () => {
+    toggleHiddenMealOption('pa1');
+    expect(visibleMealOptions('pa').some((o) => o.id === 'pa1')).toBe(false);
+    // allMealOptions (used for totals) never drops it just because it's hidden —
+    // hiding only affects what's offered for future selection, not history.
+    expect(allMealOptions('pa').some((o) => o.id === 'pa1')).toBe(true);
+    const pa1 = getMealOption('pa', 'pa1')!;
+    expect(dailyTotalsForMeals({ pa1: true }).kcal).toBe(pa1.kcal);
+  });
+
+  it('a checked custom option counts towards dailyTotalsForMeals', () => {
+    addCustomFoodOption({ id: 'cf1', mealId: 'pa', label: 'Barrita proteica', desc: '', kcal: 150, protein: 15, carbs: 10, fat: 5 });
+    const pa1 = getMealOption('pa', 'pa1')!;
+    const totals = dailyTotalsForMeals({ pa1: true, cf1: true });
+    expect(totals.kcal).toBe(pa1.kcal + 150);
+    expect(totals.protein).toBe(pa1.protein + 15);
+  });
+
+  it('deleting a custom option removes it from allMealOptions/visibleMealOptions', () => {
+    addCustomFoodOption({ id: 'cf1', mealId: 'pa', label: 'Barrita proteica', desc: '', kcal: 150, protein: 15, carbs: 10, fat: 5 });
+    expect(allMealOptions('pa').some((o) => o.id === 'cf1')).toBe(true);
+    deleteCustomFoodOption(0); // only custom option seeded -> index 0 in the full visible list
+    expect(allMealOptions('pa').some((o) => o.id === 'cf1')).toBe(false);
+    expect(visibleMealOptions('pa').some((o) => o.id === 'cf1')).toBe(false);
   });
 });

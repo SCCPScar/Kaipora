@@ -2,6 +2,7 @@ import type { DayRecord, MeasurementEntry, NoteEntry, Settings, WeightEntry, Mod
 import { DEFAULT_SETTINGS } from './types';
 import { visible, withAdded, withSoftDeleted } from './tombstoneList';
 import type { FixedCommitment, FlexibleActivity } from '../data/types-routine';
+import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
 
 export const PFX = 'vp';
 
@@ -342,5 +343,82 @@ export function deleteFlexibleActivity(visibleIndex: number): void {
   rawSet(
     `${PFX}_routine_flexible`,
     withSoftDeleted(getFlexibleActivitiesRaw(), visibleIndex, (a, b) => a.label === b.label && a.durationMin === b.durationMin)
+  );
+}
+
+// ---- Alimentação: opções personalizadas na Minha Dieta ----
+// Additive overlay over the built-in MEALS plan (src/data/diet.ts) — the
+// built-in options are never edited or deleted, only hidden per device/account
+// (see getHiddenMealOptionIds below) so the curated plan itself is preserved.
+
+function getCustomFoodOptionsRaw(): CustomFoodOption[] {
+  return rawGet<CustomFoodOption[]>(`${PFX}_diet_custom_options`, []);
+}
+
+export function getCustomFoodOptions(mealId?: string): CustomFoodOption[] {
+  const all = visible(getCustomFoodOptionsRaw());
+  return mealId ? all.filter((o) => o.mealId === mealId) : all;
+}
+
+export function addCustomFoodOption(entry: Omit<CustomFoodOption, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_diet_custom_options`, withAdded(getCustomFoodOptionsRaw(), entry));
+}
+
+/** `visibleIndex` must be the entry's index within the FULL visible list
+ * (getCustomFoodOptions() with no mealId filter) — see withSoftDeleted. */
+export function deleteCustomFoodOption(visibleIndex: number): void {
+  rawSet(
+    `${PFX}_diet_custom_options`,
+    withSoftDeleted(getCustomFoodOptionsRaw(), visibleIndex, (a, b) => a.mealId === b.mealId && a.label === b.label && a.kcal === b.kcal)
+  );
+}
+
+/**
+ * Which built-in FoodOption ids are hidden from view for this
+ * device/account. A plain string array rather than a tombstoned list — like
+ * Settings, it's a rare, low-stakes conflict on sync (worst case: a hide/show
+ * toggle from one device is overwritten by another's), never data loss of an
+ * actual logged entry.
+ */
+export function getHiddenMealOptionIds(): string[] {
+  return rawGet<string[]>(`${PFX}_diet_hidden_options`, []);
+}
+
+export function toggleHiddenMealOption(optionId: string): boolean {
+  const hidden = getHiddenMealOptionIds();
+  const idx = hidden.indexOf(optionId);
+  let isHidden: boolean;
+  if (idx >= 0) {
+    hidden.splice(idx, 1);
+    isHidden = false;
+  } else {
+    hidden.push(optionId);
+    isHidden = true;
+  }
+  rawSet(`${PFX}_diet_hidden_options`, hidden);
+  return isHidden;
+}
+
+// ---- Alimentação: Diário Livre (registo alimentar fora do plano fixo) ----
+
+function getFoodLogRaw(): FoodLogEntry[] {
+  return rawGet<FoodLogEntry[]>(`${PFX}_food_log`, []);
+}
+
+export function getFoodLog(date?: string): FoodLogEntry[] {
+  const all = visible(getFoodLogRaw());
+  return date ? all.filter((e) => e.date === date) : all;
+}
+
+export function addFoodLogEntry(entry: Omit<FoodLogEntry, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_food_log`, withAdded(getFoodLogRaw(), entry));
+}
+
+/** `visibleIndex` must be the entry's index within the FULL visible list
+ * (getFoodLog() with no date filter) — see withSoftDeleted. */
+export function deleteFoodLogEntry(visibleIndex: number): void {
+  rawSet(
+    `${PFX}_food_log`,
+    withSoftDeleted(getFoodLogRaw(), visibleIndex, (a, b) => a.date === b.date && a.label === b.label && a.kcal === b.kcal)
   );
 }

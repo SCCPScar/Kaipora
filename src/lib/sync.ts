@@ -2,6 +2,7 @@ import { supabase, isCloudConfigured } from './supabaseClient';
 import { allKeys, rawGet, rawSet } from './storage';
 import type { DayRecord, WeightEntry, MeasurementEntry, NoteEntry } from './types';
 import type { ExerciseLogEntry } from './storage';
+import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
 import { lastSyncedAt, setLastSyncedAt, touchedAt, markTouched } from './meta';
 import { mergeDayRecords, mergeEntryLists } from './merge';
 
@@ -107,6 +108,22 @@ function mergeConflicting(key: string, local: unknown, remote: unknown): unknown
       local as ExerciseLogEntry[],
       remote as ExerciseLogEntry[],
       (e) => `${e.date}_${e.weightKg}_${e.reps}_${e.seconds}_${e.note}`,
+      (e) => e.date
+    );
+  }
+  if (key === 'vp_diet_custom_options') {
+    return mergeEntryLists(
+      local as CustomFoodOption[],
+      remote as CustomFoodOption[],
+      (e) => `${e.mealId}_${e.label}_${e.kcal}`,
+      (e) => e.mealId
+    );
+  }
+  if (key === 'vp_food_log') {
+    return mergeEntryLists(
+      local as FoodLogEntry[],
+      remote as FoodLogEntry[],
+      (e) => `${e.date}_${e.label}_${e.kcal}`,
       (e) => e.date
     );
   }

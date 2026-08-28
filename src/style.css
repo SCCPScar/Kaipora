@@ -257,6 +257,9 @@ section, .card {
 .kcal { font-size: 10px; font-weight: 800; color: var(--burgundy-glow); background: var(--tint-accent-low); border: 1px solid var(--tint-accent-strong); border-radius: 6px; padding: 3px 8px; flex-shrink: 0; white-space: nowrap; }
 .row.done .kcal { opacity: .35; }
 
+.muted-row { opacity: .45; }
+.muted-row .kcal { opacity: .5; }
+
 .sub-row { display: flex; justify-content: flex-end; gap: 6px; padding: 8px 16px 10px; background: var(--bg-elevated); border-top: 1px solid var(--border); }
 .badge-p { font-size: 10px; font-weight: 800; color: var(--electric-glow); background: var(--tint-secondary-low); border-radius: 6px; padding: 3px 9px; }
 .badge-k { font-size: 10px; font-weight: 800; color: var(--burgundy-glow); background: var(--tint-accent-low); border-radius: 6px; padding: 3px 9px; }

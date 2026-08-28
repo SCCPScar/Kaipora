@@ -3,6 +3,7 @@ import { reconcile } from '../src/lib/sync';
 import { rawSet, getWeights, deleteWeight, addWeight } from '../src/lib/storage';
 import { markTouched, touchedAt } from '../src/lib/meta';
 import type { WeightEntry } from '../src/lib/types';
+import type { FoodLogEntry } from '../src/data/types-diet';
 
 // These exercise sync.ts's reconcile() directly against seeded localStorage,
 // simulating what happens when this device processes one row pulled from
@@ -143,5 +144,29 @@ describe('reconcile — first pull onto a brand new device', () => {
     const result = reconcile('vp_weights', [{ date: '2026-01-01', kg: 75, updatedAt: 100 }], 100, 0);
     expect(result.applied).toBe(true);
     expect(result.isMerge).toBe(false);
+  });
+});
+
+describe('reconcile — vp_food_log (Diário Livre) uses the same tombstoned-list merge as weights', () => {
+  it('a delete made offline is not resurrected by a stale remote copy', () => {
+    const local: FoodLogEntry[] = [{ date: '2026-01-01', label: 'Bolo', kcal: 300, protein: 4, carbs: 40, fat: 12, updatedAt: 100 }];
+    rawSet('vp_food_log', local);
+    markTouched('vp_food_log', 100);
+
+    // Offline delete at T=200.
+    rawSet('vp_food_log', [{ ...local[0], deleted: true, updatedAt: 200 }]);
+    markTouched('vp_food_log', 200);
+
+    // Remote (unaware of the delete) has a concurrent, unrelated addition pushed at T=250.
+    const remote: FoodLogEntry[] = [
+      { date: '2026-01-01', label: 'Bolo', kcal: 300, protein: 4, carbs: 40, fat: 12, updatedAt: 100 },
+      { date: '2026-01-02', label: 'Fruta', kcal: 90, protein: 1, carbs: 22, fat: 0, updatedAt: 250 }
+    ];
+
+    const result = reconcile('vp_food_log', remote, 250, 100);
+    expect(result.isMerge).toBe(true);
+    const merged = result.value as FoodLogEntry[];
+    expect(merged.find((e) => e.label === 'Bolo')?.deleted).toBe(true);
+    expect(merged.find((e) => e.label === 'Fruta')).toBeDefined();
   });
 });

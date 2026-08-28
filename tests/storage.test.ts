@@ -26,7 +26,15 @@ import {
   allKeys,
   getExerciseLoads,
   logExerciseLoad,
-  deleteExerciseLoad
+  deleteExerciseLoad,
+  getCustomFoodOptions,
+  addCustomFoodOption,
+  deleteCustomFoodOption,
+  getHiddenMealOptionIds,
+  toggleHiddenMealOption,
+  getFoodLog,
+  addFoodLogEntry,
+  deleteFoodLogEntry
 } from '../src/lib/storage';
 import { touchedAt } from '../src/lib/meta';
 
@@ -287,6 +295,63 @@ describe('exercise load tracking', () => {
     expect(latest.reps).toBe(18);
     expect(previous.reps).toBe(15);
     expect((latest.reps ?? 0) - (previous.reps ?? 0)).toBe(3); // "semana passada 15, hoje 18"
+  });
+});
+
+describe('diet: custom food options (Minha Dieta editável)', () => {
+  it('adds a custom option scoped to a meal and lists it back', () => {
+    addCustomFoodOption({ id: 'cf1', mealId: 'pa', label: 'Barrita proteica', desc: '1 barrita', kcal: 150, protein: 15, carbs: 10, fat: 5 });
+    expect(getCustomFoodOptions('pa')).toHaveLength(1);
+    expect(getCustomFoodOptions('pa')[0].label).toBe('Barrita proteica');
+    expect(getCustomFoodOptions('lm')).toHaveLength(0);
+  });
+
+  it('getCustomFoodOptions with no mealId returns every meal\'s custom options', () => {
+    addCustomFoodOption({ id: 'cf1', mealId: 'pa', label: 'A', desc: '', kcal: 100, protein: 5, carbs: 5, fat: 5 });
+    addCustomFoodOption({ id: 'cf2', mealId: 'lm', label: 'B', desc: '', kcal: 120, protein: 6, carbs: 6, fat: 6 });
+    expect(getCustomFoodOptions()).toHaveLength(2);
+  });
+
+  it('soft-deletes a custom option by its index in the full (unfiltered) visible list', () => {
+    addCustomFoodOption({ id: 'cf1', mealId: 'pa', label: 'A', desc: '', kcal: 100, protein: 5, carbs: 5, fat: 5 });
+    deleteCustomFoodOption(0);
+    expect(getCustomFoodOptions('pa')).toHaveLength(0);
+    const raw = rawGet<{ deleted?: boolean }[]>('vp_diet_custom_options', []);
+    expect(raw).toHaveLength(1);
+    expect(raw[0].deleted).toBe(true); // tombstoned, not physically removed
+  });
+});
+
+describe('diet: hidden default meal options', () => {
+  it('toggles a built-in option hidden and back to visible', () => {
+    expect(toggleHiddenMealOption('pa1')).toBe(true);
+    expect(getHiddenMealOptionIds()).toContain('pa1');
+    expect(toggleHiddenMealOption('pa1')).toBe(false);
+    expect(getHiddenMealOptionIds()).not.toContain('pa1');
+  });
+});
+
+describe('diet: Diário Livre (free food log)', () => {
+  it('adds a free-form entry and lists it back for its date', () => {
+    addFoodLogEntry({ date: '2026-01-01', label: 'Bolo de aniversário', kcal: 300, protein: 4, carbs: 40, fat: 12 });
+    expect(getFoodLog('2026-01-01')).toHaveLength(1);
+    expect(getFoodLog('2026-01-02')).toHaveLength(0);
+    expect(getFoodLog()).toHaveLength(1); // no date filter -> everything
+  });
+
+  it('adds newest entry first, matching the tombstoned-list convention', () => {
+    addFoodLogEntry({ date: '2026-01-01', label: 'Primeiro', kcal: 100, protein: 1, carbs: 1, fat: 1 });
+    addFoodLogEntry({ date: '2026-01-01', label: 'Segundo', kcal: 200, protein: 2, carbs: 2, fat: 2 });
+    expect(getFoodLog('2026-01-01').map((e) => e.label)).toEqual(['Segundo', 'Primeiro']);
+  });
+
+  it('soft-deletes a food log entry instead of physically removing it', () => {
+    addFoodLogEntry({ date: '2026-01-01', label: 'Snack', kcal: 100, protein: 1, carbs: 1, fat: 1 });
+    deleteFoodLogEntry(0);
+    expect(getFoodLog('2026-01-01')).toHaveLength(0);
+    const raw = rawGet<{ deleted?: boolean }[]>('vp_food_log', []);
+    expect(raw).toHaveLength(1);
+    expect(raw[0].deleted).toBe(true);
   });
 });
 

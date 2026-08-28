@@ -3,8 +3,9 @@
 // sem carne vermelha e com gramagens indicadas em cada opção (contexto pós-bariátrico).
 // Cada opção dentro de uma refeição é uma substituição equivalente às restantes —
 // todas ficam dentro de uma banda calórica semelhante ao alvo da refeição.
-import type { Meal } from './types-diet';
+import type { Meal, FoodOption } from './types-diet';
 import { dailyTotals } from '../lib/calories';
+import { getHiddenMealOptionIds, getCustomFoodOptions } from '../lib/storage';
 
 export const MEALS: Meal[] = [
   {
@@ -400,8 +401,23 @@ export function substitutesFor(mealId: string, optionId: string) {
   return (getMeal(mealId)?.options ?? []).filter((o) => o.id !== optionId);
 }
 
-/** Sums kcal/protein/carbs/fat across every meal option checked for a given day record. */
+/** Built-in options for a meal plus any user-added custom options — everything
+ * that counts towards totals, regardless of whether it's currently hidden. */
+export function allMealOptions(mealId: string): FoodOption[] {
+  const meal = getMeal(mealId);
+  if (!meal) return [];
+  return [...meal.options, ...getCustomFoodOptions(mealId)];
+}
+
+/** Same as allMealOptions, minus whatever the user has hidden from "A Minha
+ * Dieta" — this is what day-to-day checklists (Hoje) should render. */
+export function visibleMealOptions(mealId: string): FoodOption[] {
+  const hidden = new Set(getHiddenMealOptionIds());
+  return allMealOptions(mealId).filter((o) => !hidden.has(o.id));
+}
+
+/** Sums kcal/protein/carbs/fat across every meal option (built-in or custom) checked for a given day record. */
 export function dailyTotalsForMeals(checkedOptionIds: Record<string, boolean>) {
-  const checked = MEALS.flatMap((meal) => meal.options.filter((o) => checkedOptionIds[o.id]));
+  const checked = MEALS.flatMap((meal) => allMealOptions(meal.id).filter((o) => checkedOptionIds[o.id]));
   return dailyTotals(checked);
 }
