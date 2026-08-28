@@ -76,6 +76,14 @@ export const settingsTab: Tab = {
       </section>
 
       <section>
+        <div class="sec-title">Recompensas</div>
+        <div class="row" style="cursor:default">
+          <div class="rtxt"><strong>Ativar sistema de recompensas</strong><small>Define marcos de tempo praticado em Habilidades e resgata-os quando os atingires</small></div>
+          <label class="switch"><input type="checkbox" id="s-rewards" ${settings.rewardsEnabled ? 'checked' : ''}/><span class="slider"></span></label>
+        </div>
+      </section>
+
+      <section>
         <div class="sec-title">Acessibilidade</div>
         <div class="row" style="cursor:default">
           <div class="rtxt"><strong>Reduzir animações</strong><small>Respeita prefers-reduced-motion do sistema por defeito</small></div>
@@ -183,6 +191,10 @@ function wireEvents(root: HTMLElement) {
 
   root.querySelector('#s-motion')?.addEventListener('change', (e) => {
     saveSettings({ reducedMotion: (e.target as HTMLInputElement).checked });
+  });
+
+  root.querySelector('#s-rewards')?.addEventListener('change', (e) => {
+    saveSettings({ rewardsEnabled: (e.target as HTMLInputElement).checked });
   });
 
   root.querySelector('#s-export')?.addEventListener('click', () => {

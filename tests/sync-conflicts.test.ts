@@ -5,6 +5,7 @@ import { markTouched, touchedAt } from '../src/lib/meta';
 import type { WeightEntry } from '../src/lib/types';
 import type { FoodLogEntry } from '../src/data/types-diet';
 import type { CustomWorkout } from '../src/data/types-training';
+import type { SkillSession } from '../src/data/types-skills';
 
 // These exercise sync.ts's reconcile() directly against seeded localStorage,
 // simulating what happens when this device processes one row pulled from
@@ -194,5 +195,27 @@ describe('reconcile — vp_custom_workouts merges by stable id, not content', ()
     // never produces two rows for the same workout id.
     expect(merged).toHaveLength(1);
     expect(merged[0].id).toBe('cw1');
+  });
+});
+
+describe('reconcile — vp_skill_sessions unions independent practice logs across devices', () => {
+  it('never loses a session logged offline on either device', () => {
+    const local: SkillSession[] = [{ skillId: 'piano', date: '2026-01-01', minutes: 30, updatedAt: 100 }];
+    rawSet('vp_skill_sessions', local);
+    markTouched('vp_skill_sessions', 100);
+
+    // Local logs a new session offline at T=200.
+    rawSet('vp_skill_sessions', [...local, { skillId: 'piano', date: '2026-01-02', minutes: 20, updatedAt: 200 }]);
+    markTouched('vp_skill_sessions', 200);
+
+    // Remote logs a different session concurrently, pushed at T=250.
+    const remote: SkillSession[] = [...local, { skillId: 'mandarim', date: '2026-01-01', minutes: 15, updatedAt: 250 }];
+
+    const result = reconcile('vp_skill_sessions', remote, 250, 100);
+    expect(result.isMerge).toBe(true);
+    const merged = result.value as SkillSession[];
+    expect(merged).toHaveLength(3);
+    expect(merged.some((s) => s.skillId === 'piano' && s.date === '2026-01-02')).toBe(true);
+    expect(merged.some((s) => s.skillId === 'mandarim')).toBe(true);
   });
 });

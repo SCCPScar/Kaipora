@@ -42,7 +42,17 @@ import {
   addCustomWorkout,
   deleteCustomWorkout,
   addExerciseToCustomWorkout,
-  removeExerciseFromCustomWorkout
+  removeExerciseFromCustomWorkout,
+  getSkills,
+  addSkill,
+  deleteSkill,
+  getSkillSessions,
+  logSkillSession,
+  deleteSkillSession,
+  getRewards,
+  addReward,
+  deleteReward,
+  claimReward
 } from '../src/lib/storage';
 import { touchedAt } from '../src/lib/meta';
 
@@ -422,6 +432,67 @@ describe('training: custom workouts (Treinos personalizáveis)', () => {
     addCustomWorkout({ id: 'cw1', title: 'A', category: 'Casa', focus: '', exercises: [] });
     deleteCustomWorkout(0);
     expect(getCustomWorkouts()).toHaveLength(0);
+  });
+});
+
+describe('habilidades: skills', () => {
+  it('adds a skill and lists it back', () => {
+    addSkill({ id: 'sk1', name: 'Piano' });
+    expect(getSkills()).toHaveLength(1);
+    expect(getSkills()[0].name).toBe('Piano');
+  });
+
+  it('soft-deletes a skill without touching its logged sessions', () => {
+    addSkill({ id: 'sk1', name: 'Piano' });
+    logSkillSession({ skillId: 'sk1', date: '2026-01-01', minutes: 30 });
+    deleteSkill(0);
+    expect(getSkills()).toHaveLength(0); // no longer an active skill...
+    expect(getSkillSessions('sk1')).toHaveLength(1); // ...but its history is untouched
+  });
+});
+
+describe('habilidades: skill sessions', () => {
+  it('logs a session and filters by skillId', () => {
+    logSkillSession({ skillId: 'sk1', date: '2026-01-01', minutes: 30 });
+    logSkillSession({ skillId: 'sk2', date: '2026-01-01', minutes: 20 });
+    expect(getSkillSessions('sk1')).toHaveLength(1);
+    expect(getSkillSessions('sk2')).toHaveLength(1);
+    expect(getSkillSessions()).toHaveLength(2); // no filter -> everything
+  });
+
+  it('soft-deletes a session instead of physically removing it', () => {
+    logSkillSession({ skillId: 'sk1', date: '2026-01-01', minutes: 30 });
+    deleteSkillSession(0);
+    expect(getSkillSessions('sk1')).toHaveLength(0);
+    const raw = rawGet<{ deleted?: boolean }[]>('vp_skill_sessions', []);
+    expect(raw).toHaveLength(1);
+    expect(raw[0].deleted).toBe(true);
+  });
+});
+
+describe('habilidades: recompensas', () => {
+  it('creates a reward that starts unclaimed', () => {
+    addReward({ id: 'rw1', title: 'Ver um filme', targetMinutes: 300 });
+    expect(getRewards()).toHaveLength(1);
+    expect(getRewards()[0]).toMatchObject({ title: 'Ver um filme', targetMinutes: 300, claimed: false });
+  });
+
+  it('claiming a reward is an edit (tombstone old + add claimed), matched by stable id', () => {
+    addReward({ id: 'rw1', title: 'Ver um filme', targetMinutes: 300 });
+    claimReward('rw1', '2026-01-05');
+    const rewards = getRewards();
+    expect(rewards).toHaveLength(1); // still exactly one visible reward, not duplicated
+    expect(rewards[0]).toMatchObject({ id: 'rw1', claimed: true, claimedAt: '2026-01-05' });
+
+    const raw = rawGet<{ id: string; deleted?: boolean }[]>('vp_rewards', []);
+    expect(raw).toHaveLength(2); // old (tombstoned) + claimed version
+    expect(raw.filter((r) => r.id === 'rw1' && r.deleted)).toHaveLength(1);
+  });
+
+  it('soft-deletes a reward', () => {
+    addReward({ id: 'rw1', title: 'X', targetMinutes: 100 });
+    deleteReward(0);
+    expect(getRewards()).toHaveLength(0);
   });
 });
 

@@ -65,6 +65,9 @@ export interface Settings {
   /** Day boundaries for Rotina's scheduling window (HH:MM, 24h). */
   wakeTime: string;
   sleepTime: string;
+  /** Recompensas (Habilidades) is opt-in and fully hideable — off by default
+   * so it never intrudes until the user deliberately turns it on. */
+  rewardsEnabled: boolean;
 }
 
 // carbGoal/fatGoal derived from the average carbs/fat across all options of
@@ -82,5 +85,6 @@ export const DEFAULT_SETTINGS: Settings = {
   reducedMotion: false,
   theme: 'system',
   wakeTime: '07:00',
-  sleepTime: '23:00'
+  sleepTime: '23:00',
+  rewardsEnabled: false
 };

@@ -8,6 +8,7 @@ import { applyTheme } from './lib/theme';
 import { initNav, refreshActive } from './ui/nav';
 import { todayTab } from './ui/tabs/today';
 import { rotinaTab } from './ui/tabs/rotina';
+import { habilidadesTab } from './ui/tabs/habilidades';
 import { trainingTab } from './ui/tabs/training';
 import { dietTab } from './ui/tabs/diet';
 import { progressTab } from './ui/tabs/progress';
@@ -19,7 +20,6 @@ import { showToast } from './ui/components/toast';
 // Sections named in the Kaipora roadmap that don't have real content yet —
 // listed honestly as "em breve" so the full navigation is visible from day
 // one instead of being hidden until each phase ships.
-const habilidadesTab = placeholderTab('habilidades', 'Habilidades', 'Desenvolvimento', 'Acompanha tempo investido, frequência e histórico em qualquer habilidade que estejas a desenvolver.');
 const diarioTab = placeholderTab('diario', 'Diário', 'Desenvolvimento', 'Um espaço livre para escreveres sobre o teu dia — sem formulário rígido.');
 const desafiosTab = placeholderTab('desafios', 'Desafios', 'Desafios', 'Kaipora 75 e outros desafios pessoais, sem reinício automático em caso de falha.');
 const conquistasTab = placeholderTab('conquistas', 'Conquistas', 'Acompanhamento', 'Streaks discretos e não-punitivos — a tua jornada completa fica sempre registada.');

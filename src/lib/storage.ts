@@ -4,6 +4,7 @@ import { visible, withAdded, withSoftDeleted } from './tombstoneList';
 import type { FixedCommitment, FlexibleActivity } from '../data/types-routine';
 import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
 import type { CustomExercise, CustomWorkout, WorkoutExercise } from '../data/types-training';
+import type { Skill, SkillSession, Reward } from '../data/types-skills';
 
 export const PFX = 'vp';
 
@@ -491,4 +492,77 @@ export function removeExerciseFromCustomWorkout(workoutId: string, exerciseIndex
     workoutId,
     current.exercises.filter((_, i) => i !== exerciseIndex)
   );
+}
+
+// ---- Habilidades: skills, sessões de prática, recompensas ----
+// Deleting a skill only removes it from the active list (soft-delete) — its
+// logged sessions are never touched, so past time invested is never lost.
+
+function getSkillsRaw(): Skill[] {
+  return rawGet<Skill[]>(`${PFX}_skills`, []);
+}
+
+export function getSkills(): Skill[] {
+  return visible(getSkillsRaw());
+}
+
+export function addSkill(entry: Omit<Skill, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_skills`, withAdded(getSkillsRaw(), entry));
+}
+
+export function deleteSkill(visibleIndex: number): void {
+  rawSet(`${PFX}_skills`, withSoftDeleted(getSkillsRaw(), visibleIndex, (a, b) => a.id === b.id));
+}
+
+function getSkillSessionsRaw(): SkillSession[] {
+  return rawGet<SkillSession[]>(`${PFX}_skill_sessions`, []);
+}
+
+export function getSkillSessions(skillId?: string): SkillSession[] {
+  const all = visible(getSkillSessionsRaw());
+  return skillId ? all.filter((s) => s.skillId === skillId) : all;
+}
+
+export function logSkillSession(entry: Omit<SkillSession, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_skill_sessions`, withAdded(getSkillSessionsRaw(), entry));
+}
+
+/** `visibleIndex` must be the entry's index within the FULL visible list
+ * (getSkillSessions() with no skillId filter) — see withSoftDeleted. */
+export function deleteSkillSession(visibleIndex: number): void {
+  rawSet(
+    `${PFX}_skill_sessions`,
+    withSoftDeleted(getSkillSessionsRaw(), visibleIndex, (a, b) => a.skillId === b.skillId && a.date === b.date && a.minutes === b.minutes)
+  );
+}
+
+function getRewardsRaw(): Reward[] {
+  return rawGet<Reward[]>(`${PFX}_rewards`, []);
+}
+
+export function getRewards(): Reward[] {
+  return visible(getRewardsRaw());
+}
+
+export function addReward(entry: Omit<Reward, 'updatedAt' | 'deleted' | 'claimed' | 'claimedAt'>): void {
+  rawSet(`${PFX}_rewards`, withAdded(getRewardsRaw(), { ...entry, claimed: false }));
+}
+
+export function deleteReward(visibleIndex: number): void {
+  rawSet(`${PFX}_rewards`, withSoftDeleted(getRewardsRaw(), visibleIndex, (a, b) => a.id === b.id));
+}
+
+/** Marking a reward claimed is an edit like updateMeasurement/
+ * replaceCustomWorkoutExercises: tombstone the old version, add the claimed
+ * one, matched by the reward's stable id. */
+export function claimReward(rewardId: string, claimedAt: string): void {
+  const raw = getRewardsRaw();
+  const current = visible(raw).find((r) => r.id === rewardId);
+  if (!current) return;
+  const tombstoned = withSoftDeleted(
+    raw,
+    visible(raw).findIndex((r) => r.id === rewardId),
+    (a, b) => a.id === b.id
+  );
+  rawSet(`${PFX}_rewards`, withAdded(tombstoned, { ...current, claimed: true, claimedAt }));
 }
