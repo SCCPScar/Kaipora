@@ -1,58 +1,58 @@
 /* ============================================================
    Kaipora — tema visual
-   Sofisticado, minimalista, acolhedor — sem emojis como elementos de
-   interface. Dark e Light Mode partilham a mesma identidade através de
-   um único conjunto de tokens (--bg, --text, --primary, ...), redefinido
-   por tema abaixo. Paleta provisória: a definitiva substitui só os
-   valores neste bloco, nada mais no ficheiro precisa de mudar.
+   Paleta definitiva da utilizadora (Dark: Lavender Veil / Sunflower Gold /
+   Hot Rose / Night Bordeaux / Dark Amethyst — Light: Pearl Beige / Golden
+   Apricot / Cotton Candy / Brown Red / Black Cherry). Dark e Light Mode
+   partilham a mesma identidade através de um único conjunto de tokens
+   (--bg, --text, --primary, ...), redefinido por tema abaixo.
    ============================================================ */
 
 :root {
   color-scheme: dark;
 
   /* ---- tokens semânticos (mesmos nomes nos dois temas) ---- */
-  --bg: #12131a;
-  --bg-elevated: #191b24;
-  --bg-card: #1b1d28;
-  --bg-card-hover: #22242f;
-  --border: rgba(124, 140, 255, 0.16);
-  --border-strong: rgba(124, 140, 255, 0.32);
+  --bg: #25104d;
+  --bg-elevated: #2d145e;
+  --bg-card: #33166b;
+  --bg-card-hover: #3b1a7b;
+  --border: rgba(194, 40, 107, 0.2);
+  --border-strong: rgba(194, 40, 107, 0.36);
 
-  --text: #ededf2;
-  --text-dim: #a7abc0;
-  --text-faint: #6c7086;
+  --text: #f7d9fc;
+  --text-dim: #ae93bf;
+  --text-faint: #755c90;
 
-  --primary: #7c8cff;
-  --primary-glow: #a5b1ff;
-  --secondary: #4ade9a;
-  --secondary-glow: #7ff0b8;
-  --accent: #ff9f6e;
-  --accent-glow: #ffb891;
-  --gold: #e0a52c;
-  --green: #4ade9a;
+  --primary: #c2286b;
+  --primary-glow: #dc5590;
+  --secondary: #fab940;
+  --secondary-glow: #fccf7c;
+  --accent: #822842;
+  --accent-glow: #b9395d;
+  --gold: #fab940;
+  --green: #fab940;
 
-  --gradient-main: linear-gradient(135deg, #6a6bff 0%, #4ade9a 100%);
-  --gradient-accent: linear-gradient(135deg, #ff9f6e 0%, #7c8cff 100%);
+  --gradient-main: linear-gradient(135deg, #c2286b 0%, #fab940 100%);
+  --gradient-accent: linear-gradient(135deg, #822842 0%, #c2286b 100%);
 
-  --glow-1: rgba(124, 140, 255, 0.18);
-  --glow-2: rgba(74, 222, 154, 0.12);
-  --glow-3: rgba(255, 159, 110, 0.1);
+  --glow-1: rgba(194, 40, 107, 0.18);
+  --glow-2: rgba(250, 185, 64, 0.13);
+  --glow-3: rgba(91, 28, 46, 0.14);
 
-  --bg-translucent: rgba(18, 19, 26, 0.86);
+  --bg-translucent: rgba(37, 16, 77, 0.86);
   --ring-track: rgba(255, 255, 255, 0.08);
-  --tint-primary-low: rgba(124, 140, 255, 0.1);
-  --tint-primary-med: rgba(124, 140, 255, 0.2);
-  --tint-primary-strong: rgba(124, 140, 255, 0.3);
-  --tint-primary-glow: rgba(124, 140, 255, 0.55);
-  --tint-secondary-low: rgba(74, 222, 154, 0.12);
-  --tint-secondary-glow: rgba(74, 222, 154, 0.5);
-  --tint-accent-low: rgba(255, 159, 110, 0.14);
-  --tint-accent-strong: rgba(255, 159, 110, 0.3);
-  --tint-gold-low: rgba(224, 165, 44, 0.14);
+  --tint-primary-low: rgba(194, 40, 107, 0.12);
+  --tint-primary-med: rgba(194, 40, 107, 0.22);
+  --tint-primary-strong: rgba(194, 40, 107, 0.32);
+  --tint-primary-glow: rgba(194, 40, 107, 0.55);
+  --tint-secondary-low: rgba(250, 185, 64, 0.14);
+  --tint-secondary-glow: rgba(250, 185, 64, 0.5);
+  --tint-accent-low: rgba(91, 28, 46, 0.22);
+  --tint-accent-strong: rgba(91, 28, 46, 0.4);
+  --tint-gold-low: rgba(250, 185, 64, 0.16);
 
   --radius: 14px;
   --radius-sm: 9px;
-  --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(124, 140, 255, 0.4);
+  --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(194, 40, 107, 0.4);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
 
@@ -69,46 +69,46 @@
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --bg: #faf9f7;
-  --bg-elevated: #f1f0ec;
+  --bg: #f8f0bb;
+  --bg-elevated: #f2e37f;
   --bg-card: #ffffff;
-  --bg-card-hover: #f5f4f1;
-  --border: rgba(75, 91, 214, 0.14);
-  --border-strong: rgba(75, 91, 214, 0.28);
+  --bg-card-hover: #fafafa;
+  --border: rgba(173, 40, 49, 0.16);
+  --border-strong: rgba(173, 40, 49, 0.3);
 
-  --text: #1c1d24;
-  --text-dim: #55596e;
-  --text-faint: #8b8fa3;
+  --text: #640d14;
+  --text-dim: #985c4e;
+  --text-faint: #c09a7c;
 
-  --primary: #4b5bd6;
-  --primary-glow: #6674e0;
-  --secondary: #2fa372;
-  --secondary-glow: #38bd83;
-  --accent: #d97a49;
-  --accent-glow: #e8935f;
-  --gold: #b5811f;
-  --green: #2fa372;
+  --primary: #ad2831;
+  --primary-glow: #d54851;
+  --secondary: #cc8829;
+  --secondary-glow: #d8973c;
+  --accent: #fc694b;
+  --accent-glow: #fd9b87;
+  --gold: #cc8829;
+  --green: #cc8829;
 
-  --gradient-main: linear-gradient(135deg, #4b5bd6 0%, #2fa372 100%);
-  --gradient-accent: linear-gradient(135deg, #d97a49 0%, #4b5bd6 100%);
+  --gradient-main: linear-gradient(135deg, #ad2831 0%, #d8973c 100%);
+  --gradient-accent: linear-gradient(135deg, #fc694b 0%, #ad2831 100%);
 
-  --glow-1: rgba(75, 91, 214, 0.08);
-  --glow-2: rgba(47, 163, 114, 0.07);
-  --glow-3: rgba(217, 122, 73, 0.06);
+  --glow-1: rgba(173, 40, 49, 0.1);
+  --glow-2: rgba(216, 151, 60, 0.1);
+  --glow-3: rgba(253, 155, 135, 0.12);
 
-  --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(75, 91, 214, 0.18);
+  --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(173, 40, 49, 0.18);
 
-  --bg-translucent: rgba(250, 249, 247, 0.86);
+  --bg-translucent: rgba(248, 240, 187, 0.86);
   --ring-track: rgba(28, 29, 36, 0.08);
-  --tint-primary-low: rgba(75, 91, 214, 0.08);
-  --tint-primary-med: rgba(75, 91, 214, 0.16);
-  --tint-primary-strong: rgba(75, 91, 214, 0.26);
-  --tint-primary-glow: rgba(75, 91, 214, 0.4);
-  --tint-secondary-low: rgba(47, 163, 114, 0.1);
-  --tint-secondary-glow: rgba(47, 163, 114, 0.4);
-  --tint-accent-low: rgba(217, 122, 73, 0.12);
-  --tint-accent-strong: rgba(217, 122, 73, 0.26);
-  --tint-gold-low: rgba(181, 129, 31, 0.14);
+  --tint-primary-low: rgba(173, 40, 49, 0.08);
+  --tint-primary-med: rgba(173, 40, 49, 0.16);
+  --tint-primary-strong: rgba(173, 40, 49, 0.26);
+  --tint-primary-glow: rgba(173, 40, 49, 0.35);
+  --tint-secondary-low: rgba(216, 151, 60, 0.14);
+  --tint-secondary-glow: rgba(216, 151, 60, 0.4);
+  --tint-accent-low: rgba(253, 155, 135, 0.25);
+  --tint-accent-strong: rgba(253, 155, 135, 0.45);
+  --tint-gold-low: rgba(216, 151, 60, 0.16);
 }
 
 /* System preference applies only when the user hasn't made an explicit
@@ -116,40 +116,40 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
     color-scheme: light;
-    --bg: #faf9f7;
-    --bg-elevated: #f1f0ec;
+    --bg: #f8f0bb;
+    --bg-elevated: #f2e37f;
     --bg-card: #ffffff;
-    --bg-card-hover: #f5f4f1;
-    --border: rgba(75, 91, 214, 0.14);
-    --border-strong: rgba(75, 91, 214, 0.28);
-    --text: #1c1d24;
-    --text-dim: #55596e;
-    --text-faint: #8b8fa3;
-    --primary: #4b5bd6;
-    --primary-glow: #6674e0;
-    --secondary: #2fa372;
-    --secondary-glow: #38bd83;
-    --accent: #d97a49;
-    --accent-glow: #e8935f;
-    --gold: #b5811f;
-    --green: #2fa372;
-    --gradient-main: linear-gradient(135deg, #4b5bd6 0%, #2fa372 100%);
-    --gradient-accent: linear-gradient(135deg, #d97a49 0%, #4b5bd6 100%);
-    --glow-1: rgba(75, 91, 214, 0.08);
-    --glow-2: rgba(47, 163, 114, 0.07);
-    --glow-3: rgba(217, 122, 73, 0.06);
-    --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(75, 91, 214, 0.18);
-    --bg-translucent: rgba(250, 249, 247, 0.86);
+    --bg-card-hover: #fafafa;
+    --border: rgba(173, 40, 49, 0.16);
+    --border-strong: rgba(173, 40, 49, 0.3);
+    --text: #640d14;
+    --text-dim: #985c4e;
+    --text-faint: #c09a7c;
+    --primary: #ad2831;
+    --primary-glow: #d54851;
+    --secondary: #cc8829;
+    --secondary-glow: #d8973c;
+    --accent: #fc694b;
+    --accent-glow: #fd9b87;
+    --gold: #cc8829;
+    --green: #cc8829;
+    --gradient-main: linear-gradient(135deg, #ad2831 0%, #d8973c 100%);
+    --gradient-accent: linear-gradient(135deg, #fc694b 0%, #ad2831 100%);
+    --glow-1: rgba(173, 40, 49, 0.1);
+    --glow-2: rgba(216, 151, 60, 0.1);
+    --glow-3: rgba(253, 155, 135, 0.12);
+    --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(173, 40, 49, 0.18);
+    --bg-translucent: rgba(248, 240, 187, 0.86);
     --ring-track: rgba(28, 29, 36, 0.08);
-    --tint-primary-low: rgba(75, 91, 214, 0.08);
-    --tint-primary-med: rgba(75, 91, 214, 0.16);
-    --tint-primary-strong: rgba(75, 91, 214, 0.26);
-    --tint-primary-glow: rgba(75, 91, 214, 0.4);
-    --tint-secondary-low: rgba(47, 163, 114, 0.1);
-    --tint-secondary-glow: rgba(47, 163, 114, 0.4);
-    --tint-accent-low: rgba(217, 122, 73, 0.12);
-    --tint-accent-strong: rgba(217, 122, 73, 0.26);
-    --tint-gold-low: rgba(181, 129, 31, 0.14);
+    --tint-primary-low: rgba(173, 40, 49, 0.08);
+    --tint-primary-med: rgba(173, 40, 49, 0.16);
+    --tint-primary-strong: rgba(173, 40, 49, 0.26);
+    --tint-primary-glow: rgba(173, 40, 49, 0.35);
+    --tint-secondary-low: rgba(216, 151, 60, 0.14);
+    --tint-secondary-glow: rgba(216, 151, 60, 0.4);
+    --tint-accent-low: rgba(253, 155, 135, 0.25);
+    --tint-accent-strong: rgba(253, 155, 135, 0.45);
+    --tint-gold-low: rgba(216, 151, 60, 0.16);
   }
 }
 
