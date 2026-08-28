@@ -1,8 +1,10 @@
-# VProject
+# Kaipora
 
-Plataforma pessoal de transformação física e recomposição corporal — construída para a Scarllett (Scar). Substitui por completo a antiga `plano-scar.html` (single-file) e remove qualquer vestígio da aplicação da Luana.
+PWA pessoal de consistência e evolução — rotina, corpo, alimentação, treino, água, habilidades e diário, para a Scarllett (Scar). Evoluído a partir do VProject (que por sua vez substituiu por completo a antiga `plano-scar.html` single-file e removeu qualquer vestígio da aplicação da Luana).
 
-Identidade visual própria inspirada na atmosfera de Vi (Arcane) e Maki Zenin (Jujutsu Kaisen) — roxo/azul elétrico, borgonha, tons escuros, glow — sem usar personagens, logótipos ou assets protegidos.
+Identidade visual própria: minimalista, sofisticada e acolhedora, com temas Dark e Light definidos por tokens CSS (`src/style.css`) — sem emojis como elementos de interface. O logótipo/mascote definitivo ainda não foi desenhado; a marca usa por agora só tipografia e um símbolo mínimo.
+
+Princípio central: **consistência é mais importante que perfeição** — um dia incompleto não apaga a jornada nem reinicia o progresso.
 
 ## Stack
 
@@ -18,12 +20,27 @@ Identidade visual própria inspirada na atmosfera de Vi (Arcane) e Maki Zenin (J
 src/
   data/        Exercícios, plano de treino (Academia+Casa x7 dias), dieta, hábitos
   lib/         storage, migração, merge (resolução de conflitos), datas, cálculo calórico,
-               cliente Supabase, sync, notificações
-  ui/          nav + 6 separadores (Hoje, Treino, Dieta, Progresso, Calendário, Ajustes) + componentes
+               cliente Supabase, sync, notificações, tema (dark/light)
+  ui/          navegação lateral (nav.ts) + separadores + componentes (ícones, gráfico, modal, timer, toast)
 supabase/schema.sql   Esquema para sincronização cloud (tabela chave/valor + RLS)
 scripts/stamp-sw.mjs  Dá à cache do service worker um nome único por build
 tests/                Testes Vitest (storage, migração, merge/sync, dieta, treino)
 ```
+
+### Navegação
+
+A navegação é uma sidebar/drawer (menu lateral), agrupada por secção:
+
+| Secção | Separadores |
+|---|---|
+| Início | Hoje, Rotina* |
+| Corpo | Treino, Alimentação, Progresso |
+| Desenvolvimento | Habilidades*, Diário* |
+| Desafios | Desafios* |
+| Acompanhamento | Calendário, Conquistas* |
+| Sistema | Ajustes |
+
+Separadores marcados com `*` são placeholders "em breve" — navegáveis desde já (para a estrutura completa ficar visível), com o conteúdo real a chegar em fases seguintes do roteiro Kaipora.
 
 ## Correr localmente
 

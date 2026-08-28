@@ -1,4 +1,4 @@
-// Biblioteca de exercícios do VProject.
+// Biblioteca de exercícios do Kaipora.
 // Base reaproveitada do plano-scar.html original (44 exercícios) + exercícios
 // adicionais dedicados ao programa de glúteos (Academia + Casa).
 import type { Exercise } from './types-training';

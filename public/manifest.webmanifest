@@ -1,13 +1,13 @@
 {
-  "name": "VProject",
-  "short_name": "VProject",
-  "description": "Plataforma pessoal de transformação física e recomposição corporal.",
+  "name": "Kaipora",
+  "short_name": "Kaipora",
+  "description": "PWA pessoal de consistência e evolução: rotina, corpo, alimentação e desenvolvimento.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0a0912",
-  "theme_color": "#0a0912",
+  "background_color": "#12131A",
+  "theme_color": "#12131A",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

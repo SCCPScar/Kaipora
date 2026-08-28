@@ -40,6 +40,8 @@ export interface DayRecord {
   habits: Record<string, boolean>;
 }
 
+export type ThemePreference = 'system' | 'dark' | 'light';
+
 export interface Settings {
   waterGoalMl: number;
   calorieGoal: number;
@@ -51,6 +53,7 @@ export interface Settings {
   notificationsEnabled: boolean;
   reminderTimes: { water: string[]; meals: string[]; training: string[] };
   reducedMotion: boolean;
+  theme: ThemePreference;
 }
 
 // carbGoal/fatGoal derived from the average carbs/fat across all options of
@@ -65,5 +68,6 @@ export const DEFAULT_SETTINGS: Settings = {
   heightCm: 171,
   notificationsEnabled: false,
   reminderTimes: { water: ['11:00', '15:00'], meals: ['07:00', '13:00', '19:00'], training: ['18:00'] },
-  reducedMotion: false
+  reducedMotion: false,
+  theme: 'system'
 };

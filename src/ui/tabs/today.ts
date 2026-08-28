@@ -19,8 +19,14 @@ import { refreshActive, switchTab } from '../nav';
 import { openTimerModal } from '../components/timer';
 import { openExerciseModal } from '../components/exerciseModal';
 import { showToast } from '../components/toast';
+import { infoIcon, timerIcon } from '../components/icons';
+import { isDayComplete } from '../../lib/dayCompletion';
 
 let modality: Modality = 'academia';
+/** The date (YYYY-MM-DD) for which the completion celebration has already
+ * played — so re-renders triggered by unrelated toggles (a meal checked,
+ * water adjusted) don't replay it on every click once the day is done. */
+let celebratedDate: string | null = null;
 
 function computeProgress(date: string): { done: number; total: number } {
   const day = getDay(date);
@@ -47,7 +53,8 @@ function computeProgress(date: string): { done: number; total: number } {
 export const todayTab: Tab = {
   id: 'hoje',
   label: 'Hoje',
-  icon: '☀️',
+  icon: '',
+  group: 'Início',
   render(root: HTMLElement) {
     const date = todayISO();
     const settings = getSettings();
@@ -65,6 +72,14 @@ export const todayTab: Tab = {
     const glassGoal = Math.max(1, Math.round(settings.waterGoalMl / 250));
     const mlEach = Math.round(settings.waterGoalMl / glassGoal);
 
+    const essentialsDone = isDayComplete({
+      waterGlasses: day.water,
+      waterGoalGlasses: glassGoal,
+      trainingDone: Boolean(day.training?.done)
+    });
+    const justCelebrated = essentialsDone && celebratedDate !== date;
+    if (essentialsDone) celebratedDate = date;
+
     root.innerHTML = `
       <div class="ph">
         <h2>${greeting(now)}, Scarllett</h2>
@@ -77,7 +92,7 @@ export const todayTab: Tab = {
           <div class="ring-wrap">
             <svg width="72" height="72" viewBox="0 0 72 72">
               <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#22d3ee"/>
+                <stop offset="0" style="stop-color:var(--primary)"/><stop offset="1" style="stop-color:var(--secondary)"/>
               </linearGradient></defs>
               <circle class="ring-bg" cx="36" cy="36" r="32"/>
               <circle class="ring-fg" cx="36" cy="36" r="32" stroke-dasharray="${RING_C}" stroke-dashoffset="${offset}"/>
@@ -87,14 +102,18 @@ export const todayTab: Tab = {
           <div class="hero-txt">
             <strong>Progresso do dia</strong>
             <span>${done} de ${total} itens concluídos</span>
-            <span>Foco: recomposição corporal, não só a balança 🌱</span>
+            <span>Foco: recomposição corporal, não só a balança</span>
           </div>
         </div>
       </div>
 
+      ${essentialsDone ? completionBannerHTML(justCelebrated) : ''}
+
+      <div class="priority-heading">Essencial</div>
+
       <div class="wcard">
         <div class="wcard-top">
-          <div class="wcard-lbl">💧 Água de hoje</div>
+          <div class="wcard-lbl">Água de hoje</div>
           <div class="wcard-ml" id="wml">${day.water * mlEach} / ${settings.waterGoalMl} ml</div>
         </div>
         <div class="glasses" id="glasses"></div>
@@ -107,12 +126,12 @@ export const todayTab: Tab = {
 
       <section id="training-card">
         <div class="sec-title">
-          <span>💪 Treino de hoje — ${trainingDay.label}</span>
+          <span>Treino de hoje — ${trainingDay.label}</span>
           <span class="pill">${workout.focus}</span>
         </div>
         <div class="modality-switch">
-          <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-modality="academia">🏋️ Academia</button>
-          <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-modality="casa">🏠 Casa</button>
+          <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-modality="academia">Academia</button>
+          <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-modality="casa">Casa</button>
         </div>
         <div id="today-exercises"></div>
         <div class="sub-row" style="justify-content:space-between">
@@ -123,10 +142,12 @@ export const todayTab: Tab = {
         </div>
       </section>
 
+      <div class="priority-heading">Opcional</div>
+
       <section id="meals-card"></section>
 
       <section>
-        <div class="sec-title">🌾 Hábitos de hoje</div>
+        <div class="sec-title">Hábitos de hoje</div>
         <div id="habits-list"></div>
       </section>
     `;
@@ -138,6 +159,28 @@ export const todayTab: Tab = {
     wireEvents(root, date, glassGoal, workout, weekdayKey);
   }
 };
+
+/** 6 small dots bursting outward briefly on the first render after the
+ * essentials flip to done — sober, short, respects prefers-reduced-motion
+ * (globally disabled via the app-wide media query in style.css). */
+function completionBannerHTML(animate: boolean): string {
+  const sparks = animate
+    ? Array.from({ length: 6 }, (_, i) => {
+        const angle = (i / 6) * Math.PI * 2;
+        const dx = Math.round(Math.cos(angle) * 46);
+        const dy = Math.round(Math.sin(angle) * 46);
+        return `<span class="spark" style="--dx:${dx}px;--dy:${dy}px;animation-delay:${i * 30}ms"></span>`;
+      }).join('')
+    : '';
+  return `
+    <div class="day-complete-banner ${animate ? 'animate' : ''}">
+      ${sparks}
+      <div>
+        <strong>Essenciais de hoje concluídos.</strong>
+        <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">O resto do dia é bónus — consistência é mais importante que perfeição.</div>
+      </div>
+    </div>`;
+}
 
 function renderGlasses(root: HTMLElement, water: number, goal: number) {
   const el = root.querySelector('#glasses') as HTMLElement;
@@ -161,11 +204,11 @@ function renderExercises(root: HTMLElement, workout: ReturnType<typeof getTraini
         <div class="ex-main" data-select="${we.exerciseId}">
           <strong>${ex.name}</strong>
           <small>${we.sets}x ${we.reps} · descanso ${we.restSeconds}s${we.note ? ' · ' + we.note : ''}</small>
-          ${ex.gluteFocus ? '<span class="gluteo-tag">🔥 Glúteos</span>' : ''}
+          ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
         </div>
         <div class="ex-actions">
-          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">ℹ️</button>
-          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">⏱</button>
+          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">${infoIcon()}</button>
+          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">${timerIcon()}</button>
         </div>
       </div>`;
     })
@@ -184,13 +227,13 @@ function renderMeals(root: HTMLElement, date: string, day: ReturnType<typeof get
         .map(
           (o) => `
         <div class="row ${day.meals[o.id] ? 'done' : ''}" data-meal="${meal.id}" data-option="${o.id}">
-          <div class="chk">✓</div>
-          <div class="rtxt"><strong>${o.emoji} ${o.label}</strong><small>${o.desc}</small></div>
+          <div class="chk"></div>
+          <div class="rtxt"><strong>${o.label}</strong><small>${o.desc}</small></div>
           <span class="kcal">${o.kcal} kcal</span>
         </div>`
         )
         .join('')}
-      ${totalKcal > 0 ? `<div class="sub-row"><span class="badge-p">🥩 ${totalP}g prot</span><span class="badge-k">🔥 ${totalKcal} kcal</span></div>` : ''}
+      ${totalKcal > 0 ? `<div class="sub-row"><span class="badge-p">${totalP}g prot</span><span class="badge-k">${totalKcal} kcal</span></div>` : ''}
     </div>`;
   }).join('');
 }
@@ -200,8 +243,8 @@ function renderHabits(root: HTMLElement, date: string, day: ReturnType<typeof ge
   el.innerHTML = HABITS.map(
     (h) => `
     <div class="row ${day.habits[h.id] ? 'done' : ''}" data-habit="${h.id}">
-      <div class="chk">✓</div>
-      <div class="rtxt"><strong>${h.emoji} ${h.label}</strong></div>
+      <div class="chk"></div>
+      <div class="rtxt"><strong>${h.label}</strong></div>
     </div>`
   ).join('');
 }
@@ -262,7 +305,7 @@ function wireEvents(
   root.querySelector('#training-done')?.addEventListener('change', (e) => {
     const checked = (e.target as HTMLInputElement).checked;
     setTrainingDone(date, modality, workout.id, checked);
-    if (checked) showToast('Treino de hoje registado! 💪');
+    if (checked) showToast('Treino de hoje registado!');
     refreshActive();
   });
 

@@ -11,11 +11,11 @@ export function openExerciseModal(ex: Exercise): void {
   const diagram = EXERCISE_DIAGRAMS[ex.id];
   openModal(
     `
-    <button class="modal-close" data-close>✕</button>
+    <button class="modal-close" data-close></button>
     <h3>${ex.name}</h3>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
       ${ex.muscles.map((m) => `<span class="pill">${m}</span>`).join('')}
-      ${ex.gluteFocus ? '<span class="pill" style="color:var(--burgundy-glow)">🔥 Glúteos</span>' : ''}
+      ${ex.gluteFocus ? '<span class="pill" style="color:var(--burgundy-glow)">Glúteos</span>' : ''}
     </div>
     ${
       diagram
@@ -25,13 +25,13 @@ export function openExerciseModal(ex: Exercise): void {
     }
     <p style="font-size:14px;line-height:1.6;color:var(--text)">${ex.desc}</p>
     <div class="alert" style="margin:14px 0 0">
-      <span>💡</span><span>${ex.tip}</span>
+      <span>${ex.tip}</span>
     </div>
 
-    <div class="sec-title" style="margin:18px -20px 0;border-radius:0">📈 Carga e progressão</div>
+    <div class="sec-title" style="margin:18px -20px 0;border-radius:0">Carga e progressão</div>
     <div id="load-compare"></div>
     <canvas id="load-chart" style="width:100%;display:none;margin-top:10px"></canvas>
-    <div id="load-empty" class="empty" style="display:none">Regista pelo menos 2 vezes com carga para veres o gráfico de evolução 🌱</div>
+    <div id="load-empty" class="empty" style="display:none">Regista pelo menos 2 vezes com carga para veres o gráfico de evolução</div>
     <div style="padding:12px 0 0;font-size:10.5px;color:var(--text-faint)">Preenche só o que fizer sentido: carga para exercícios de academia, repetições/duração/variação para calistenia.</div>
     <div class="form-row" style="padding:8px 0 0">
       <input class="finp" id="load-kg" type="number" step="0.5" min="0" placeholder="Carga (kg)" />
@@ -68,7 +68,7 @@ export function openExerciseModal(ex: Exercise): void {
         repsInput.value = '';
         secondsInput.value = '';
         noteInput.value = '';
-        showToast('Sessão registada 💪');
+        showToast('Sessão registada');
         renderLoads(modal, ex.id);
       });
 
@@ -129,7 +129,6 @@ function renderLoads(modal: HTMLElement, exerciseId: string): void {
     }
     compare.innerHTML = `
       <div class="alert" style="margin:10px 0">
-        <span>📊</span>
         <span>Última vez (${previous.date}): <strong>${summarize(previous)}</strong> → Agora (${latest.date}): <strong>${summarize(latest)}</strong>${delta}</span>
       </div>`;
   } else {
@@ -147,7 +146,7 @@ function renderLoads(modal: HTMLElement, exerciseId: string): void {
       (l, i) => `
       <div class="log-item">
         <div class="log-txt"><strong>${summarize(l)}</strong><div class="log-date">${l.date}</div></div>
-        <button class="log-del" data-del-load="${i}">✕</button>
+        <button class="log-del" data-del-load="${i}"></button>
       </div>`
     )
     .join('');

@@ -1,11 +1,11 @@
-// VProject — service worker
+// Kaipora — service worker
 // Cache-first for the built app shell (hashed JS/CSS get cached the first time
 // they're fetched, since Vite generates their names at build time and we can't
 // know them up front), network-first for navigations with an offline fallback
 // to the cached index.html. Cross-origin requests (Supabase) are never
 // intercepted — they always go straight to the network.
 
-const CACHE_VERSION = 'vproject-v1';
+const CACHE_VERSION = 'kaipora-v1';
 const SCOPE = self.registration.scope; // e.g. https://host/VProject/
 
 const APP_SHELL = [

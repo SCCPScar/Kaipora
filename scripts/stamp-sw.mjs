@@ -1,5 +1,5 @@
 // Stamps dist/sw.js with a build-unique cache name. public/sw.js ships with a
-// static placeholder ('vproject-v1') because Vite copies public/ files
+// static placeholder ('kaipora-v1') because Vite copies public/ files
 // verbatim without processing them — this script is what actually varies the
 // value per build, so each deploy gets its own cache namespace and the
 // service worker's activate handler evicts the previous deploy's assets
@@ -14,7 +14,7 @@ const buildId = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
 const original = readFileSync(distSwPath, 'utf8');
 const stamped = original.replace(
   /const CACHE_VERSION = '[^']*';/,
-  `const CACHE_VERSION = 'vproject-${buildId}';`
+  `const CACHE_VERSION = 'kaipora-${buildId}';`
 );
 
 if (stamped === original) {
@@ -22,4 +22,4 @@ if (stamped === original) {
 }
 
 writeFileSync(distSwPath, stamped);
-console.log(`stamp-sw: dist/sw.js cache namespace set to vproject-${buildId}`);
+console.log(`stamp-sw: dist/sw.js cache namespace set to kaipora-${buildId}`);

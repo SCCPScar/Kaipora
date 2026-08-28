@@ -58,8 +58,8 @@ export function openTimerModal(initialSeconds = 60): void {
 
   const close = openModal(
     `
-    <button class="modal-close" data-close>✕</button>
-    <h3>⏱ Temporizador de descanso</h3>
+    <button class="modal-close" data-close></button>
+    <h3>Temporizador de descanso</h3>
     <div class="timer-display" id="tmr-display">${fmt(remaining)}</div>
     <div class="timer-presets" id="tmr-presets">
       ${PRESETS.map((p) => `<button class="timer-preset${p === total ? ' active' : ''}" data-preset="${p}">${p}s</button>`).join('')}

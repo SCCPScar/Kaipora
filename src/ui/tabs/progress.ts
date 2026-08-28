@@ -22,7 +22,8 @@ let editingMeasurementIndex: number | null = null;
 export const progressTab: Tab = {
   id: 'progresso',
   label: 'Progresso',
-  icon: '📈',
+  icon: '',
+  group: 'Corpo',
   render(root: HTMLElement) {
     const weights = getWeights();
     const measurements = getMeasurements();
@@ -33,15 +34,15 @@ export const progressTab: Tab = {
       <div class="ph">
         <h2>Progresso</h2>
         <div class="ph-title">O teu historial, Scarllett</div>
-        <div class="ph-sub">Recomposição corporal — mais do que a balança 🌱</div>
+        <div class="ph-sub">Recomposição corporal — mais do que a balança</div>
       </div>
 
-      <div class="alert"><span>📊</span><span>O sucesso combina peso, medidas, treino e consistência — nunca só o número na balança.</span></div>
+      <div class="alert"><span>O sucesso combina peso, medidas, treino e consistência — nunca só o número na balança.</span></div>
 
       <div class="chart-sec">
-        <h4>📉 Evolução do peso</h4>
+        <h4>Evolução do peso</h4>
         <canvas id="wchart" style="width:100%"></canvas>
-        <div id="chart-empty" class="empty" style="display:none">Regista pelo menos 2 pesagens para veres o gráfico 🌱</div>
+        <div id="chart-empty" class="empty" style="display:none">Regista pelo menos 2 pesagens para veres o gráfico</div>
       </div>
       <div class="form-row">
         <input class="finp" id="wi" type="number" step="0.1" min="30" max="250" placeholder="Peso em kg (ex: 74.8)" />
@@ -54,8 +55,8 @@ export const progressTab: Tab = {
 
       <section>
         <div class="sec-title">
-          <span>📏 Medidas (cm)</span>
-          ${editingMeasurementIndex !== null ? '<span class="pill">✏️ A editar</span>' : ''}
+          <span>Medidas (cm)</span>
+          ${editingMeasurementIndex !== null ? '<span class="pill">A editar</span>' : ''}
         </div>
         <div class="meds-grid">
           <div><label>Cintura</label><input class="finp" id="mc" type="number" placeholder="Ex: 82" /></div>
@@ -68,7 +69,7 @@ export const progressTab: Tab = {
           <input class="finp" id="mextra-val" type="number" placeholder="cm" style="max-width:90px" />
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn block" id="msave">${editingMeasurementIndex !== null ? '✓ Guardar alterações' : '+ Guardar medidas'}</button>
+          <button class="btn block" id="msave">${editingMeasurementIndex !== null ? 'Guardar alterações' : '+ Guardar medidas'}</button>
           ${editingMeasurementIndex !== null ? '<button class="btn ghost" id="mcancel">Cancelar</button>' : ''}
         </div>
         <div style="padding:0 16px 4px;font-size:11px;color:var(--text-faint)">Toca num registo abaixo para o editar.</div>
@@ -76,7 +77,7 @@ export const progressTab: Tab = {
       </section>
 
       <section>
-        <div class="sec-title">📝 Diário</div>
+        <div class="sec-title">Diário</div>
         <div class="form-row">
           <input class="finp" id="ni" type="text" placeholder="Como foi hoje, Scarllett?" />
           <button class="fsave" id="nsave">Guardar</button>
@@ -111,7 +112,7 @@ function renderChart(root: HTMLElement, weights: ReturnType<typeof getWeights>, 
 function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeights>) {
   const el = root.querySelector('#wlog') as HTMLElement;
   if (!weights.length) {
-    el.innerHTML = '<div class="empty">Ainda sem registos de peso 🌱</div>';
+    el.innerHTML = '<div class="empty">Ainda sem registos de peso</div>';
     return;
   }
   el.innerHTML = weights
@@ -125,7 +126,7 @@ function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeight
       return `
       <div class="log-item">
         <div class="log-txt"><strong>${w.kg} kg</strong>${diffHTML}<div class="log-date">${w.date}</div></div>
-        <button class="log-del" data-del-weight="${i}">✕</button>
+        <button class="log-del" data-del-weight="${i}"></button>
       </div>`;
     })
     .join('');
@@ -134,7 +135,7 @@ function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeight
 function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasurements>) {
   const el = root.querySelector('#mlog') as HTMLElement;
   if (!list.length) {
-    el.innerHTML = '<div class="empty">Regista as medidas mensalmente 🌱</div>';
+    el.innerHTML = '<div class="empty">Regista as medidas mensalmente</div>';
     return;
   }
   el.innerHTML = list
@@ -146,10 +147,10 @@ function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasur
       return `
     <div class="log-item" data-edit-measurement="${i}" style="cursor:pointer;${isEditing ? 'background:rgba(139,92,246,.12)' : ''}">
       <div class="log-txt">
-        <strong>${m.date}${isEditing ? ' ✏️' : ''}</strong>
+        <strong>${m.date}${isEditing ? ' · a editar' : ''}</strong>
         <div class="log-date">Cintura ${m.waist ?? '-'}cm · Quadril ${m.hip ?? '-'}cm · Coxa ${m.thigh ?? '-'}cm · Braço ${m.arm ?? '-'}cm${extras ? ` · ${extras}` : ''}</div>
       </div>
-      <button class="log-del" data-del-measurement="${i}">✕</button>
+      <button class="log-del" data-del-measurement="${i}"></button>
     </div>`;
     })
     .join('');
@@ -176,7 +177,7 @@ function prefillMeasurementForm(root: HTMLElement, measurements: ReturnType<type
 function renderNotes(root: HTMLElement, list: ReturnType<typeof getNotes>) {
   const el = root.querySelector('#nlog') as HTMLElement;
   if (!list.length) {
-    el.innerHTML = '<div class="empty">Ainda sem notas 🌱</div>';
+    el.innerHTML = '<div class="empty">Ainda sem notas</div>';
     return;
   }
   el.innerHTML = list
@@ -184,7 +185,7 @@ function renderNotes(root: HTMLElement, list: ReturnType<typeof getNotes>) {
       (n, i) => `
     <div class="log-item">
       <div class="log-txt"><strong>${n.text}</strong><div class="log-date">${n.date}</div></div>
-      <button class="log-del" data-del-note="${i}">✕</button>
+      <button class="log-del" data-del-note="${i}"></button>
     </div>`
     )
     .join('');
@@ -196,7 +197,7 @@ function wireEvents(root: HTMLElement) {
     const v = parseFloat(input.value);
     if (!v || Number.isNaN(v)) return;
     addWeight(v, todayISO());
-    showToast('Peso guardado 🌱');
+    showToast('Peso guardado');
     refreshActive();
   });
 
@@ -221,10 +222,10 @@ function wireEvents(root: HTMLElement) {
     if (editingMeasurementIndex !== null) {
       updateMeasurement(editingMeasurementIndex, values);
       editingMeasurementIndex = null;
-      showToast('Medidas atualizadas 🌱');
+      showToast('Medidas atualizadas');
     } else {
       addMeasurement(values);
-      showToast('Medidas guardadas 🌱');
+      showToast('Medidas guardadas');
     }
     refreshActive();
   });

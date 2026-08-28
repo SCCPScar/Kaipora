@@ -1,8 +1,8 @@
 {
-  "name": "vproject",
+  "name": "kaipora",
   "private": true,
   "version": "1.0.0",
-  "description": "VProject — plataforma pessoal de transformação física de Scarllett.",
+  "description": "Kaipora — PWA pessoal de consistência e evolução: rotina, corpo, alimentação e desenvolvimento.",
   "type": "module",
   "scripts": {
     "dev": "vite",

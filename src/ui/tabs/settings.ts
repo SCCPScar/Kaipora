@@ -2,13 +2,16 @@ import type { Tab } from '../nav';
 import { getSettings, saveSettings, exportBackup, importBackup } from '../../lib/storage';
 import { isCloudConfigured, getSession, signInWithEmail, signOut, fullSync } from '../../lib/sync';
 import { requestNotificationPermission } from '../../lib/notifications';
+import { applyTheme } from '../../lib/theme';
+import type { ThemePreference } from '../../lib/types';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
 
 export const settingsTab: Tab = {
   id: 'ajustes',
   label: 'Ajustes',
-  icon: '⚙️',
+  icon: '',
+  group: 'Sistema',
   render(root: HTMLElement) {
     const settings = getSettings();
 
@@ -20,7 +23,17 @@ export const settingsTab: Tab = {
       </div>
 
       <section>
-        <div class="sec-title">🎯 Metas</div>
+        <div class="sec-title">Aparência</div>
+        <div style="padding:12px 16px 4px;font-size:12.5px;color:var(--text-dim)">Dark e Light Mode partilham a mesma identidade — escolhe o que preferires.</div>
+        <div class="form-row">
+          <button class="btn ${settings.theme === 'system' ? '' : 'ghost'}" data-theme-choice="system">Sistema</button>
+          <button class="btn ${settings.theme === 'light' ? '' : 'ghost'}" data-theme-choice="light">Claro</button>
+          <button class="btn ${settings.theme === 'dark' ? '' : 'ghost'}" data-theme-choice="dark">Escuro</button>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-title">Metas</div>
         <div class="meds-grid">
           <div><label>Água diária (ml)</label><input class="finp" id="s-water" type="number" step="50" value="${settings.waterGoalMl}" /></div>
           <div><label>Peso meta (kg)</label><input class="finp" id="s-goalweight" type="number" step="0.5" value="${settings.goalWeightKg}" /></div>
@@ -35,43 +48,42 @@ export const settingsTab: Tab = {
       </section>
 
       <section>
-        <div class="sec-title">🔔 Notificações</div>
+        <div class="sec-title">Notificações</div>
         <div class="row" style="cursor:default">
           <div class="rtxt"><strong>Ativar lembretes</strong><small>Água, refeições e treino</small></div>
           <label class="switch"><input type="checkbox" id="s-notif" ${settings.notificationsEnabled ? 'checked' : ''}/><span class="slider"></span></label>
         </div>
         <div class="alert" style="margin:10px 14px">
-          <span>🍏</span>
           <span>No iPhone (Safari/PWA), notificações só funcionam com a app aberta em primeiro plano — o iOS não permite lembretes agendados em segundo plano sem um servidor de push dedicado. No Android/Chrome o comportamento pode ser mais fiável, mas ainda depende da permissão do sistema.</span>
         </div>
       </section>
 
       <section>
-        <div class="sec-title">☁️ Conta e sincronização</div>
+        <div class="sec-title">Conta e sincronização</div>
         <div id="cloud-section"></div>
       </section>
 
       <section>
-        <div class="sec-title">💾 Backup</div>
+        <div class="sec-title">Backup</div>
         <div style="padding:12px 16px 4px;font-size:12.5px;color:var(--text-dim)">Exporta os teus dados regularmente — é a tua rede de segurança, mesmo com sincronização cloud ativa.</div>
         <div class="form-row">
-          <button class="btn ghost" id="s-export">📤 Exportar backup (.json)</button>
+          <button class="btn ghost" id="s-export">Exportar backup (.json)</button>
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn ghost" id="s-import-btn">📥 Importar backup</button>
+          <button class="btn ghost" id="s-import-btn">Importar backup</button>
           <input type="file" id="s-import-file" accept="application/json" style="display:none" />
         </div>
       </section>
 
       <section>
-        <div class="sec-title">♿ Acessibilidade</div>
+        <div class="sec-title">Acessibilidade</div>
         <div class="row" style="cursor:default">
           <div class="rtxt"><strong>Reduzir animações</strong><small>Respeita prefers-reduced-motion do sistema por defeito</small></div>
           <label class="switch"><input type="checkbox" id="s-motion" ${settings.reducedMotion ? 'checked' : ''}/><span class="slider"></span></label>
         </div>
       </section>
 
-      <div style="text-align:center;padding:20px;font-size:11px;color:var(--text-faint)">VProject · plataforma pessoal de Scarllett 💜</div>
+      <div style="text-align:center;padding:20px;font-size:11px;color:var(--text-faint)">Kaipora · plataforma pessoal de Scarllett</div>
     `;
 
     renderCloudSection(root);
@@ -96,7 +108,7 @@ function renderCloudSection(root: HTMLElement) {
       el.innerHTML = `
         <div style="padding:12px 16px;font-size:13px">Sessão iniciada como <strong>${session.user.email}</strong></div>
         <div class="form-row">
-          <button class="btn" id="s-sync-now">🔄 Sincronizar agora</button>
+          <button class="btn" id="s-sync-now">Sincronizar agora</button>
         </div>
         <div class="form-row" style="padding-top:0">
           <button class="btn ghost" id="s-signout">Terminar sessão</button>
@@ -142,6 +154,15 @@ function renderCloudSection(root: HTMLElement) {
 }
 
 function wireEvents(root: HTMLElement) {
+  root.querySelectorAll<HTMLButtonElement>('[data-theme-choice]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const theme = btn.dataset.themeChoice as ThemePreference;
+      saveSettings({ theme });
+      applyTheme(theme);
+      refreshActive();
+    });
+  });
+
   root.querySelector('#s-save-goals')?.addEventListener('click', () => {
     saveSettings({
       waterGoalMl: Number((root.querySelector('#s-water') as HTMLInputElement).value) || 2000,
@@ -151,7 +172,7 @@ function wireEvents(root: HTMLElement) {
       carbGoal: Number((root.querySelector('#s-carb') as HTMLInputElement).value) || 140,
       fatGoal: Number((root.querySelector('#s-fat') as HTMLInputElement).value) || 55
     });
-    showToast('Metas guardadas 🌱');
+    showToast('Metas guardadas');
   });
 
   root.querySelector('#s-notif')?.addEventListener('change', async (e) => {
@@ -170,10 +191,10 @@ function wireEvents(root: HTMLElement) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `vproject-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `kaipora-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('Backup exportado 📤');
+    showToast('Backup exportado');
   });
 
   root.querySelector('#s-import-btn')?.addEventListener('click', () => {
@@ -191,7 +212,7 @@ function wireEvents(root: HTMLElement) {
     try {
       const text = await file.text();
       importBackup(JSON.parse(text));
-      showToast('Backup importado ✅');
+      showToast('Backup importado');
       refreshActive();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Não foi possível importar este ficheiro.');

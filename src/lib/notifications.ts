@@ -17,7 +17,7 @@ function notify(title: string, body: string) {
 /**
  * Foreground-only reminder loop. iOS PWAs don't support background timers or
  * scheduled local notifications without a push server, so this only fires
- * while VProject is actually open in the foreground — see the Ajustes tab
+ * while Kaipora is actually open in the foreground — see the Ajustes tab
  * and README for the full explanation shown to the user.
  */
 export function startReminderLoop(): void {
@@ -31,15 +31,15 @@ export function startReminderLoop(): void {
 
     if (settings.reminderTimes.water.includes(hhmm) && !firedToday.has(`water_${todayKey}`)) {
       firedToday.add(`water_${todayKey}`);
-      notify('VProject 💧', 'Hora de beber água!');
+      notify('Kaipora', 'Hora de beber água!');
     }
     if (settings.reminderTimes.meals.includes(hhmm) && !firedToday.has(`meal_${todayKey}`)) {
       firedToday.add(`meal_${todayKey}`);
-      notify('VProject 🥗', 'Hora de uma refeição — regista o que comeres.');
+      notify('Kaipora', 'Hora de uma refeição — regista o que comeres.');
     }
     if (settings.reminderTimes.training.includes(hhmm) && !firedToday.has(`train_${todayKey}`)) {
       firedToday.add(`train_${todayKey}`);
-      notify('VProject 💪', 'Hora de treinar, Scarllett!');
+      notify('Kaipora', 'Hora de treinar, Scarllett!');
     }
   }, 30_000);
 }

@@ -1,4 +1,4 @@
-// Plano alimentar do VProject.
+// Plano alimentar do Kaipora.
 // Reformulado com foco em alimentos comuns em supermercados portugueses (Leiria),
 // sem carne vermelha e com gramagens indicadas em cada opção (contexto pós-bariátrico).
 // Cada opção dentro de uma refeição é uma substituição equivalente às restantes —
@@ -16,7 +16,6 @@ export const MEALS: Meal[] = [
     options: [
       {
         id: "pa1",
-        emoji: "🍳",
         label: "Omelete de espinafres",
         desc: "1 ovo + 2 claras + espinafres (40g) + queijo light (25g) + pão integral (30g)",
         kcal: 243,
@@ -26,7 +25,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "pa2",
-        emoji: "🥣",
         label: "Aveia com mirtilos",
         desc: "Aveia (40g) + leite s/lactose (200ml) + mirtilos (80g) + mel (5g)",
         kcal: 285,
@@ -36,7 +34,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "pa3",
-        emoji: "🥚",
         label: "Ovos mexidos e abacate",
         desc: "2 ovos mexidos + torrada integral (25g) + abacate (30g) + café s/açúcar",
         kcal: 290,
@@ -46,7 +43,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "pa4",
-        emoji: "🥞",
         label: "Panquecas de aveia e banana",
         desc: "Aveia (40g) + 1 ovo + banana (60g) amassada, grelhadas sem óleo",
         kcal: 270,
@@ -56,7 +52,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "pa5",
-        emoji: "🫓",
         label: "Iogurte grego com granola",
         desc: "Iogurte grego 0% (200g) + granola s/açúcar (25g) + morangos (80g)",
         kcal: 275,
@@ -66,7 +61,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "pa6",
-        emoji: "🥯",
         label: "Torrada com queijo fresco e peru",
         desc: "Pão de mistura (40g) + queijo fresco magro (40g) + peru fumado (30g) + tomate",
         kcal: 260,
@@ -85,7 +79,6 @@ export const MEALS: Meal[] = [
     options: [
       {
         id: "lm1",
-        emoji: "🫐",
         label: "Iogurte com frutos vermelhos",
         desc: "Iogurte grego 0% (150g) + mirtilos ou morangos (80g) + granola s/açúcar (15g)",
         kcal: 177,
@@ -95,7 +88,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lm2",
-        emoji: "🍎",
         label: "Fruta com amêndoas",
         desc: "1 maçã ou pêra (150g) + amêndoas (15g, ~10 unidades)",
         kcal: 175,
@@ -105,7 +97,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lm3",
-        emoji: "🥝",
         label: "Cottage com fruta",
         desc: "Queijo cottage (100g) + 1 kiwi + 1 tangerina",
         kcal: 150,
@@ -115,7 +106,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lm4",
-        emoji: "🍌",
         label: "Banana com manteiga de amendoim",
         desc: "1 banana pequena (100g) + manteiga de amendoim natural (10g)",
         kcal: 155,
@@ -125,7 +115,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lm5",
-        emoji: "🍒",
         label: "Papaia com ovo cozido",
         desc: "Papaia (120g) + 1 ovo cozido",
         kcal: 155,
@@ -135,7 +124,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lm6",
-        emoji: "🍫",
         label: "Skyr com chocolate negro",
         desc: "Skyr ou requeijão magro (150g) + chocolate negro 85% (10g)",
         kcal: 165,
@@ -154,7 +142,6 @@ export const MEALS: Meal[] = [
     options: [
       {
         id: "al1",
-        emoji: "🐟",
         label: "Pescada grelhada com batata-doce",
         desc: "Pescada ou dourada grelhada (150g) + batata-doce assada (150g) + brócolos (100g) + azeite (5ml)",
         kcal: 345,
@@ -164,7 +151,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "al2",
-        emoji: "🍗",
         label: "Frango grelhado com arroz integral",
         desc: "Peito de frango grelhado (130g) + arroz integral (100g) + feijão verde (100g) + azeite (5ml)",
         kcal: 495,
@@ -174,7 +160,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "al3",
-        emoji: "🥗",
         label: "Salada de grão com atum",
         desc: "Grão de bico cozido (150g) + atum em água (80g) + tomate, pepino, cebola + azeite (10ml)",
         kcal: 470,
@@ -184,7 +169,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "al4",
-        emoji: "🍝",
         label: "Massa integral com frango e legumes",
         desc: "Massa integral cozida (100g) + peito de frango (100g) + courgette e cenoura salteadas (100g) + azeite (5ml)",
         kcal: 500,
@@ -194,7 +178,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "al5",
-        emoji: "🍛",
         label: "Salmão com legumes e quinoa",
         desc: "Salmão grelhado (100g) + quinoa cozida (100g) + brócolos e cenoura (100g)",
         kcal: 470,
@@ -204,7 +187,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "al6",
-        emoji: "🌱",
         label: "Tofu grelhado com arroz (opção vegetariana)",
         desc: "Tofu grelhado (150g) + arroz integral (100g) + legumes salteados (120g) + azeite (10ml)",
         kcal: 475,
@@ -223,7 +205,6 @@ export const MEALS: Meal[] = [
     options: [
       {
         id: "lt1",
-        emoji: "🧀",
         label: "Queijo fresco com fruta",
         desc: "Queijo fresco magro (50g) + uvas ou meloa (100g)",
         kcal: 190,
@@ -233,7 +214,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lt2",
-        emoji: "🥪",
         label: "Sandes de peru",
         desc: "Pão integral (30g) + peru fumado (40g) + queijo light (15g) + alface e tomate",
         kcal: 175,
@@ -243,7 +223,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lt3",
-        emoji: "🍫",
         label: "Iogurte proteico com chocolate",
         desc: "Iogurte grego 0% (150g) + chocolate negro 85% (10g)",
         kcal: 155,
@@ -253,7 +232,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lt4",
-        emoji: "🥜",
         label: "Fruta com frutos secos",
         desc: "1 pera ou maçã (150g) + nozes ou amêndoas (15g)",
         kcal: 215,
@@ -263,7 +241,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lt5",
-        emoji: "🫓",
         label: "Bolachas de arroz com hummus",
         desc: "Bolachas de arroz (2 un.) + hummus (40g) + cenoura em palitos (60g)",
         kcal: 195,
@@ -273,7 +250,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lt6",
-        emoji: "🥚",
         label: "Ovo cozido com fruta",
         desc: "1 ovo cozido + 1 laranja ou tangerina (150g)",
         kcal: 145,
@@ -292,7 +268,6 @@ export const MEALS: Meal[] = [
     options: [
       {
         id: "ja1",
-        emoji: "🐟",
         label: "Peixe branco com legumes",
         desc: "Pescada ou robalo grelhado (130g) + legumes salteados (150g) + azeite (5ml)",
         kcal: 320,
@@ -302,7 +277,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ja2",
-        emoji: "🍗",
         label: "Frango com puré de batata-doce",
         desc: "Peito de frango grelhado (120g) + puré de batata-doce (120g) + espinafres salteados (80g)",
         kcal: 345,
@@ -312,7 +286,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ja3",
-        emoji: "🍲",
         label: "Sopa de legumes com ovo",
         desc: "Sopa de legumes variados (350ml) + 1 ovo cozido ou escalfado + pão integral (20g)",
         kcal: 330,
@@ -322,7 +295,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ja4",
-        emoji: "🥘",
         label: "Omelete de legumes",
         desc: "2 ovos + 1 clara + courgette, cogumelos e cebola (120g) + salada verde",
         kcal: 300,
@@ -332,7 +304,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ja5",
-        emoji: "🍤",
         label: "Camarão salteado com legumes",
         desc: "Camarão salteado (150g) + legumes variados (150g) + azeite (8ml)",
         kcal: 310,
@@ -342,7 +313,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ja6",
-        emoji: "🌾",
         label: "Grão-de-bico estufado com legumes",
         desc: "Grão de bico estufado (150g) + tomate, courgette e pimento (150g)",
         kcal: 340,
@@ -361,7 +331,6 @@ export const MEALS: Meal[] = [
     options: [
       {
         id: "ce1",
-        emoji: "🥛",
         label: "Leite morno com canela",
         desc: "Leite meio-gordo ou s/lactose (200ml) + canela",
         kcal: 150,
@@ -371,7 +340,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ce2",
-        emoji: "🍓",
         label: "Skyr com morangos",
         desc: "Skyr ou requeijão magro (100g) + morangos (60g)",
         kcal: 90,
@@ -381,7 +349,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ce3",
-        emoji: "🌰",
         label: "Punhado de frutos secos",
         desc: "Amêndoas ou nozes (15g)",
         kcal: 95,
@@ -391,7 +358,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ce4",
-        emoji: "🍵",
         label: "Chá de camomila com bolacha de arroz",
         desc: "Chá de ervas + bolacha de arroz (1 un.) + queijo fresco (20g)",
         kcal: 120,
@@ -401,7 +367,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ce5",
-        emoji: "🥄",
         label: "Iogurte grego simples",
         desc: "Iogurte grego 0% (125g)",
         kcal: 70,
@@ -411,7 +376,6 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ce6",
-        emoji: "🍫",
         label: "Quadrado de chocolate negro com fruta",
         desc: "Chocolate negro 85% (10g) + 1 tangerina",
         kcal: 110,

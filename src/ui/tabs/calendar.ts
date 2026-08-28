@@ -13,7 +13,8 @@ let viewMonth = new Date().getMonth();
 export const calendarTab: Tab = {
   id: 'calendario',
   label: 'Calendário',
-  icon: '📅',
+  icon: '',
+  group: 'Acompanhamento',
   render(root: HTMLElement) {
     const first = new Date(viewYear, viewMonth, 1);
     const startWeekday = first.getDay();
@@ -46,7 +47,7 @@ export const calendarTab: Tab = {
       <div class="ph">
         <h2>Calendário</h2>
         <div class="ph-title">${MONTH_NAMES[viewMonth]} ${viewYear}</div>
-        <div class="ph-sub">💧 água · 🥗 alimentação · 💪 treino</div>
+        <div class="ph-sub">água · alimentação · treino</div>
       </div>
       <section>
         <div class="cal-head">
@@ -95,9 +96,9 @@ function openDayDetail(iso: string) {
 
   openModal(
     `
-    <button class="modal-close" data-close>✕</button>
+    <button class="modal-close" data-close></button>
     <h3>${iso}</h3>
-    <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px">💧 Água: ${rec.water} copo(s)${rec.training?.done ? ` · 💪 Treino: ${rec.training.modality === 'academia' ? 'Academia' : 'Casa'}` : ''}</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px">Água: ${rec.water} copo(s)${rec.training?.done ? ` · Treino: ${rec.training.modality === 'academia' ? 'Academia' : 'Casa'}` : ''}</div>
     ${mealNames.length ? `<p style="font-size:13px"><strong>Refeições:</strong><br>${mealNames.join('<br>')}</p>` : '<p style="font-size:13px;color:var(--text-faint)">Sem refeições registadas.</p>'}
     ${exerciseNames.length ? `<p style="font-size:13px"><strong>Exercícios:</strong><br>${exerciseNames.join('<br>')}</p>` : ''}
   `,

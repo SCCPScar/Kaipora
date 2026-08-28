@@ -1,6 +1,5 @@
 export interface FoodOption {
   id: string;
-  emoji: string;
   label: string;
   desc: string;
   kcal: number;

@@ -12,7 +12,7 @@ interface OldDay {
 
 /**
  * One-time, non-destructive migration of the original plano-scar.html
- * localStorage keys (prefix "scar_") into the VProject schema (prefix "vp_").
+ * localStorage keys (prefix "scar_") into the Kaipora schema (prefix "vp_").
  * Old keys are never deleted, so nothing is lost even if this runs more than once
  * or the new schema changes again later.
  */

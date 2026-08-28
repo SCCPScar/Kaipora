@@ -7,8 +7,9 @@ import { refreshActive } from '../nav';
 
 export const dietTab: Tab = {
   id: 'dieta',
-  label: 'Dieta',
-  icon: '🥗',
+  label: 'Alimentação',
+  icon: '',
+  group: 'Corpo',
   render(root: HTMLElement) {
     const date = todayISO();
     const day = getDay(date);
@@ -36,26 +37,26 @@ export const dietTab: Tab = {
         <div class="stat"><strong>${totals.fat}g</strong><small>gordura / ${settings.fatGoal}g</small></div>
       </div>
 
-      <div class="alert"><span>⚠️</span><span>Não bebas durante as refeições (30 min antes e depois). Marca o que realmente comeste — as opções de cada refeição são substituições equivalentes entre si.</span></div>
+      <div class="alert"><span>Não bebas durante as refeições (30 min antes e depois). Marca o que realmente comeste — as opções de cada refeição são substituições equivalentes entre si.</span></div>
 
       <div id="meals-full"></div>
 
       <section>
-        <div class="sec-title">💊 Suplementos</div>
+        <div class="sec-title">Suplementos</div>
         ${SUPPLEMENTS.map(
           (s) => `<div class="row" style="cursor:default"><div class="rtxt"><strong>${s.name}</strong><small>${s.note}</small></div></div>`
         ).join('')}
       </section>
 
       <section>
-        <div class="sec-title">📋 Notas sobre o plano</div>
+        <div class="sec-title">Notas sobre o plano</div>
         <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.7">
           ${DIET_NOTES.map((n) => `• ${n}`).join('<br>')}
         </div>
       </section>
 
       <section>
-        <div class="sec-title">📅 Histórico alimentar (últimos 7 dias)</div>
+        <div class="sec-title">Histórico alimentar (últimos 7 dias)</div>
         <div id="diet-history"></div>
       </section>
     `;
@@ -84,9 +85,9 @@ function renderMeals(root: HTMLElement, date: string, day: ReturnType<typeof get
         .map(
           (o) => `
         <div class="row ${day.meals[o.id] ? 'done' : ''}" data-option="${o.id}">
-          <div class="chk">✓</div>
+          <div class="chk"></div>
           <div class="rtxt">
-            <strong>${o.emoji} ${o.label}</strong>
+            <strong>${o.label}</strong>
             <small>${o.desc}</small>
             <small>P: ${o.protein}g · HC: ${o.carbs}g · G: ${o.fat}g</small>
           </div>
@@ -95,8 +96,8 @@ function renderMeals(root: HTMLElement, date: string, day: ReturnType<typeof get
         )
         .join('')}
       <div class="sub-row">
-        <span class="badge-p">🥩 ${totalP}g prot</span>
-        <span class="badge-k">🔥 ${totalKcal} kcal</span>
+        <span class="badge-p">${totalP}g prot</span>
+        <span class="badge-k">${totalKcal} kcal</span>
       </div>
     </section>`;
   }).join('');

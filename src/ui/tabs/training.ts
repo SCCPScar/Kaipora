@@ -9,6 +9,7 @@ import { refreshActive } from '../nav';
 import { openTimerModal } from '../components/timer';
 import { openExerciseModal } from '../components/exerciseModal';
 import { showToast } from '../components/toast';
+import { infoIcon, timerIcon } from '../components/icons';
 
 const expanded = new Set<string>();
 const modalityByDay: Record<string, Modality> = {};
@@ -18,13 +19,20 @@ function dayModality(weekday: string): Modality {
 }
 
 const PILL_COLORS: Record<string, string> = {
-  seg: '#8b5cf6', ter: '#22d3ee', qua: '#d1275a', qui: '#e0a52c', sex: '#8b5cf6', sab: '#22d3ee', dom: '#6f6690'
+  seg: 'var(--primary)',
+  ter: 'var(--secondary)',
+  qua: 'var(--accent)',
+  qui: 'var(--gold)',
+  sex: 'var(--primary)',
+  sab: 'var(--secondary)',
+  dom: 'var(--text-faint)'
 };
 
 export const trainingTab: Tab = {
   id: 'treino',
   label: 'Treino',
-  icon: '💪',
+  icon: '',
+  group: 'Corpo',
   render(root: HTMLElement) {
     const date = todayISO();
     // Wrapped in a freshly-created child (rather than delegating straight on
@@ -38,13 +46,13 @@ export const trainingTab: Tab = {
         <div class="ph">
           <h2>Treino</h2>
           <div class="ph-title">Academia + Casa</div>
-          <div class="ph-sub">Toca no dia para abrir · ⏱ = descanso · ℹ️ = como fazer</div>
+          <div class="ph-sub">Toca no dia para abrir · relógio = descanso · info = como fazer</div>
         </div>
-        <div class="alert"><span>🌾</span><span>Cada dia tem sempre as duas versões — escolhe Academia ou Casa consoante o que fizeres.</span></div>
+        <div class="alert"><span>Cada dia tem sempre as duas versões — escolhe Academia ou Casa consoante o que fizeres.</span></div>
         <div id="week-days"></div>
 
         <section>
-          <div class="sec-title"><span>🔥 Programa Intensivo de Glúteos</span></div>
+          <div class="sec-title"><span>Programa Intensivo de Glúteos</span></div>
           <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
             Trabalho dedicado a glúteo máximo e médio, distribuído ao longo da semana para evitar volume excessivo.
             Aparece nos dias de pernas (Qua, Qui, Sáb) — aqui tens a lista completa dos treinos que fazem parte do programa.
@@ -76,20 +84,20 @@ function dayCardHTML(day: TrainingDay, date: string): string {
       <div class="day-head" data-toggle="${day.weekday}">
         <div class="day-pill" style="background:${PILL_COLORS[day.weekday]}">${day.weekday.toUpperCase()}</div>
         <div class="day-info">
-          <div class="day-nm">${day.label}${isTodayDone ? ' ✅' : ''}</div>
+          <div class="day-nm">${day.label}${isTodayDone ? '' : ''}</div>
           <div class="day-focus">${workout.focus}</div>
         </div>
         <div class="icon-btn">${isOpen ? '−' : '+'}</div>
       </div>
       <div class="day-body">
         <div class="modality-switch">
-          <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-set-modality="${day.weekday}:academia">🏋️ Academia</button>
-          <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-set-modality="${day.weekday}:casa">🏠 Casa</button>
+          <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-set-modality="${day.weekday}:academia">Academia</button>
+          <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-set-modality="${day.weekday}:casa">Casa</button>
         </div>
         ${exerciseListHTML(workout, date)}
         <div class="sub-row" style="justify-content:flex-end">
           <button class="btn sm ${isTodayDone ? 'ghost' : ''}" data-complete="${day.weekday}:${workout.id}:${modality}">
-            ${isTodayDone ? '✓ Treino concluído hoje' : 'Marcar como treino de hoje'}
+            ${isTodayDone ? 'Treino concluído hoje' : 'Marcar como treino de hoje'}
           </button>
         </div>
       </div>
@@ -109,11 +117,11 @@ function exerciseListHTML(workout: Workout, date: string): string {
         <div class="ex-main" data-select="${workout.id}:${we.exerciseId}">
           <strong>${ex.name}</strong>
           <small>${we.sets}x ${we.reps} · descanso ${we.restSeconds}s${we.note ? ' · ' + we.note : ''}</small>
-          ${ex.gluteFocus ? '<span class="gluteo-tag">🔥 Glúteos</span>' : ''}
+          ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
         </div>
         <div class="ex-actions">
-          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">ℹ️</button>
-          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">⏱</button>
+          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">${infoIcon()}</button>
+          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">${timerIcon()}</button>
         </div>
       </div>`;
     })
@@ -131,7 +139,7 @@ function renderGluteList(root: HTMLElement) {
         <strong>${w.title}</strong>
         <small>${w.exercises.map((e) => EXERCISES[e.exerciseId]?.name).filter(Boolean).join(' · ')}</small>
       </div>
-      <span class="pill">${w.location === 'academia' ? '🏋️' : '🏠'}</span>
+      <span class="pill">${w.location === 'academia' ? 'Academia' : 'Casa'}</span>
     </div>`
     )
     .join('');
@@ -186,7 +194,7 @@ function wireEvents(root: HTMLElement, date: string) {
       const marker = getDay(date).training;
       const alreadyDone = marker?.workoutId === workoutId && marker.done;
       setTrainingDone(date, modality as Modality, workoutId, !alreadyDone);
-      if (!alreadyDone) showToast('Treino de hoje registado! 💪');
+      if (!alreadyDone) showToast('Treino de hoje registado!');
       refreshActive();
     }
   });

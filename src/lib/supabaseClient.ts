@@ -8,7 +8,7 @@ export const isCloudConfigured = Boolean(url && anonKey);
 /**
  * `null` whenever VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY aren't set —
  * every caller must treat that as "cloud sync unavailable, stay local-only",
- * never throw. This keeps VProject fully usable without any backend.
+ * never throw. This keeps Kaipora fully usable without any backend.
  */
 export const supabase: SupabaseClient | null = isCloudConfigured
   ? createClient(url as string, anonKey as string, {

@@ -1,4 +1,4 @@
--- VProject — esquema de sincronização na nuvem (opcional).
+-- Kaipora — esquema de sincronização na nuvem (opcional).
 --
 -- Estratégia: uma tabela genérica chave/valor por utilizador. Cada chave
 -- corresponde a uma chave localStorage da app (peso, medidas, treinos,
