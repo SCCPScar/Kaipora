@@ -6,7 +6,7 @@
 // intercepted — they always go straight to the network.
 
 const CACHE_VERSION = 'kaipora-v1';
-const SCOPE = self.registration.scope; // e.g. https://host/VProject/
+const SCOPE = self.registration.scope; // e.g. https://host/Kaipora/
 
 const APP_SHELL = [
   SCOPE,

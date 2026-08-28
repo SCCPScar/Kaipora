@@ -58,13 +58,13 @@ O workflow `.github/workflows/deploy.yml` publica automaticamente a cada push pa
 
 1. Em **Settings → Pages**, define a origem como **GitHub Actions**.
 2. (Opcional) Define os secrets `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` em **Settings → Secrets and variables → Actions** para ativar a sincronização cloud no build publicado.
-3. Faz push para `main` — o site fica disponível em `https://<utilizador>.github.io/VProject/`.
+3. Faz push para `main` — o site fica disponível em `https://<utilizador>.github.io/Kaipora/`.
 
 Se publicares num domínio próprio (raiz, não subpasta), define `VITE_BASE_PATH=/` como variável de ambiente do build.
 
 ## Sincronização cloud (iPhone ↔ PC)
 
-Esta é a forma pretendida de usar o VProject em mais do que um dispositivo: Supabase é a fonte de verdade entre o iPhone e o PC, e o `localStorage` de cada dispositivo é a camada offline que garante que a app nunca fica bloqueada à espera de rede. Sem `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` definidos, a app funciona inteiramente local — nada quebra, só não sincroniza entre dispositivos.
+Esta é a forma pretendida de usar o Kaipora em mais do que um dispositivo: Supabase é a fonte de verdade entre o iPhone e o PC, e o `localStorage` de cada dispositivo é a camada offline que garante que a app nunca fica bloqueada à espera de rede. Sem `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` definidos, a app funciona inteiramente local — nada quebra, só não sincroniza entre dispositivos.
 
 ### Quais valores são públicos e quais são secretos
 
@@ -74,7 +74,7 @@ Isto confunde muita gente vindo de outros backends, por isso fica claro à parti
 |---|---|---|
 | `VITE_SUPABASE_URL` | Não — é o endereço público da tua API. | Bundle JS público (qualquer visitante do site consegue vê-lo). |
 | `VITE_SUPABASE_ANON_KEY` (a "anon key" / "publishable key") | **Não.** Foi desenhada pela Supabase para ser distribuída no frontend. Sozinha, sem RLS, permitiria aceder a tudo — é a Row Level Security do `schema.sql` que restringe cada pedido a `auth.uid() = user_id`. Com RLS ativo (como está), expô-la publicamente é seguro e é o uso pretendido. | Bundle JS público. |
-| **`service_role` key** | **Sim, extremamente secreta.** Ignora RLS por completo — dá acesso total à base de dados. | **Nunca deve existir neste projeto.** Não é usada em nenhum ficheiro do repositório, não deve ser colada em nenhum ficheiro, commit, issue ou secret do GitHub Actions. Se algum dia precisares dela (não precisas para nada do VProject), fica só no Supabase Dashboard. |
+| **`service_role` key** | **Sim, extremamente secreta.** Ignora RLS por completo — dá acesso total à base de dados. | **Nunca deve existir neste projeto.** Não é usada em nenhum ficheiro do repositório, não deve ser colada em nenhum ficheiro, commit, issue ou secret do GitHub Actions. Se algum dia precisares dela (não precisas para nada do Kaipora), fica só no Supabase Dashboard. |
 | Password de login | Não existe — autenticação é só por magic link (email). Nunca há password para proteger. | — |
 
 Por isso, no passo do GitHub Actions abaixo, `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` podem ir em **Variables** (não em **Secrets**) — mas colocá-los em Secrets também funciona sem problema, só é menos preciso semanticamente. O que nunca deve acontecer, em nenhum dos dois sítios, é uma `service_role` key.
@@ -93,11 +93,11 @@ Por isso, no passo do GitHub Actions abaixo, `VITE_SUPABASE_URL` e `VITE_SUPABAS
 - Se já tinhas aplicado uma versão anterior deste ficheiro (com um trigger `user_data_touch`), corre o `schema.sql` atual outra vez — a instrução `drop trigger if exists` remove esse trigger antigo, que estava a **substituir o timestamp enviado pelo cliente pelo do servidor em cada UPDATE**, quebrando a resolução de conflitos descrita mais abaixo.
 
 **3. Configurar Auth (magic link)**
-- **Authentication → Providers → Email**: confirma que está **Enabled** (vem assim por omissão). Não precisas de configurar nenhum outro provider — o VProject só usa o link de acesso por email (OTP), nunca password.
+- **Authentication → Providers → Email**: confirma que está **Enabled** (vem assim por omissão). Não precisas de configurar nenhum outro provider — o Kaipora só usa o link de acesso por email (OTP), nunca password.
 - **Authentication → Emails → Magic Link**: podes personalizar o template do email aqui se quiseres (opcional — o template por omissão da Supabase já funciona).
 - **Authentication → URL Configuration**:
-  - **Site URL**: a URL onde a app fica publicada, ex. `https://<o-teu-utilizador-github>.github.io/VProject/`.
-  - **Redirect URLs**: adiciona a mesma URL (e, se testares localmente, também `http://localhost:5173/VProject/` ou o que o `npm run dev` te mostrar). O link de magic link só reabre a app numa URL que esteja nesta lista — se faltar, o login falha silenciosamente ao voltar do email.
+  - **Site URL**: a URL onde a app fica publicada, ex. `https://<o-teu-utilizador-github>.github.io/Kaipora/`.
+  - **Redirect URLs**: adiciona a mesma URL (e, se testares localmente, também `http://localhost:5173/Kaipora/` ou o que o `npm run dev` te mostrar). O link de magic link só reabre a app numa URL que esteja nesta lista — se faltar, o login falha silenciosamente ao voltar do email.
 
 **4. Obter `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`**
 - **Project Settings (ícone de engrenagem) → API**.
@@ -122,7 +122,7 @@ No repositório GitHub → **Settings → Secrets and variables → Actions**:
 **7. Publicar no GitHub Pages**
 - **Settings → Pages → Source**: **GitHub Actions**.
 - Faz push para `main` (ou faz merge desta branch para `main` quando estiveres pronta) — o workflow builda, corre os testes, e publica.
-- Site fica em `https://<o-teu-utilizador-github>.github.io/VProject/`.
+- Site fica em `https://<o-teu-utilizador-github>.github.io/Kaipora/`.
 
 **8. Confirmar que a sincronização está mesmo a funcionar**
 - Abre o site publicado, vai a **Ajustes → Conta e sincronização**, introduz o teu email, recebe o magic link, clica-o.
