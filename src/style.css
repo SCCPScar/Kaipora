@@ -12,9 +12,9 @@
 
   /* ---- tokens semânticos (mesmos nomes nos dois temas) ---- */
   --bg: #25104d;
-  --bg-elevated: #381442;
-  --bg-card: #5b1c2e;
-  --bg-card-hover: #6b3343;
+  --bg-elevated: #311346;
+  --bg-card: #371442;
+  --bg-card-hover: #3e163f;
   --border: rgba(194, 40, 107, 0.2);
   --border-strong: rgba(194, 40, 107, 0.36);
 
@@ -26,17 +26,17 @@
   --primary-glow: #cd4f86;
   --secondary: #fab940;
   --secondary-glow: #fbc45f;
-  --accent: #8e224c;
-  --accent-glow: #a54e70;
+  --accent: #5b1c2e;
+  --accent-glow: #825260;
   --gold: #fab940;
   --green: #fab940;
 
   --gradient-main: linear-gradient(135deg, #c2286b 0%, #fab940 100%);
-  --gradient-accent: linear-gradient(135deg, #8e224c 0%, #c2286b 100%);
+  --gradient-accent: linear-gradient(135deg, #5b1c2e 0%, #c2286b 100%);
 
   --glow-1: rgba(194, 40, 107, 0.18);
   --glow-2: rgba(250, 185, 64, 0.13);
-  --glow-3: rgba(91, 28, 46, 0.22);
+  --glow-3: rgba(91, 28, 46, 0.2);
 
   --bg-translucent: rgba(37, 16, 77, 0.86);
   --ring-track: rgba(255, 255, 255, 0.08);
@@ -46,8 +46,8 @@
   --tint-primary-glow: rgba(194, 40, 107, 0.55);
   --tint-secondary-low: rgba(250, 185, 64, 0.14);
   --tint-secondary-glow: rgba(250, 185, 64, 0.5);
-  --tint-accent-low: rgba(142, 34, 76, 0.24);
-  --tint-accent-strong: rgba(142, 34, 76, 0.42);
+  --tint-accent-low: rgba(91, 28, 46, 0.28);
+  --tint-accent-strong: rgba(91, 28, 46, 0.46);
   --tint-gold-low: rgba(250, 185, 64, 0.16);
 
   --radius: 14px;
@@ -70,9 +70,9 @@
   color-scheme: light;
 
   --bg: #f3e6bd;
-  --bg-elevated: #f6d1bb;
-  --bg-card: #fd9bb7;
-  --bg-card-hover: #fdadc4;
+  --bg-elevated: #f5dabc;
+  --bg-card: #fff5f8;
+  --bg-card-hover: #ffedf2;
   --border: rgba(173, 40, 49, 0.16);
   --border-strong: rgba(173, 40, 49, 0.3);
 
@@ -84,17 +84,17 @@
   --primary-glow: #bd535a;
   --secondary: #cd8f39;
   --secondary-glow: #d8973c;
-  --accent: #d15c6d;
-  --accent-glow: #da7d8a;
+  --accent: #fd9bb7;
+  --accent-glow: #feb4c9;
   --gold: #cc8829;
   --green: #cc8829;
 
   --gradient-main: linear-gradient(135deg, #ad2831 0%, #d8973c 100%);
-  --gradient-accent: linear-gradient(135deg, #d15c6d 0%, #ad2831 100%);
+  --gradient-accent: linear-gradient(135deg, #fd9bb7 0%, #ad2831 100%);
 
   --glow-1: rgba(173, 40, 49, 0.1);
   --glow-2: rgba(216, 151, 60, 0.1);
-  --glow-3: rgba(253, 155, 183, 0.28);
+  --glow-3: rgba(253, 155, 183, 0.16);
 
   --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(173, 40, 49, 0.18);
 
@@ -106,8 +106,8 @@
   --tint-primary-glow: rgba(173, 40, 49, 0.35);
   --tint-secondary-low: rgba(216, 151, 60, 0.14);
   --tint-secondary-glow: rgba(216, 151, 60, 0.4);
-  --tint-accent-low: rgba(253, 155, 183, 0.35);
-  --tint-accent-strong: rgba(253, 155, 183, 0.55);
+  --tint-accent-low: rgba(253, 155, 183, 0.3);
+  --tint-accent-strong: rgba(253, 155, 183, 0.5);
   --tint-gold-low: rgba(216, 151, 60, 0.16);
 }
 
@@ -117,9 +117,9 @@
   :root:not([data-theme]) {
     color-scheme: light;
     --bg: #f3e6bd;
-    --bg-elevated: #f6d1bb;
-    --bg-card: #fd9bb7;
-    --bg-card-hover: #fdadc4;
+    --bg-elevated: #f5dabc;
+    --bg-card: #fff5f8;
+    --bg-card-hover: #ffedf2;
     --border: rgba(173, 40, 49, 0.16);
     --border-strong: rgba(173, 40, 49, 0.3);
     --text: #640d14;
@@ -129,15 +129,15 @@
     --primary-glow: #bd535a;
     --secondary: #cd8f39;
     --secondary-glow: #d8973c;
-    --accent: #d15c6d;
-    --accent-glow: #da7d8a;
+    --accent: #fd9bb7;
+    --accent-glow: #feb4c9;
     --gold: #cc8829;
     --green: #cc8829;
     --gradient-main: linear-gradient(135deg, #ad2831 0%, #d8973c 100%);
-    --gradient-accent: linear-gradient(135deg, #d15c6d 0%, #ad2831 100%);
+    --gradient-accent: linear-gradient(135deg, #fd9bb7 0%, #ad2831 100%);
     --glow-1: rgba(173, 40, 49, 0.1);
     --glow-2: rgba(216, 151, 60, 0.1);
-    --glow-3: rgba(253, 155, 183, 0.28);
+    --glow-3: rgba(253, 155, 183, 0.16);
     --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(173, 40, 49, 0.18);
     --bg-translucent: rgba(243, 230, 189, 0.86);
     --ring-track: rgba(28, 29, 36, 0.08);
@@ -147,8 +147,8 @@
     --tint-primary-glow: rgba(173, 40, 49, 0.35);
     --tint-secondary-low: rgba(216, 151, 60, 0.14);
     --tint-secondary-glow: rgba(216, 151, 60, 0.4);
-    --tint-accent-low: rgba(253, 155, 183, 0.35);
-    --tint-accent-strong: rgba(253, 155, 183, 0.55);
+    --tint-accent-low: rgba(253, 155, 183, 0.3);
+    --tint-accent-strong: rgba(253, 155, 183, 0.5);
     --tint-gold-low: rgba(216, 151, 60, 0.16);
   }
 }
