@@ -12,15 +12,19 @@ import {
   toggleExercise,
   setTrainingDone,
   toggleHabit,
+  toggleRoutineItem,
+  getFixedCommitments,
+  getFlexibleActivities,
   getSettings
 } from '../../lib/storage';
-import type { Modality } from '../../lib/types';
+import type { Modality, Weekday } from '../../lib/types';
 import { refreshActive, switchTab } from '../nav';
 import { openTimerModal } from '../components/timer';
 import { openExerciseModal } from '../components/exerciseModal';
 import { showToast } from '../components/toast';
 import { infoIcon, timerIcon } from '../components/icons';
 import { isDayComplete } from '../../lib/dayCompletion';
+import { computeDaySchedule } from '../../lib/routineSchedule';
 
 let modality: Modality = 'academia';
 /** The date (YYYY-MM-DD) for which the completion celebration has already
@@ -142,6 +146,13 @@ export const todayTab: Tab = {
         </div>
       </section>
 
+      <div class="priority-heading">Importante</div>
+
+      <section>
+        <div class="sec-title">Rotina de hoje</div>
+        <div id="routine-list"></div>
+      </section>
+
       <div class="priority-heading">Opcional</div>
 
       <section id="meals-card"></section>
@@ -154,6 +165,7 @@ export const todayTab: Tab = {
 
     renderGlasses(root, day.water, glassGoal);
     renderExercises(root, workout, date);
+    renderRoutine(root, date, day, weekdayKey, settings.wakeTime, settings.sleepTime);
     renderMeals(root, date, day);
     renderHabits(root, date, day);
     wireEvents(root, date, glassGoal, workout, weekdayKey);
@@ -210,6 +222,36 @@ function renderExercises(root: HTMLElement, workout: ReturnType<typeof getTraini
           <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">${infoIcon()}</button>
           <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">${timerIcon()}</button>
         </div>
+      </div>`;
+    })
+    .join('');
+}
+
+function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof getDay>, weekday: Weekday, wake: string, sleep: string) {
+  const el = root.querySelector('#routine-list') as HTMLElement;
+  const fixed = getFixedCommitments().filter((f) => f.days.includes(weekday));
+  const flexible = getFlexibleActivities().filter((f) => f.days.includes(weekday));
+  const blocks = computeDaySchedule(fixed, flexible, wake, sleep);
+
+  if (!blocks.length) {
+    el.innerHTML = '<div class="empty">Sem rotina configurada para hoje — define-a na aba Rotina</div>';
+    return;
+  }
+
+  el.innerHTML = blocks
+    .map((b) => {
+      if (b.kind === 'unscheduled') {
+        return `
+        <div class="row" style="cursor:default">
+          <div class="rtxt"><strong>${b.label}</strong><small>Sem espaço hoje (${b.durationMin} min) — considera adiar</small></div>
+        </div>`;
+      }
+      const h = (m: number) => `${Math.floor(m / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}`;
+      const isDone = day.routineDone.includes(b.id);
+      return `
+      <div class="row ${isDone ? 'done' : ''}" data-routine="${b.id}">
+        <div class="chk"></div>
+        <div class="rtxt"><strong>${b.label}</strong><small>${h(b.startMin)} – ${h(b.endMin)}</small></div>
       </div>`;
     })
     .join('');
@@ -320,6 +362,13 @@ function wireEvents(
     const row = (e.target as HTMLElement).closest<HTMLElement>('[data-habit]');
     if (!row) return;
     toggleHabit(date, row.dataset.habit as string);
+    refreshActive();
+  });
+
+  root.querySelector('#routine-list')?.addEventListener('click', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLElement>('[data-routine]');
+    if (!row) return;
+    toggleRoutineItem(date, row.dataset.routine as string);
     refreshActive();
   });
 

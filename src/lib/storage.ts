@@ -1,6 +1,7 @@
 import type { DayRecord, MeasurementEntry, NoteEntry, Settings, WeightEntry, Modality, Tombstonable } from './types';
 import { DEFAULT_SETTINGS } from './types';
 import { visible, withAdded, withSoftDeleted } from './tombstoneList';
+import type { FixedCommitment, FlexibleActivity } from '../data/types-routine';
 
 export const PFX = 'vp';
 
@@ -62,7 +63,7 @@ export function allKeys(): string[] {
 
 // ---- Day records (meals, water, exercises, training, habits) ----
 
-const emptyDay = (): DayRecord => ({ meals: {}, water: 0, exercisesDone: {}, training: null, habits: {} });
+const emptyDay = (): DayRecord => ({ meals: {}, water: 0, exercisesDone: {}, training: null, habits: {}, routineDone: [] });
 
 export function getDay(date: string): DayRecord {
   const d = rawGet<Partial<DayRecord>>(`${PFX}_day_${date}`, {});
@@ -126,6 +127,21 @@ export function toggleHabit(date: string, habitId: string): boolean {
   day.habits[habitId] = !day.habits[habitId];
   setDay(date, day);
   return day.habits[habitId];
+}
+
+export function toggleRoutineItem(date: string, itemId: string): boolean {
+  const day = getDay(date);
+  const idx = day.routineDone.indexOf(itemId);
+  let done: boolean;
+  if (idx >= 0) {
+    day.routineDone.splice(idx, 1);
+    done = false;
+  } else {
+    day.routineDone.push(itemId);
+    done = true;
+  }
+  setDay(date, day);
+  return done;
 }
 
 // ---- Weights ----
@@ -282,5 +298,49 @@ export function deleteExerciseLoad(exerciseId: string, visibleIndex: number): vo
       visibleIndex,
       (a, b) => a.date === b.date && a.weightKg === b.weightKg && a.reps === b.reps && a.seconds === b.seconds && a.note === b.note
     )
+  );
+}
+
+// ---- Rotina: compromissos fixos e atividades flexíveis ----
+
+function getFixedCommitmentsRaw(): FixedCommitment[] {
+  return rawGet<FixedCommitment[]>(`${PFX}_routine_fixed`, []);
+}
+
+export function getFixedCommitments(): FixedCommitment[] {
+  return visible(getFixedCommitmentsRaw());
+}
+
+export function addFixedCommitment(entry: Omit<FixedCommitment, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_routine_fixed`, withAdded(getFixedCommitmentsRaw(), entry));
+}
+
+export function deleteFixedCommitment(visibleIndex: number): void {
+  rawSet(
+    `${PFX}_routine_fixed`,
+    withSoftDeleted(
+      getFixedCommitmentsRaw(),
+      visibleIndex,
+      (a, b) => a.label === b.label && a.startMin === b.startMin && a.endMin === b.endMin
+    )
+  );
+}
+
+function getFlexibleActivitiesRaw(): FlexibleActivity[] {
+  return rawGet<FlexibleActivity[]>(`${PFX}_routine_flexible`, []);
+}
+
+export function getFlexibleActivities(): FlexibleActivity[] {
+  return visible(getFlexibleActivitiesRaw());
+}
+
+export function addFlexibleActivity(entry: Omit<FlexibleActivity, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_routine_flexible`, withAdded(getFlexibleActivitiesRaw(), entry));
+}
+
+export function deleteFlexibleActivity(visibleIndex: number): void {
+  rawSet(
+    `${PFX}_routine_flexible`,
+    withSoftDeleted(getFlexibleActivitiesRaw(), visibleIndex, (a, b) => a.label === b.label && a.durationMin === b.durationMin)
   );
 }

@@ -3,7 +3,7 @@ import { mergeDayRecords, mergeEntryLists } from '../src/lib/merge';
 import type { DayRecord, WeightEntry } from '../src/lib/types';
 
 function day(partial: Partial<DayRecord>): DayRecord {
-  return { meals: {}, water: 0, exercisesDone: {}, training: null, habits: {}, ...partial };
+  return { meals: {}, water: 0, exercisesDone: {}, training: null, habits: {}, routineDone: [], ...partial };
 }
 
 function weight(kg: number, date: string, updatedAt: number, deleted = false): WeightEntry {

@@ -110,7 +110,8 @@ export function migrateFromLegacyApp(): { migrated: boolean; warnings: string[] 
       water: oldWater,
       exercisesDone,
       training: trained ? { modality: 'academia', workoutId: 'migrated', done: true } : null,
-      habits: {}
+      habits: {},
+      routineDone: []
     };
 
     rawSet(newDayKey, record);
@@ -148,7 +149,7 @@ export function migrateFromLegacyApp(): { migrated: boolean; warnings: string[] 
       const date = toISO(addDays(weekStart, dayOfWeek));
       const dayKey = `${PFX}_day_${date}`;
       const existing = rawGet<DayRecord | null>(dayKey, null);
-      const merged: DayRecord = existing ?? { meals: {}, water: 0, exercisesDone: {}, training: null, habits: {} };
+      const merged: DayRecord = existing ?? { meals: {}, water: 0, exercisesDone: {}, training: null, habits: {}, routineDone: [] };
       if (!merged.habits[habit.id]) {
         merged.habits[habit.id] = true;
         rawSet(dayKey, merged);

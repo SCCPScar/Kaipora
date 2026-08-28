@@ -1,4 +1,5 @@
 export type Modality = 'academia' | 'casa';
+export type Weekday = 'seg' | 'ter' | 'qua' | 'qui' | 'sex' | 'sab' | 'dom';
 
 /**
  * Every append-only, sync-merged list entry (weights, measurements, notes,
@@ -38,6 +39,8 @@ export interface DayRecord {
   exercisesDone: Record<string, string[]>; // workoutId -> exercise ids done
   training: { modality: Modality; workoutId: string; done: boolean } | null;
   habits: Record<string, boolean>;
+  /** ids of Rotina items (fixed commitments / flexible activities) marked done today. */
+  routineDone: string[];
 }
 
 export type ThemePreference = 'system' | 'dark' | 'light';
@@ -54,6 +57,9 @@ export interface Settings {
   reminderTimes: { water: string[]; meals: string[]; training: string[] };
   reducedMotion: boolean;
   theme: ThemePreference;
+  /** Day boundaries for Rotina's scheduling window (HH:MM, 24h). */
+  wakeTime: string;
+  sleepTime: string;
 }
 
 // carbGoal/fatGoal derived from the average carbs/fat across all options of
@@ -69,5 +75,7 @@ export const DEFAULT_SETTINGS: Settings = {
   notificationsEnabled: false,
   reminderTimes: { water: ['11:00', '15:00'], meals: ['07:00', '13:00', '19:00'], training: ['18:00'] },
   reducedMotion: false,
-  theme: 'system'
+  theme: 'system',
+  wakeTime: '07:00',
+  sleepTime: '23:00'
 };
