@@ -17,7 +17,7 @@ import {
   getFlexibleActivities,
   getSettings
 } from '../../lib/storage';
-import type { Modality, Weekday } from '../../lib/types';
+import type { BuiltInModality, Weekday } from '../../lib/types';
 import { refreshActive, switchTab } from '../nav';
 import { openTimerModal } from '../components/timer';
 import { openExerciseModal } from '../components/exerciseModal';
@@ -26,7 +26,7 @@ import { infoIcon, timerIcon } from '../components/icons';
 import { isDayComplete } from '../../lib/dayCompletion';
 import { computeDaySchedule } from '../../lib/routineSchedule';
 
-let modality: Modality = 'academia';
+let modality: BuiltInModality = 'academia';
 /** The date (YYYY-MM-DD) for which the completion celebration has already
  * played — so re-renders triggered by unrelated toggles (a meal checked,
  * water adjusted) don't replay it on every click once the day is done. */
@@ -321,7 +321,7 @@ function wireEvents(
 
   root.querySelectorAll('.modality-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      modality = (btn as HTMLElement).dataset.modality as Modality;
+      modality = (btn as HTMLElement).dataset.modality as BuiltInModality;
       refreshActive();
     });
   });

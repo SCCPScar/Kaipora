@@ -3,6 +3,7 @@ import { DEFAULT_SETTINGS } from './types';
 import { visible, withAdded, withSoftDeleted } from './tombstoneList';
 import type { FixedCommitment, FlexibleActivity } from '../data/types-routine';
 import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
+import type { CustomExercise, CustomWorkout, WorkoutExercise } from '../data/types-training';
 
 export const PFX = 'vp';
 
@@ -420,5 +421,74 @@ export function deleteFoodLogEntry(visibleIndex: number): void {
   rawSet(
     `${PFX}_food_log`,
     withSoftDeleted(getFoodLogRaw(), visibleIndex, (a, b) => a.date === b.date && a.label === b.label && a.kcal === b.kcal)
+  );
+}
+
+// ---- Treinos personalizáveis: exercícios e treinos criados pela utilizadora ----
+// The built-in TRAINING_WEEK plan (src/data/training.ts) is never edited or
+// deleted — this is a separate, additive library the user builds on top of it.
+
+function getCustomExercisesRaw(): CustomExercise[] {
+  return rawGet<CustomExercise[]>(`${PFX}_custom_exercises`, []);
+}
+
+export function getCustomExercises(): CustomExercise[] {
+  return visible(getCustomExercisesRaw());
+}
+
+export function addCustomExercise(entry: Omit<CustomExercise, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_custom_exercises`, withAdded(getCustomExercisesRaw(), entry));
+}
+
+export function deleteCustomExercise(visibleIndex: number): void {
+  rawSet(`${PFX}_custom_exercises`, withSoftDeleted(getCustomExercisesRaw(), visibleIndex, (a, b) => a.id === b.id));
+}
+
+function getCustomWorkoutsRaw(): CustomWorkout[] {
+  return rawGet<CustomWorkout[]>(`${PFX}_custom_workouts`, []);
+}
+
+export function getCustomWorkouts(): CustomWorkout[] {
+  return visible(getCustomWorkoutsRaw());
+}
+
+export function addCustomWorkout(entry: Omit<CustomWorkout, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_custom_workouts`, withAdded(getCustomWorkoutsRaw(), entry));
+}
+
+export function deleteCustomWorkout(visibleIndex: number): void {
+  rawSet(`${PFX}_custom_workouts`, withSoftDeleted(getCustomWorkoutsRaw(), visibleIndex, (a, b) => a.id === b.id));
+}
+
+/**
+ * A CustomWorkout's exercise list is edited as a whole (tombstone the old
+ * version + add the edited one) rather than mutated in place — same
+ * sync-safe pattern as updateMeasurement, since CustomWorkout has a stable
+ * `id` to match on instead of a content tuple.
+ */
+function replaceCustomWorkoutExercises(workoutId: string, exercises: WorkoutExercise[]): void {
+  const raw = getCustomWorkoutsRaw();
+  const current = visible(raw).find((w) => w.id === workoutId);
+  if (!current) return;
+  const tombstoned = withSoftDeleted(
+    raw,
+    visible(raw).findIndex((w) => w.id === workoutId),
+    (a, b) => a.id === b.id
+  );
+  rawSet(`${PFX}_custom_workouts`, withAdded(tombstoned, { ...current, exercises }));
+}
+
+export function addExerciseToCustomWorkout(workoutId: string, exercise: WorkoutExercise): void {
+  const current = getCustomWorkouts().find((w) => w.id === workoutId);
+  if (!current) return;
+  replaceCustomWorkoutExercises(workoutId, [...current.exercises, exercise]);
+}
+
+export function removeExerciseFromCustomWorkout(workoutId: string, exerciseIndex: number): void {
+  const current = getCustomWorkouts().find((w) => w.id === workoutId);
+  if (!current) return;
+  replaceCustomWorkoutExercises(
+    workoutId,
+    current.exercises.filter((_, i) => i !== exerciseIndex)
   );
 }

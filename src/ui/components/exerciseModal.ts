@@ -1,5 +1,5 @@
 import { openModal } from './modal';
-import type { Exercise } from '../../data/types-training';
+import type { ExerciseLike } from '../../data/types-training';
 import { getExerciseLoads, logExerciseLoad, deleteExerciseLoad } from '../../lib/storage';
 import type { ExerciseLogEntry } from '../../lib/storage';
 import { todayISO } from '../../lib/dates';
@@ -7,7 +7,7 @@ import { drawLineChart } from './chart';
 import { showToast } from './toast';
 import { EXERCISE_DIAGRAMS } from '../../data/exerciseDiagrams';
 
-export function openExerciseModal(ex: Exercise): void {
+export function openExerciseModal(ex: ExerciseLike): void {
   const diagram = EXERCISE_DIAGRAMS[ex.id];
   openModal(
     `

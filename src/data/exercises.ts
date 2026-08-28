@@ -1,7 +1,8 @@
 // Biblioteca de exercícios do Kaipora.
 // Base reaproveitada do plano-scar.html original (44 exercícios) + exercícios
 // adicionais dedicados ao programa de glúteos (Academia + Casa).
-import type { Exercise } from './types-training';
+import type { Exercise, ExerciseLike } from './types-training';
+import { getCustomExercises } from '../lib/storage';
 
 export const EXERCISES: Record<string, Exercise> = {
   desenvolvimento: {
@@ -527,3 +528,10 @@ export const EXERCISES: Record<string, Exercise> = {
     tip: "Escolhe uma altura que sintas segura e estável — quanto mais alto o degrau, mais intenso para o glúteo."
   },
 };
+
+/** Looks up an exercise id in the built-in library first, then in the
+ * user's custom exercises — used wherever a WorkoutExercise (built-in or
+ * from a CustomWorkout) needs its display details. */
+export function getExerciseById(id: string): ExerciseLike | undefined {
+  return EXERCISES[id] ?? getCustomExercises().find((e) => e.id === id);
+}

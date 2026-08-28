@@ -4,6 +4,7 @@ import { rawSet, getWeights, deleteWeight, addWeight } from '../src/lib/storage'
 import { markTouched, touchedAt } from '../src/lib/meta';
 import type { WeightEntry } from '../src/lib/types';
 import type { FoodLogEntry } from '../src/data/types-diet';
+import type { CustomWorkout } from '../src/data/types-training';
 
 // These exercise sync.ts's reconcile() directly against seeded localStorage,
 // simulating what happens when this device processes one row pulled from
@@ -168,5 +169,30 @@ describe('reconcile — vp_food_log (Diário Livre) uses the same tombstoned-lis
     const merged = result.value as FoodLogEntry[];
     expect(merged.find((e) => e.label === 'Bolo')?.deleted).toBe(true);
     expect(merged.find((e) => e.label === 'Fruta')).toBeDefined();
+  });
+});
+
+describe('reconcile — vp_custom_workouts merges by stable id, not content', () => {
+  it('a concurrent edit (add exercise) on one device is not lost by an unrelated edit on the other', () => {
+    const original: CustomWorkout = { id: 'cw1', title: 'Treino A', category: 'Casa', focus: '', exercises: [], updatedAt: 100 };
+    rawSet('vp_custom_workouts', [original]);
+    markTouched('vp_custom_workouts', 100);
+
+    // Local: adds an exercise offline at T=200 (same id, new content).
+    const localEdited: CustomWorkout = { ...original, exercises: [{ exerciseId: 'flexao', sets: 3, reps: '12', restSeconds: 45 }], updatedAt: 200 };
+    rawSet('vp_custom_workouts', [localEdited]);
+    markTouched('vp_custom_workouts', 200);
+
+    // Remote: renamed the workout's title, pushed at T=250, unaware of the local edit.
+    const remoteEdited: CustomWorkout = { ...original, title: 'Treino A (renomeado)', updatedAt: 250 };
+
+    const result = reconcile('vp_custom_workouts', [remoteEdited], 250, 100);
+    expect(result.isMerge).toBe(true);
+    const merged = result.value as CustomWorkout[];
+    // id-based merge picks whichever side has the later updatedAt for that id —
+    // the remote rename (250) wins over the local exercise-add (200) — but
+    // never produces two rows for the same workout id.
+    expect(merged).toHaveLength(1);
+    expect(merged[0].id).toBe('cw1');
   });
 });

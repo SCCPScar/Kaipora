@@ -34,7 +34,15 @@ import {
   toggleHiddenMealOption,
   getFoodLog,
   addFoodLogEntry,
-  deleteFoodLogEntry
+  deleteFoodLogEntry,
+  getCustomExercises,
+  addCustomExercise,
+  deleteCustomExercise,
+  getCustomWorkouts,
+  addCustomWorkout,
+  deleteCustomWorkout,
+  addExerciseToCustomWorkout,
+  removeExerciseFromCustomWorkout
 } from '../src/lib/storage';
 import { touchedAt } from '../src/lib/meta';
 
@@ -352,6 +360,68 @@ describe('diet: Diário Livre (free food log)', () => {
     const raw = rawGet<{ deleted?: boolean }[]>('vp_food_log', []);
     expect(raw).toHaveLength(1);
     expect(raw[0].deleted).toBe(true);
+  });
+});
+
+describe('training: custom exercises', () => {
+  it('adds a custom exercise and lists it back', () => {
+    addCustomExercise({ id: 'cex1', name: 'Elevação unilateral', muscles: ['Panturrilha'], gluteFocus: false, desc: '', tip: '' });
+    expect(getCustomExercises()).toHaveLength(1);
+    expect(getCustomExercises()[0].name).toBe('Elevação unilateral');
+  });
+
+  it('soft-deletes a custom exercise instead of physically removing it', () => {
+    addCustomExercise({ id: 'cex1', name: 'A', muscles: [], gluteFocus: false, desc: '', tip: '' });
+    deleteCustomExercise(0);
+    expect(getCustomExercises()).toHaveLength(0);
+    const raw = rawGet<{ deleted?: boolean }[]>('vp_custom_exercises', []);
+    expect(raw).toHaveLength(1);
+    expect(raw[0].deleted).toBe(true);
+  });
+});
+
+describe('training: custom workouts (Treinos personalizáveis)', () => {
+  it('creates a custom workout with a free-text category, starting with no exercises', () => {
+    addCustomWorkout({ id: 'cw1', title: 'Treino de Calistenia A', category: 'Calistenia', focus: 'Corpo inteiro', exercises: [] });
+    const workouts = getCustomWorkouts();
+    expect(workouts).toHaveLength(1);
+    expect(workouts[0]).toMatchObject({ title: 'Treino de Calistenia A', category: 'Calistenia', exercises: [] });
+  });
+
+  it('adds an exercise to a custom workout without touching other workouts', () => {
+    addCustomWorkout({ id: 'cw1', title: 'A', category: 'Casa', focus: '', exercises: [] });
+    addCustomWorkout({ id: 'cw2', title: 'B', category: 'Academia', focus: '', exercises: [] });
+    addExerciseToCustomWorkout('cw1', { exerciseId: 'flexao', sets: 4, reps: '15', restSeconds: 60 });
+    const [a, b] = getCustomWorkouts().sort((x, y) => x.id.localeCompare(y.id));
+    expect(a.exercises).toHaveLength(1);
+    expect(a.exercises[0]).toMatchObject({ exerciseId: 'flexao', sets: 4 });
+    expect(b.exercises).toHaveLength(0);
+  });
+
+  it('editing a workout (add exercise) is sync-safe: old version tombstoned, new one added, same id', () => {
+    addCustomWorkout({ id: 'cw1', title: 'A', category: 'Casa', focus: '', exercises: [] });
+    addExerciseToCustomWorkout('cw1', { exerciseId: 'flexao', sets: 3, reps: '12', restSeconds: 45 });
+    const raw = rawGet<{ id: string; deleted?: boolean }[]>('vp_custom_workouts', []);
+    expect(raw).toHaveLength(2); // old (tombstoned) + edited
+    expect(raw.filter((w) => w.id === 'cw1' && w.deleted)).toHaveLength(1);
+    expect(raw.filter((w) => w.id === 'cw1' && !w.deleted)).toHaveLength(1);
+    expect(getCustomWorkouts()).toHaveLength(1); // visible getter still shows exactly one
+  });
+
+  it('removes a single exercise from a workout by index, keeping the rest', () => {
+    addCustomWorkout({ id: 'cw1', title: 'A', category: 'Casa', focus: '', exercises: [] });
+    addExerciseToCustomWorkout('cw1', { exerciseId: 'flexao', sets: 3, reps: '12', restSeconds: 45 });
+    addExerciseToCustomWorkout('cw1', { exerciseId: 'plank', sets: 3, reps: '30s', restSeconds: 30 });
+    removeExerciseFromCustomWorkout('cw1', 0);
+    const workout = getCustomWorkouts().find((w) => w.id === 'cw1')!;
+    expect(workout.exercises).toHaveLength(1);
+    expect(workout.exercises[0].exerciseId).toBe('plank');
+  });
+
+  it('soft-deletes a whole custom workout', () => {
+    addCustomWorkout({ id: 'cw1', title: 'A', category: 'Casa', focus: '', exercises: [] });
+    deleteCustomWorkout(0);
+    expect(getCustomWorkouts()).toHaveLength(0);
   });
 });
 

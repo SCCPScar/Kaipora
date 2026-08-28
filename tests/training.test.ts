@@ -1,7 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TRAINING_WEEK, getWorkoutById, getGluteWorkouts, getTrainingDay } from '../src/data/training';
-import { EXERCISES } from '../src/data/exercises';
+import { EXERCISES, getExerciseById } from '../src/data/exercises';
 import { EXERCISE_DIAGRAMS } from '../src/data/exerciseDiagrams';
+import { addCustomExercise } from '../src/lib/storage';
+
+beforeEach(() => {
+  localStorage.clear();
+});
 
 describe('training plan', () => {
   it('has all seven weekdays, each with both Academia and Casa', () => {
@@ -62,6 +67,21 @@ describe('exercise library', () => {
     const gluteExercises = Object.values(EXERCISES).filter((e) => e.gluteFocus);
     expect(gluteExercises.filter((e) => e.location === 'academia').length).toBeGreaterThanOrEqual(3);
     expect(gluteExercises.filter((e) => e.location === 'casa').length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('getExerciseById (Treinos personalizáveis)', () => {
+  it('finds a built-in exercise by id', () => {
+    expect(getExerciseById('flexao')?.name).toBe(EXERCISES.flexao.name);
+  });
+
+  it('falls back to a user-added custom exercise when not in the built-in library', () => {
+    addCustomExercise({ id: 'cex1', name: 'Elevação unilateral', muscles: ['Panturrilha'], gluteFocus: false, desc: '', tip: '' });
+    expect(getExerciseById('cex1')?.name).toBe('Elevação unilateral');
+  });
+
+  it('returns undefined for an id that exists nowhere', () => {
+    expect(getExerciseById('does-not-exist')).toBeUndefined();
   });
 });
 

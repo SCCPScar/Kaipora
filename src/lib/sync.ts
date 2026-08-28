@@ -3,6 +3,7 @@ import { allKeys, rawGet, rawSet } from './storage';
 import type { DayRecord, WeightEntry, MeasurementEntry, NoteEntry } from './types';
 import type { ExerciseLogEntry } from './storage';
 import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
+import type { CustomExercise, CustomWorkout } from '../data/types-training';
 import { lastSyncedAt, setLastSyncedAt, touchedAt, markTouched } from './meta';
 import { mergeDayRecords, mergeEntryLists } from './merge';
 
@@ -125,6 +126,22 @@ function mergeConflicting(key: string, local: unknown, remote: unknown): unknown
       remote as FoodLogEntry[],
       (e) => `${e.date}_${e.label}_${e.kcal}`,
       (e) => e.date
+    );
+  }
+  if (key === 'vp_custom_exercises') {
+    return mergeEntryLists(
+      local as CustomExercise[],
+      remote as CustomExercise[],
+      (e) => e.id,
+      (e) => String(e.updatedAt ?? 0)
+    );
+  }
+  if (key === 'vp_custom_workouts') {
+    return mergeEntryLists(
+      local as CustomWorkout[],
+      remote as CustomWorkout[],
+      (e) => e.id,
+      (e) => String(e.updatedAt ?? 0)
     );
   }
   // Opaque scalar (settings, ...): no field-level merge possible — the

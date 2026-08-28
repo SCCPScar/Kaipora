@@ -1,4 +1,9 @@
-export type Modality = 'academia' | 'casa';
+/** The built-in plan always has exactly these two variants per day. */
+export type BuiltInModality = 'academia' | 'casa';
+
+/** 'academia' | 'casa' for the built-in plan, or any free-text category the
+ * user names for a custom workout (e.g. 'Calistenia', 'Personal Trainer'). */
+export type Modality = string;
 export type Weekday = 'seg' | 'ter' | 'qua' | 'qui' | 'sex' | 'sab' | 'dom';
 
 /**
