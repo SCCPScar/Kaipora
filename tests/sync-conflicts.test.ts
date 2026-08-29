@@ -6,6 +6,7 @@ import type { WeightEntry } from '../src/lib/types';
 import type { FoodLogEntry } from '../src/data/types-diet';
 import type { CustomWorkout } from '../src/data/types-training';
 import type { SkillSession } from '../src/data/types-skills';
+import type { JournalEntry } from '../src/lib/types';
 
 // These exercise sync.ts's reconcile() directly against seeded localStorage,
 // simulating what happens when this device processes one row pulled from
@@ -217,5 +218,25 @@ describe('reconcile — vp_skill_sessions unions independent practice logs acros
     expect(merged).toHaveLength(3);
     expect(merged.some((s) => s.skillId === 'piano' && s.date === '2026-01-02')).toBe(true);
     expect(merged.some((s) => s.skillId === 'mandarim')).toBe(true);
+  });
+});
+
+describe('reconcile — vp_journal (Diário) never loses an entry written offline on either device', () => {
+  it('unions journal entries added independently on each device', () => {
+    const local: JournalEntry[] = [{ date: '2026-01-01', text: 'Entrada A', updatedAt: 100 }];
+    rawSet('vp_journal', local);
+    markTouched('vp_journal', 100);
+
+    rawSet('vp_journal', [...local, { date: '2026-01-02', text: 'Entrada B (offline)', updatedAt: 200 }]);
+    markTouched('vp_journal', 200);
+
+    const remote: JournalEntry[] = [...local, { date: '2026-01-03', text: 'Entrada C (outro dispositivo)', updatedAt: 250 }];
+
+    const result = reconcile('vp_journal', remote, 250, 100);
+    expect(result.isMerge).toBe(true);
+    const merged = result.value as JournalEntry[];
+    expect(merged).toHaveLength(3);
+    expect(merged.some((e) => e.text === 'Entrada B (offline)')).toBe(true);
+    expect(merged.some((e) => e.text === 'Entrada C (outro dispositivo)')).toBe(true);
   });
 });

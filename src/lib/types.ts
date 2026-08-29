@@ -38,6 +38,14 @@ export interface NoteEntry extends Tombstonable {
   text: string;
 }
 
+/** A free-form Diário entry — distinct from NoteEntry (Progresso's
+ * body/training notes): this is a general personal journal, not scoped to
+ * fitness. Same shape, separate storage key, so the two never mix. */
+export interface JournalEntry extends Tombstonable {
+  date: string;
+  text: string;
+}
+
 export interface DayRecord {
   meals: Record<string, boolean>;
   water: number;

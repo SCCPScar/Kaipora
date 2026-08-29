@@ -52,7 +52,13 @@ import {
   getRewards,
   addReward,
   deleteReward,
-  claimReward
+  claimReward,
+  getJournalEntries,
+  addJournalEntry,
+  deleteJournalEntry,
+  getChallenges,
+  addChallenge,
+  deleteChallenge
 } from '../src/lib/storage';
 import { touchedAt } from '../src/lib/meta';
 
@@ -493,6 +499,48 @@ describe('habilidades: recompensas', () => {
     addReward({ id: 'rw1', title: 'X', targetMinutes: 100 });
     deleteReward(0);
     expect(getRewards()).toHaveLength(0);
+  });
+});
+
+describe('diário livre (distinct from Progresso notes)', () => {
+  it('adds an entry newest first', () => {
+    addJournalEntry('primeiro dia', '2026-01-01');
+    addJournalEntry('segundo dia', '2026-01-02');
+    expect(getJournalEntries().map((e) => e.text)).toEqual(['segundo dia', 'primeiro dia']);
+  });
+
+  it('soft-deletes instead of physically removing', () => {
+    addJournalEntry('nota', '2026-01-01');
+    deleteJournalEntry(0);
+    expect(getJournalEntries()).toHaveLength(0);
+    const raw = rawGet<{ deleted?: boolean }[]>('vp_journal', []);
+    expect(raw).toHaveLength(1);
+    expect(raw[0].deleted).toBe(true);
+  });
+
+  it('never mixes with Progresso\'s vp_notes key', () => {
+    addJournalEntry('diário', '2026-01-01');
+    addNote('nota de progresso', '2026-01-01');
+    expect(getJournalEntries()).toHaveLength(1);
+    expect(getNotes()).toHaveLength(1);
+    expect(getJournalEntries()[0].text).toBe('diário');
+    expect(getNotes()[0].text).toBe('nota de progresso');
+  });
+});
+
+describe('desafios: Kaipora 75 e outros desafios pessoais', () => {
+  it('creates a challenge and lists it back', () => {
+    addChallenge({ id: 'ch1', title: 'Kaipora 75', totalDays: 75, startDate: '2026-01-01' });
+    expect(getChallenges()).toHaveLength(1);
+    expect(getChallenges()[0]).toMatchObject({ title: 'Kaipora 75', totalDays: 75 });
+  });
+
+  it('soft-deletes a challenge without touching the day records it was based on', () => {
+    addChallenge({ id: 'ch1', title: 'Kaipora 75', totalDays: 75, startDate: '2026-01-01' });
+    setWater('2026-01-01', 8);
+    deleteChallenge(0);
+    expect(getChallenges()).toHaveLength(0);
+    expect(getWater('2026-01-01')).toBe(8); // untouched
   });
 });
 

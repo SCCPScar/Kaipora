@@ -1,10 +1,11 @@
-import type { DayRecord, MeasurementEntry, NoteEntry, Settings, WeightEntry, Modality, Tombstonable } from './types';
+import type { DayRecord, MeasurementEntry, NoteEntry, JournalEntry, Settings, WeightEntry, Modality, Tombstonable } from './types';
 import { DEFAULT_SETTINGS } from './types';
 import { visible, withAdded, withSoftDeleted } from './tombstoneList';
 import type { FixedCommitment, FlexibleActivity } from '../data/types-routine';
 import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
 import type { CustomExercise, CustomWorkout, WorkoutExercise } from '../data/types-training';
 import type { Skill, SkillSession, Reward } from '../data/types-skills';
+import type { Challenge } from '../data/types-challenges';
 
 export const PFX = 'vp';
 
@@ -565,4 +566,46 @@ export function claimReward(rewardId: string, claimedAt: string): void {
     (a, b) => a.id === b.id
   );
   rawSet(`${PFX}_rewards`, withAdded(tombstoned, { ...current, claimed: true, claimedAt }));
+}
+
+// ---- Diário livre — distinct from Progresso's vp_notes (body/training notes) ----
+
+function getJournalRaw(): JournalEntry[] {
+  return rawGet<JournalEntry[]>(`${PFX}_journal`, []);
+}
+
+export function getJournalEntries(): JournalEntry[] {
+  return visible(getJournalRaw());
+}
+
+export function addJournalEntry(text: string, date: string): void {
+  rawSet(`${PFX}_journal`, withAdded(getJournalRaw(), { text, date }));
+}
+
+export function deleteJournalEntry(visibleIndex: number): void {
+  rawSet(
+    `${PFX}_journal`,
+    withSoftDeleted(getJournalRaw(), visibleIndex, (a, b) => a.date === b.date && a.text === b.text)
+  );
+}
+
+// ---- Desafios: Kaipora 75 e outros desafios pessoais ----
+// Progress is never stored here — see challengeStats.ts. Deleting a
+// challenge just stops tracking it; the day records it was based on are
+// untouched, so nothing about past days is lost.
+
+function getChallengesRaw(): Challenge[] {
+  return rawGet<Challenge[]>(`${PFX}_challenges`, []);
+}
+
+export function getChallenges(): Challenge[] {
+  return visible(getChallengesRaw());
+}
+
+export function addChallenge(entry: Omit<Challenge, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_challenges`, withAdded(getChallengesRaw(), entry));
+}
+
+export function deleteChallenge(visibleIndex: number): void {
+  rawSet(`${PFX}_challenges`, withSoftDeleted(getChallengesRaw(), visibleIndex, (a, b) => a.id === b.id));
 }

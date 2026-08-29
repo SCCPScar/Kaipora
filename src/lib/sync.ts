@@ -1,10 +1,11 @@
 import { supabase, isCloudConfigured } from './supabaseClient';
 import { allKeys, rawGet, rawSet } from './storage';
-import type { DayRecord, WeightEntry, MeasurementEntry, NoteEntry } from './types';
+import type { DayRecord, WeightEntry, MeasurementEntry, NoteEntry, JournalEntry } from './types';
 import type { ExerciseLogEntry } from './storage';
 import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
 import type { CustomExercise, CustomWorkout } from '../data/types-training';
 import type { Skill, SkillSession, Reward } from '../data/types-skills';
+import type { Challenge } from '../data/types-challenges';
 import { lastSyncedAt, setLastSyncedAt, touchedAt, markTouched } from './meta';
 import { mergeDayRecords, mergeEntryLists } from './merge';
 
@@ -165,6 +166,22 @@ function mergeConflicting(key: string, local: unknown, remote: unknown): unknown
     return mergeEntryLists(
       local as Reward[],
       remote as Reward[],
+      (e) => e.id,
+      (e) => String(e.updatedAt ?? 0)
+    );
+  }
+  if (key === 'vp_journal') {
+    return mergeEntryLists(
+      local as JournalEntry[],
+      remote as JournalEntry[],
+      (e) => `${e.date}_${e.text}`,
+      (e) => e.date
+    );
+  }
+  if (key === 'vp_challenges') {
+    return mergeEntryLists(
+      local as Challenge[],
+      remote as Challenge[],
       (e) => e.id,
       (e) => String(e.updatedAt ?? 0)
     );
