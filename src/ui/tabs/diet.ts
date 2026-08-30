@@ -1,8 +1,7 @@
 import type { Tab } from '../nav';
-import { MEALS, dailyTotalsForMeals, allMealOptions } from '../../data/diet';
+import { MEALS, allMealOptions, combinedDayTotals } from '../../data/diet';
 import { SUPPLEMENTS, DIET_NOTES } from '../../data/types-diet';
 import { searchFoodDatabase, scaleFood, type FoodDatabaseItem } from '../../data/foodDatabase';
-import { dailyTotals } from '../../lib/calories';
 import {
   getDay,
   toggleMeal,
@@ -25,17 +24,6 @@ let view: DietView = 'plano';
 /** meal id currently showing its "add custom food" mini-form, or null. */
 let addingCustomToMeal: string | null = null;
 
-function combinedDayTotals(date: string, day: ReturnType<typeof getDay>) {
-  const plan = dailyTotalsForMeals(day.meals);
-  const log = dailyTotals(getFoodLog(date));
-  return {
-    kcal: plan.kcal + log.kcal,
-    protein: plan.protein + log.protein,
-    carbs: plan.carbs + log.carbs,
-    fat: plan.fat + log.fat
-  };
-}
-
 export const dietTab: Tab = {
   id: 'dieta',
   label: 'Alimentação',
@@ -46,7 +34,7 @@ export const dietTab: Tab = {
     const day = getDay(date);
     const settings = getSettings();
 
-    const totals = combinedDayTotals(date, day);
+    const totals = combinedDayTotals(date, day.meals);
     const remaining = settings.calorieGoal - totals.kcal;
 
     root.innerHTML = `
@@ -93,7 +81,7 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
   const allCustom = getCustomFoodOptions();
 
   el.innerHTML =
-    `<div class="alert"><span>Não bebas durante as refeições (30 min antes e depois). As opções de cada refeição são substituições equivalentes — oculta as que não usas e adiciona as tuas próprias.</span></div>` +
+    `<div class="alert"><span>Não bebas durante as refeições (30 min antes e depois). As opções de cada refeição são substituições equivalentes. Oculta as que não usas e adiciona as tuas próprias.</span></div>` +
     MEALS.map((meal) => {
       const options = allMealOptions(meal.id);
       const totalKcal = options.reduce((s, o) => (day.meals[o.id] ? s + o.kcal : s), 0);
@@ -163,7 +151,7 @@ function renderDiario(root: HTMLElement, date: string) {
   const todays = allLog.filter((e) => e.date === date);
 
   el.innerHTML = `
-    <div class="alert"><span>Regista aqui o que comeste fora do plano — pesquisa um alimento (valores por 100g) ou adiciona manualmente.</span></div>
+    <div class="alert"><span>Regista aqui o que comeste fora do plano: pesquisa um alimento (valores por 100g) ou adiciona manualmente.</span></div>
 
     <section>
       <div class="sec-title">Contador de Calorias</div>
@@ -241,7 +229,7 @@ function renderHistory(root: HTMLElement, date: string) {
     const d = addDays(today, -i);
     const iso = toISO(d);
     const rec = getDay(iso);
-    const kcal = combinedDayTotals(iso, rec).kcal;
+    const kcal = combinedDayTotals(iso, rec.meals).kcal;
     const anyMarked = MEALS.some((m) => m.options.some((o) => rec.meals[o.id])) || getFoodLog(iso).length > 0;
     rows.push(`
       <div class="log-item">

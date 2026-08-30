@@ -12,7 +12,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: false,
     desc: "Senta-te num banco com as costas apoiadas. Segura um halter em cada mão ao nível dos ombros com as palmas para a frente. Empurra os halteres para cima até os braços ficarem quase esticados. Desce de forma controlada.",
-    tip: "Não trava os cotovelos no topo — mantém uma ligeira flexão. Expira ao subir, inspira ao descer."
+    tip: "Não trava os cotovelos no topo. Mantém uma ligeira flexão. Expira ao subir, inspira ao descer."
   },
   elevacao_lateral: {
     id: "elevacao_lateral",
@@ -21,7 +21,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: false,
     desc: "Em pé ou sentada, segura um halter em cada mão ao lado do corpo. Com os cotovelos levemente dobrados, eleva os braços para os lados até ficarem ao nível dos ombros.",
-    tip: "Não uses momentum do corpo. Sobe só até ao nível dos ombros — não mais alto."
+    tip: "Não uses momentum do corpo. Sobe só até ao nível dos ombros, não mais alto."
   },
   crucifixo: {
     id: "crucifixo",
@@ -39,7 +39,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: false,
     desc: "Na polia alta do cabo, agarra a barra ou corda com as duas mãos. Com os cotovelos fixos junto ao corpo, empurra a barra para baixo até os braços ficarem completamente esticados. Sobe devagar de volta.",
-    tip: "Os cotovelos são o pivô — não se movem. Só o antebraço se move. Mantém o tronco levemente inclinado."
+    tip: "Os cotovelos são o pivô: não se movem. Só o antebraço se move. Mantém o tronco levemente inclinado."
   },
   triceps_extensao: {
     id: "triceps_extensao",
@@ -48,7 +48,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: false,
     desc: "Deita-te num banco. Segura os halteres com os braços apontados para o teto. Sem mover os ombros, dobra os cotovelos e desce os pesos em direção à testa. Estende de volta.",
-    tip: "Este exercício chama-se skull crusher — vai devagar! Mantém os cotovelos apontados para o teto durante todo o movimento."
+    tip: "Este exercício chama-se skull crusher. Vai devagar! Mantém os cotovelos apontados para o teto durante todo o movimento."
   },
   puxador_alto: {
     id: "puxador_alto",
@@ -93,7 +93,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: false,
     desc: "Igual à rosca direta mas as palmas ficam viradas uma para a outra (como se segurasses um martelo). Alterna os braços.",
-    tip: "Trabalha o bíceps num ângulo diferente e o músculo do antebraço — ótimo para dar volume ao braço inteiro."
+    tip: "Trabalha o bíceps num ângulo diferente e o músculo do antebraço, ótimo para dar volume ao braço inteiro."
   },
   agachamento: {
     id: "agachamento",
@@ -120,7 +120,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: false,
     desc: "Na máquina extensora, senta-te com as costas apoiadas e o apoio no tornozelo. Estende as pernas até ficarem retas. Desce de forma controlada.",
-    tip: "Faz o movimento devagar e controlado — evita usar balanço. No topo aperta o músculo por 1 segundo."
+    tip: "Faz o movimento devagar e controlado, evita usar balanço. No topo aperta o músculo por 1 segundo."
   },
   cadeira_flexora: {
     id: "cadeira_flexora",
@@ -138,7 +138,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: true,
     desc: "Na máquina de abdução (as almofadas ficam por fora das pernas), afasta as pernas para os lados contra a resistência. Volta a fechar devagar.",
-    tip: "Diz ao instrutor que queres a máquina de abdução — as almofadas ficam por fora (ao contrário da adução)."
+    tip: "Diz ao instrutor que queres a máquina de abdução: as almofadas ficam por fora (ao contrário da adução)."
   },
   gluteo_cabo: {
     id: "gluteo_cabo",
@@ -147,7 +147,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: true,
     desc: "No cabo/cross, prende a argola num tornozelo. Com as mãos a apoiar na máquina, chuta a perna para trás, contraindo o glúteo. Repete do outro lado.",
-    tip: "Não dobres a coluna — o movimento deve ser só da perna. Aperta o glúteo no ponto mais alto por 1 segundo."
+    tip: "Não dobres a coluna, o movimento deve ser só da perna. Aperta o glúteo no ponto mais alto por 1 segundo."
   },
   afundo: {
     id: "afundo",
@@ -165,7 +165,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: false,
     desc: "Em pé, eleva os calcanhares do chão, ficando nas pontas dos pés. Mantém um segundo em cima. Desce de forma controlada.",
-    tip: "Podes fazer numa degrau de escada para maior amplitude — sobe até às pontas e desce deixando o calcanhar ir abaixo da degrau."
+    tip: "Podes fazer numa degrau de escada para maior amplitude: sobe até às pontas e desce deixando o calcanhar ir abaixo da degrau."
   },
   prancha: {
     id: "prancha",
@@ -192,7 +192,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: false,
     desc: "Na posição de prancha com braços esticados, traz um joelho em direção ao peito rapidamente, depois alterna. Como se estivesses a correr no lugar em posição de prancha.",
-    tip: "Mantém as ancas baixas — não levantes o rabo! Começa devagar e depois acelera."
+    tip: "Mantém as ancas baixas, não levantes o rabo! Começa devagar e depois acelera."
   },
   flexao: {
     id: "flexao",
@@ -201,7 +201,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: false,
     desc: "Em posição de prancha com os braços estendidos. Dobra os cotovelos e desce o peito ao chão. Empurra para cima de volta. Se for difícil, faz com os joelhos no chão.",
-    tip: "Para começar faz com os joelhos no chão — não há problema! Os cotovelos ficam a 45° do corpo."
+    tip: "Para começar faz com os joelhos no chão, não há problema! Os cotovelos ficam a 45° do corpo."
   },
   agachamento_salto: {
     id: "agachamento_salto",
@@ -210,7 +210,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "Agachamento normal, mas ao subir explodes num salto. Cai de volta suavemente em posição de agachamento.",
-    tip: "Cai sempre com os joelhos levemente dobrados — nunca com as pernas esticadas! Aterragem suave é fundamental."
+    tip: "Cai sempre com os joelhos levemente dobrados, nunca com as pernas esticadas! Aterragem suave é fundamental."
   },
   elevacao_pernas: {
     id: "elevacao_pernas",
@@ -264,7 +264,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "De pé numa perna, estende a outra para a frente. Desce em agachamento numa perna só até o glúteo tocar o calcanhar. Sobe de volta.",
-    tip: "Começa apoiando-te numa parede ou segurando algo. É um exercício avançado — treina o agachamento normal primeiro!"
+    tip: "Começa apoiando-te numa parede ou segurando algo. É um exercício avançado, treina o agachamento normal primeiro!"
   },
   muscle_up: {
     id: "muscle_up",
@@ -327,7 +327,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "Pés à largura dos ombros. Dobra os joelhos e desce como se fosses sentar numa cadeira imaginária, costas retas, peito para cima, calcanhares no chão.",
-    tip: "Para começar faz agachamentos parciais se sentires dificuldade. Os joelhos seguem a direção dos pés — não os deixes cair para dentro."
+    tip: "Para começar faz agachamentos parciais se sentires dificuldade. Os joelhos seguem a direção dos pés, não os deixes cair para dentro."
   },
   lunge: {
     id: "lunge",
@@ -354,7 +354,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: false,
     desc: "Deitada no chão, pernas juntas e ligeiramente dobradas. Eleva-as até ficarem perpendiculares ao chão. Baixa de forma lenta e controlada.",
-    tip: "Se for muito difícil, começa com os joelhos dobrados. Movimento sempre lento — não uses balanço!"
+    tip: "Se for muito difícil, começa com os joelhos dobrados. Movimento sempre lento, não uses balanço!"
   },
   glute_bridge: {
     id: "glute_bridge",
@@ -372,7 +372,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "Deita-te de barriga para baixo com os braços estendidos à frente. Eleva simultaneamente os braços, peito e pernas do chão, como se fosses voar. Mantém 2 segundos e desce.",
-    tip: "Não forces o pescoço — olha para o chão. Excelente para fortalecer as costas e prevenir dores lombares."
+    tip: "Não forces o pescoço, olha para o chão. Excelente para fortalecer as costas e prevenir dores lombares."
   },
   dead_bug: {
     id: "dead_bug",
@@ -399,7 +399,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: false,
     desc: "Em pé com os pés à largura dos ombros. Eleva os calcanhares do chão ficando nas pontas dos pés. Mantém 1 segundo. Desce de forma controlada. Podes apoiar-te numa parede para equilíbrio.",
-    tip: "Para maior amplitude, faz numa degrau de escada — sobe até às pontas e desce deixando o calcanhar ir abaixo da degrau."
+    tip: "Para maior amplitude, faz numa degrau de escada: sobe até às pontas e desce deixando o calcanhar ir abaixo da degrau."
   },
   hip_thrust: {
     id: "hip_thrust",
@@ -408,7 +408,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: true,
     desc: "Senta-te no chão com as costas apoiadas na borda de um banco, joelhos dobrados e pés apoiados no chão. Coloca uma barra ou halter sobre a anca (usa um step ou toalha para proteger). Empurra a anca para cima até o corpo ficar reto dos ombros aos joelhos, contraindo bem o glúteo no topo. Desce controlado.",
-    tip: "É o exercício rei para o glúteo máximo. Aperta o glúteo com força no topo durante 1-2 segundos antes de descer — a contração importa mais do que a carga."
+    tip: "É o exercício rei para o glúteo máximo. Aperta o glúteo com força no topo durante 1-2 segundos antes de descer. A contração importa mais do que a carga."
   },
   gluteo_maquina: {
     id: "gluteo_maquina",
@@ -426,7 +426,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: true,
     desc: "Deita-te no chão com a barra guiada apoiada na anca (usa proteção). Pés à largura dos ombros, joelhos dobrados. Empurra a anca para cima até estender completamente, aperta o glúteo, desce controlado sem tocar o chão entre repetições.",
-    tip: "Versão do hip thrust com maior estabilidade — ótima para progredir carga com segurança."
+    tip: "Versão do hip thrust com maior estabilidade, ótima para progredir carga com segurança."
   },
   stiff_halteres: {
     id: "stiff_halteres",
@@ -435,7 +435,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: true,
     desc: "Em pé, halteres à frente das coxas. Com joelhos quase esticados (ligeira flexão), inclina o tronco à frente empurrando a anca para trás, deixando os halteres deslizarem pelas pernas até sentires o alongamento no posterior da coxa. Volta à posição inicial contraindo o glúteo.",
-    tip: "As costas mantêm-se sempre direitas — o movimento é na anca, não na coluna. Se sentires a lombar a curvar, reduz a amplitude."
+    tip: "As costas mantêm-se sempre direitas. O movimento é na anca, não na coluna. Se sentires a lombar a curvar, reduz a amplitude."
   },
   step_up_banco: {
     id: "step_up_banco",
@@ -444,7 +444,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: true,
     desc: "Com um halter em cada mão, sobe para cima de um banco ou step com uma perna, empurrando através do calcanhar e contraindo o glúteo no topo. Desce controlada pela mesma perna. Alterna ou completa todas as repetições de um lado antes de trocar.",
-    tip: "Evita empurrar com a perna de trás — o trabalho deve vir da perna que está em cima do banco."
+    tip: "Evita empurrar com a perna de trás. O trabalho deve vir da perna que está em cima do banco."
   },
   abducao_deitada_cabo: {
     id: "abducao_deitada_cabo",
@@ -453,7 +453,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "academia",
     gluteFocus: true,
     desc: "Prende uma caneleira de cabo no tornozelo, de lado para a máquina. Com a perna quase esticada, afasta-a lateralmente contra a resistência do cabo, contraindo o glúteo médio. Volta controlada.",
-    tip: "Mantém o tronco estável e não uses balanço — isola o glúteo médio, importante para a forma e estabilidade da anca."
+    tip: "Mantém o tronco estável e não uses balanço. Isola o glúteo médio, importante para a forma e estabilidade da anca."
   },
   ponte_gluteo_unilateral: {
     id: "ponte_gluteo_unilateral",
@@ -471,7 +471,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "Deitada de costas com as costas apoiadas numa cadeira ou sofá baixo, elástico de resistência colocado por cima da anca e preso ao chão ou segurado pelas mãos. Empurra a anca para cima contra a resistência, aperta o glúteo, desce controlada.",
-    tip: "Sem elástico também funciona muito bem — usa só o peso do corpo e foca na contração máxima no topo."
+    tip: "Sem elástico também funciona muito bem: usa só o peso do corpo e foca na contração máxima no topo."
   },
   caminhada_lateral_elastico: {
     id: "caminhada_lateral_elastico",
@@ -480,7 +480,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "Coloca um elástico de resistência à volta dos tornozelos ou acima dos joelhos. Fica em meio-agachamento e dá passos laterais mantendo tensão constante no elástico, sem deixar os joelhos colapsarem para dentro.",
-    tip: "Sem elástico, faz o mesmo movimento em meio-agachamento focando em manter os joelhos alinhados com os pés — a intenção do movimento já ativa o glúteo médio."
+    tip: "Sem elástico, faz o mesmo movimento em meio-agachamento focando em manter os joelhos alinhados com os pés. A intenção do movimento já ativa o glúteo médio."
   },
   frog_pump: {
     id: "frog_pump",
@@ -489,7 +489,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "Deitada de costas, sola dos pés unidas e joelhos abertos para os lados (posição de rã). Empurra a anca para cima apertando o glúteo no topo, desce controlada sem deixar a anca tocar completamente no chão entre repetições.",
-    tip: "Amplitude curta mas intensa — foca-te em apertar bem o glúteo no topo em vez de ires rápido."
+    tip: "Amplitude curta mas intensa: foca-te em apertar bem o glúteo no topo em vez de ires rápido."
   },
   donkey_kick: {
     id: "donkey_kick",
@@ -498,7 +498,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "De quatro apoios (mãos e joelhos no chão), mantém o joelho a 90° e eleva uma perna para trás e para cima, empurrando com a sola do pé em direção ao teto. Contrai o glúteo no topo e desce controlada sem deixar o joelho tocar no chão.",
-    tip: "Não uses a lombar para ganhar altura — a amplitude é menor do que parece, mantém o core firme."
+    tip: "Não uses a lombar para ganhar altura. A amplitude é menor do que parece, mantém o core firme."
   },
   fire_hydrant: {
     id: "fire_hydrant",
@@ -507,7 +507,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "De quatro apoios, mantém o joelho dobrado a 90° e eleva a perna lateralmente, como um cão a levantar a perna, mantendo a anca estável e o tronco parado. Volta controlada.",
-    tip: "Movimento pequeno e controlado — evita rodar o tronco para ganhar amplitude extra."
+    tip: "Movimento pequeno e controlado, evita rodar o tronco para ganhar amplitude extra."
   },
   sumo_squat_casa: {
     id: "sumo_squat_casa",
@@ -525,7 +525,7 @@ export const EXERCISES: Record<string, Exercise> = {
     location: "casa",
     gluteFocus: true,
     desc: "Usa um degrau de escada, banco ou step estável. Sobe com uma perna, empurrando pelo calcanhar e apertando o glúteo no topo, desce controlada pela mesma perna. Podes segurar garrafões de água para adicionar peso.",
-    tip: "Escolhe uma altura que sintas segura e estável — quanto mais alto o degrau, mais intenso para o glúteo."
+    tip: "Escolhe uma altura que sintas segura e estável. Quanto mais alto o degrau, mais intenso para o glúteo."
   },
 };
 

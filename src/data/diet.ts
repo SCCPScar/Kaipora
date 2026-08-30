@@ -5,7 +5,7 @@
 // todas ficam dentro de uma banda calórica semelhante ao alvo da refeição.
 import type { Meal, FoodOption } from './types-diet';
 import { dailyTotals } from '../lib/calories';
-import { getHiddenMealOptionIds, getCustomFoodOptions } from '../lib/storage';
+import { getHiddenMealOptionIds, getCustomFoodOptions, getFoodLog } from '../lib/storage';
 
 export const MEALS: Meal[] = [
   {
@@ -420,4 +420,17 @@ export function visibleMealOptions(mealId: string): FoodOption[] {
 export function dailyTotalsForMeals(checkedOptionIds: Record<string, boolean>) {
   const checked = MEALS.flatMap((meal) => allMealOptions(meal.id).filter((o) => checkedOptionIds[o.id]));
   return dailyTotals(checked);
+}
+
+/** dailyTotalsForMeals plus that date's Diário Livre entries — the single
+ * combined total shown consistently on both Hoje and Alimentação. */
+export function combinedDayTotals(date: string, checkedOptionIds: Record<string, boolean>) {
+  const plan = dailyTotalsForMeals(checkedOptionIds);
+  const log = dailyTotals(getFoodLog(date));
+  return {
+    kcal: plan.kcal + log.kcal,
+    protein: plan.protein + log.protein,
+    carbs: plan.carbs + log.carbs,
+    fat: plan.fat + log.fat
+  };
 }

@@ -43,7 +43,7 @@ export const habilidadesTab: Tab = {
       <div class="ph">
         <h2>Habilidades</h2>
         <div class="ph-title">Tempo investido e frequência</div>
-        <div class="ph-sub">Qualquer habilidade que estejas a desenvolver — sem categorias fixas</div>
+        <div class="ph-sub">Qualquer habilidade que estejas a desenvolver, sem categorias fixas</div>
       </div>
 
       <section>
@@ -68,7 +68,7 @@ export const habilidadesTab: Tab = {
 function renderSkills(root: HTMLElement, skills: ReturnType<typeof getSkills>, sessions: ReturnType<typeof getSkillSessions>) {
   const el = root.querySelector('#skill-list') as HTMLElement;
   if (!skills.length) {
-    el.innerHTML = '<div class="empty">Ainda sem habilidades — adiciona a primeira abaixo</div>';
+    el.innerHTML = '<div class="empty">Ainda sem habilidades. Adiciona a primeira abaixo</div>';
     return;
   }
   el.innerHTML = skills
@@ -126,7 +126,7 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
   if (!enabled) {
     el.innerHTML = `
       <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-        Sistema de recompensas desativado — ativa em <a href="#" data-goto-settings style="color:var(--primary);font-weight:700">Ajustes</a> se quiseres definir marcos para o teu tempo de prática.
+        Sistema de recompensas desativado. Ativa em <a href="#" data-goto-settings style="color:var(--primary);font-weight:700">Ajustes</a> se quiseres definir marcos para o teu tempo de prática.
       </div>`;
     return;
   }

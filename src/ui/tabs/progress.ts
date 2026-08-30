@@ -34,10 +34,10 @@ export const progressTab: Tab = {
       <div class="ph">
         <h2>Progresso</h2>
         <div class="ph-title">O teu historial, Scarllett</div>
-        <div class="ph-sub">Recomposição corporal — mais do que a balança</div>
+        <div class="ph-sub">Recomposição corporal, mais do que a balança</div>
       </div>
 
-      <div class="alert"><span>O sucesso combina peso, medidas, treino e consistência — nunca só o número na balança.</span></div>
+      <div class="alert"><span>O sucesso combina peso, medidas, treino e consistência, nunca só o número na balança.</span></div>
 
       <div class="chart-sec">
         <h4>Evolução do peso</h4>

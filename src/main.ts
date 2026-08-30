@@ -64,7 +64,7 @@ onAuthChange((signedIn) => {
   if (justSignedIn) {
     void fullSync().then((result) => {
       refreshActive();
-      showToast(result.ok ? 'Sessão iniciada e sincronizada' : 'Sessão iniciada — sincronização falhou, a tentar novamente em breve.');
+      showToast(result.ok ? 'Sessão iniciada e sincronizada' : 'Sessão iniciada. Sincronização falhou, a tentar novamente em breve.');
     });
   } else if (justSignedOut) {
     showToast('Sessão terminada.');

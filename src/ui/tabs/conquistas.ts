@@ -32,7 +32,7 @@ export const conquistasTab: Tab = {
       </div>
 
       <div class="alert">
-        <span>Sequência = dias seguidos (até hoje) com os Essenciais cumpridos (água + treino). Falhar um dia não apaga a tua melhor sequência nem o teu histórico — só recomeça a contagem atual.</span>
+        <span>Sequência = dias seguidos (até hoje) com os Essenciais cumpridos (água + treino). Falhar um dia não apaga a tua melhor sequência nem o teu histórico, só recomeça a contagem atual.</span>
       </div>
     `;
   }

@@ -64,14 +64,14 @@ export const trainingTab: Tab = {
           <div class="ph-title">Academia + Casa</div>
           <div class="ph-sub">Toca no dia para abrir · relógio = descanso · info = como fazer</div>
         </div>
-        <div class="alert"><span>Cada dia tem sempre as duas versões — escolhe Academia ou Casa consoante o que fizeres.</span></div>
+        <div class="alert"><span>Cada dia tem sempre as duas versões: escolhe Academia ou Casa consoante o que fizeres.</span></div>
         <div id="week-days"></div>
 
         <section>
           <div class="sec-title"><span>Programa Intensivo de Glúteos</span></div>
           <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
             Trabalho dedicado a glúteo máximo e médio, distribuído ao longo da semana para evitar volume excessivo.
-            Aparece nos dias de pernas (Qua, Qui, Sáb) — aqui tens a lista completa dos treinos que fazem parte do programa.
+            Aparece nos dias de pernas (Qua, Qui, Sáb). Aqui tens a lista completa dos treinos que fazem parte do programa.
           </div>
           <div id="glute-list"></div>
         </section>
@@ -79,7 +79,7 @@ export const trainingTab: Tab = {
         <section>
           <div class="sec-title"><span>Os Meus Exercícios</span></div>
           <div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-            Exercícios que a biblioteca não tem — ex. algo que o teu personal trainer te ensinou. Ficam disponíveis para qualquer treino teu.
+            Exercícios que a biblioteca não tem, como algo que o teu personal trainer te ensinou. Ficam disponíveis para qualquer treino teu.
           </div>
           <div id="custom-exercise-list"></div>
           <div id="custom-exercise-form"></div>
@@ -88,7 +88,7 @@ export const trainingTab: Tab = {
         <section>
           <div class="sec-title"><span>Os Meus Treinos</span></div>
           <div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-            Cria os teus próprios treinos — academia, casa, calistenia, personal trainer ou o que fizer sentido — sem mexer no plano acima.
+            Cria os teus próprios treinos (academia, casa, calistenia, personal trainer ou o que fizer sentido) sem mexer no plano acima.
           </div>
           <div id="custom-workout-list"></div>
           <div id="custom-workout-form"></div>
@@ -455,7 +455,7 @@ function wireEvents(root: HTMLElement, date: string) {
       }
       addCustomWorkout({ id: `cw_${Date.now()}`, title, category, focus, exercises: [] });
       addingCustomWorkout = false;
-      showToast('Treino criado — adiciona exercícios abaixo');
+      showToast('Treino criado. Adiciona exercícios abaixo');
       refreshActive();
       return;
     }

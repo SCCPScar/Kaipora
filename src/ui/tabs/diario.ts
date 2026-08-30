@@ -14,7 +14,7 @@ export const diarioTab: Tab = {
       <div class="ph">
         <h2>Diário</h2>
         <div class="ph-title">Um espaço livre</div>
-        <div class="ph-sub">Escreve sobre o teu dia — sem formulário rígido, sem categorias</div>
+        <div class="ph-sub">Escreve sobre o teu dia, sem formulário rígido, sem categorias</div>
       </div>
 
       <section>

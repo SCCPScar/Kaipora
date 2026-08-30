@@ -24,7 +24,7 @@ export const settingsTab: Tab = {
 
       <section>
         <div class="sec-title">Aparência</div>
-        <div style="padding:12px 16px 4px;font-size:12.5px;color:var(--text-dim)">Dark e Light Mode partilham a mesma identidade — escolhe o que preferires.</div>
+        <div style="padding:12px 16px 4px;font-size:12.5px;color:var(--text-dim)">Dark e Light Mode partilham a mesma identidade. Escolhe o que preferires.</div>
         <div class="form-row">
           <button class="btn ${settings.theme === 'system' ? '' : 'ghost'}" data-theme-choice="system">Sistema</button>
           <button class="btn ${settings.theme === 'light' ? '' : 'ghost'}" data-theme-choice="light">Claro</button>
@@ -54,7 +54,7 @@ export const settingsTab: Tab = {
           <label class="switch"><input type="checkbox" id="s-notif" ${settings.notificationsEnabled ? 'checked' : ''}/><span class="slider"></span></label>
         </div>
         <div class="alert" style="margin:10px 14px">
-          <span>No iPhone (Safari/PWA), notificações só funcionam com a app aberta em primeiro plano — o iOS não permite lembretes agendados em segundo plano sem um servidor de push dedicado. No Android/Chrome o comportamento pode ser mais fiável, mas ainda depende da permissão do sistema.</span>
+          <span>No iPhone (Safari/PWA), notificações só funcionam com a app aberta em primeiro plano: o iOS não permite lembretes agendados em segundo plano sem um servidor de push dedicado. No Android/Chrome o comportamento pode ser mais fiável, mas ainda depende da permissão do sistema.</span>
         </div>
       </section>
 
@@ -65,7 +65,7 @@ export const settingsTab: Tab = {
 
       <section>
         <div class="sec-title">Backup</div>
-        <div style="padding:12px 16px 4px;font-size:12.5px;color:var(--text-dim)">Exporta os teus dados regularmente — é a tua rede de segurança, mesmo com sincronização cloud ativa.</div>
+        <div style="padding:12px 16px 4px;font-size:12.5px;color:var(--text-dim)">Exporta os teus dados regularmente: é a tua rede de segurança, mesmo com sincronização cloud ativa.</div>
         <div class="form-row">
           <button class="btn ghost" id="s-export">Exportar backup (.json)</button>
         </div>
@@ -106,7 +106,7 @@ function renderCloudSection(root: HTMLElement) {
       <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
         Sincronização cloud ainda não está configurada neste deployment. A app funciona 100% offline com
         localStorage. Para sincronizar entre o iPhone e o PC, define <code>VITE_SUPABASE_URL</code> e
-        <code>VITE_SUPABASE_ANON_KEY</code> — instruções completas no README.
+        <code>VITE_SUPABASE_ANON_KEY</code>. Instruções completas no README.
       </div>`;
     return;
   }
@@ -128,7 +128,7 @@ function renderCloudSection(root: HTMLElement) {
         status.textContent = 'A sincronizar…';
         const result = await fullSync();
         status.textContent = result.ok
-          ? `Sincronizado — ${result.pushed} enviado(s), ${result.pulled} recebido(s).`
+          ? `Sincronizado: ${result.pushed} enviado(s), ${result.pulled} recebido(s).`
           : `Falhou: ${result.reason}`;
       });
       el.querySelector('#s-signout')?.addEventListener('click', async () => {
@@ -155,7 +155,7 @@ function renderCloudSection(root: HTMLElement) {
         if (!input.value) return;
         status.textContent = 'A enviar…';
         const result = await signInWithEmail(input.value);
-        status.textContent = result.ok ? 'Link enviado — verifica o teu email.' : `Erro: ${result.error}`;
+        status.textContent = result.ok ? 'Link enviado. Verifica o teu email.' : `Erro: ${result.error}`;
       });
     }
   });

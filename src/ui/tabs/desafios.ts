@@ -18,7 +18,7 @@ export const desafiosTab: Tab = {
       <div class="ph">
         <h2>Desafios</h2>
         <div class="ph-title">Kaipora 75 e outros desafios pessoais</div>
-        <div class="ph-sub">Um dia falhado nunca reinicia o desafio — a contagem continua</div>
+        <div class="ph-sub">Um dia falhado nunca reinicia o desafio. A contagem continua</div>
       </div>
 
       <section>
@@ -99,7 +99,7 @@ function wireEvents(root: HTMLElement) {
     const quickstart = target.closest<HTMLElement>('#ch-quickstart-75');
     if (quickstart) {
       addChallenge({ id: `ch_${Date.now()}`, title: 'Kaipora 75', totalDays: 75, startDate: todayISO() });
-      showToast('Kaipora 75 iniciado — boa sorte!');
+      showToast('Kaipora 75 iniciado. Boa sorte!');
       refreshActive();
       return;
     }

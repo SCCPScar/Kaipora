@@ -20,7 +20,7 @@ export function openExerciseModal(ex: ExerciseLike): void {
     ${
       diagram
         ? `<div style="border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)">${diagram}</div>
-           <div style="font-size:10.5px;color:var(--text-faint);margin:6px 0 14px;text-align:center">Diagrama esquemático simplificado — a descrição abaixo é a referência principal.</div>`
+           <div style="font-size:10.5px;color:var(--text-faint);margin:6px 0 14px;text-align:center">Diagrama esquemático simplificado. A descrição abaixo é a referência principal.</div>`
         : ''
     }
     <p style="font-size:14px;line-height:1.6;color:var(--text)">${ex.desc}</p>

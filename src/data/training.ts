@@ -19,14 +19,14 @@ export const TRAINING_WEEK: TrainingDay[] = [
   {
     weekday: 'seg',
     label: 'Segunda-feira',
-    academia: workout('seg-academia', 'Push — Peito, Ombros e Tríceps', 'Peito · Ombros · Tríceps', 'academia', [
+    academia: workout('seg-academia', 'Push · Peito, Ombros e Tríceps', 'Peito · Ombros · Tríceps', 'academia', [
       ex('crucifixo', 3, '12', 60),
       ex('desenvolvimento', 3, '10', 75),
       ex('elevacao_lateral', 3, '15', 45),
       ex('triceps_polia', 3, '12', 60),
       ex('triceps_extensao', 3, '12', 60)
     ]),
-    casa: workout('seg-casa', 'Push em Casa — Peito, Ombros e Tríceps', 'Peito · Ombros · Tríceps', 'casa', [
+    casa: workout('seg-casa', 'Push em Casa · Peito, Ombros e Tríceps', 'Peito · Ombros · Tríceps', 'casa', [
       ex('flexao', 4, 'até 15', 60),
       ex('pike_push', 3, '10', 60),
       ex('dip_parallel', 3, '12', 45),
@@ -37,14 +37,14 @@ export const TRAINING_WEEK: TrainingDay[] = [
   {
     weekday: 'ter',
     label: 'Terça-feira',
-    academia: workout('ter-academia', 'Pull — Costas e Bíceps', 'Costas · Bíceps · Core', 'academia', [
+    academia: workout('ter-academia', 'Pull · Costas e Bíceps', 'Costas · Bíceps · Core', 'academia', [
       ex('puxador_alto', 4, '10', 75),
       ex('remada_curvada', 3, '12', 60),
       ex('remada_unilateral', 3, '12 cada lado', 60),
       ex('rosca_direta', 3, '12', 45),
       ex('rosca_martelo', 3, '12', 45)
     ]),
-    casa: workout('ter-casa', 'Pull em Casa — Costas e Bíceps', 'Costas · Bíceps · Core', 'casa', [
+    casa: workout('ter-casa', 'Pull em Casa · Costas e Bíceps', 'Costas · Bíceps · Core', 'casa', [
       ex('australian_row', 4, '12', 60, 'Usa uma mesa firme ou barra baixa.'),
       ex('pull_up', 4, 'máx. reps (ou negativas)', 90, 'Sem barra em casa? troca por remada invertida extra.'),
       ex('hanging_knee', 3, '12', 45),
@@ -57,7 +57,7 @@ export const TRAINING_WEEK: TrainingDay[] = [
     label: 'Quarta-feira',
     academia: workout(
       'qua-academia',
-      'Pernas — Quadríceps e Glúteos',
+      'Pernas · Quadríceps e Glúteos',
       'Quadríceps · Glúteos',
       'academia',
       [
@@ -72,7 +72,7 @@ export const TRAINING_WEEK: TrainingDay[] = [
     ),
     casa: workout(
       'qua-casa',
-      'Pernas em Casa — Quadríceps e Glúteos',
+      'Pernas em Casa · Quadríceps e Glúteos',
       'Quadríceps · Glúteos',
       'casa',
       [
@@ -90,11 +90,11 @@ export const TRAINING_WEEK: TrainingDay[] = [
     label: 'Quinta-feira',
     academia: workout(
       'qui-academia',
-      'Programa de Glúteos — Máximo e Médio',
+      'Programa de Glúteos · Máximo e Médio',
       'Glúteo máximo · Glúteo médio',
       'academia',
       [
-        ex('hip_thrust', 4, '12', 75, 'Exercício principal do dia — aperta bem no topo.'),
+        ex('hip_thrust', 4, '12', 75, 'Exercício principal do dia. Aperta bem no topo.'),
         ex('gluteo_cabo', 3, '15 cada perna', 45),
         ex('abducao_quadril', 3, '15', 45),
         ex('stiff_halteres', 3, '12', 75),
@@ -108,7 +108,7 @@ export const TRAINING_WEEK: TrainingDay[] = [
       'Glúteo máximo · Glúteo médio',
       'casa',
       [
-        ex('elevacao_quadril_elastico', 4, '15', 60, 'Exercício principal do dia — aperta bem no topo.'),
+        ex('elevacao_quadril_elastico', 4, '15', 60, 'Exercício principal do dia. Aperta bem no topo.'),
         ex('ponte_gluteo_unilateral', 3, '10 cada perna', 45),
         ex('caminhada_lateral_elastico', 3, '15 passos cada lado', 30),
         ex('donkey_kick', 3, '15 cada perna', 30),
@@ -141,7 +141,7 @@ export const TRAINING_WEEK: TrainingDay[] = [
     label: 'Sábado',
     academia: workout(
       'sab-academia',
-      'Pernas — Posterior e Glúteos',
+      'Pernas · Posterior e Glúteos',
       'Posterior de coxa · Glúteos',
       'academia',
       [
@@ -155,7 +155,7 @@ export const TRAINING_WEEK: TrainingDay[] = [
     ),
     casa: workout(
       'sab-casa',
-      'Pernas em Casa — Posterior e Glúteos',
+      'Pernas em Casa · Posterior e Glúteos',
       'Posterior de coxa · Glúteos',
       'casa',
       [
@@ -171,13 +171,13 @@ export const TRAINING_WEEK: TrainingDay[] = [
   {
     weekday: 'dom',
     label: 'Domingo',
-    academia: workout('dom-academia', 'Recuperação Ativa — Core e Mobilidade', 'Core · Mobilidade', 'academia', [
+    academia: workout('dom-academia', 'Recuperação Ativa · Core e Mobilidade', 'Core · Mobilidade', 'academia', [
       ex('mountain_climber', 3, '30s', 30),
       ex('prancha', 3, '45s', 30),
       ex('dead_bug', 3, '12 cada lado', 30),
       ex('crunch', 3, '20', 30)
     ]),
-    casa: workout('dom-casa', 'Recuperação Ativa em Casa — Core e Mobilidade', 'Core · Mobilidade', 'casa', [
+    casa: workout('dom-casa', 'Recuperação Ativa em Casa · Core e Mobilidade', 'Core · Mobilidade', 'casa', [
       ex('plank', 3, '45s', 30),
       ex('dead_bug', 3, '12 cada lado', 30),
       ex('superman', 3, '15', 30),

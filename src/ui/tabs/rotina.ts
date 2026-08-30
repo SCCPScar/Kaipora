@@ -112,7 +112,7 @@ export const rotinaTab: Tab = {
         </div>
       </section>
 
-      <div class="alert"><span>Se não houver espaço para tudo, uma atividade flexível fica "sem espaço hoje" em vez de sobrepor um compromisso fixo — considera adiá-la.</span></div>
+      <div class="alert"><span>Se não houver espaço para tudo, uma atividade flexível fica "sem espaço hoje" em vez de sobrepor um compromisso fixo, considera adiá-la.</span></div>
     `;
 
     renderAgenda(root, fixed, flexible, settings.wakeTime, settings.sleepTime);
@@ -140,7 +140,7 @@ function blockHTML(b: ScheduleBlock): string {
   if (b.kind === 'unscheduled') {
     return `
     <div class="row" style="cursor:default">
-      <div class="rtxt"><strong>${b.label}</strong><small>Sem espaço hoje (${b.durationMin} min) — considera adiar</small></div>
+      <div class="rtxt"><strong>${b.label}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
       <span class="badge-k">Adiar?</span>
     </div>`;
   }

@@ -1,15 +1,12 @@
 import type { Tab } from '../nav';
 import { todayISO, formatLong, greeting, WEEKDAY_KEYS } from '../../lib/dates';
 import { getTrainingDay } from '../../data/training';
-import { EXERCISES } from '../../data/exercises';
-import { MEALS, allMealOptions, visibleMealOptions } from '../../data/diet';
+import { MEALS, allMealOptions, combinedDayTotals } from '../../data/diet';
 import { HABITS } from '../../data/habits';
 import {
   getDay,
-  toggleMeal,
   getWater,
   setWater,
-  toggleExercise,
   setTrainingDone,
   toggleHabit,
   toggleRoutineItem,
@@ -19,10 +16,7 @@ import {
 } from '../../lib/storage';
 import type { BuiltInModality, Weekday } from '../../lib/types';
 import { refreshActive, switchTab } from '../nav';
-import { openTimerModal } from '../components/timer';
-import { openExerciseModal } from '../components/exerciseModal';
 import { showToast } from '../components/toast';
-import { infoIcon, timerIcon } from '../components/icons';
 import { isDayComplete } from '../../lib/dayCompletion';
 import { computeDaySchedule } from '../../lib/routineSchedule';
 
@@ -84,6 +78,10 @@ export const todayTab: Tab = {
     const justCelebrated = essentialsDone && celebratedDate !== date;
     if (essentialsDone) celebratedDate = date;
 
+    const exercisesDone = (day.exercisesDone[workout.id] ?? []).length;
+    const mealsLogged = MEALS.filter((m) => allMealOptions(m.id).some((o) => day.meals[o.id])).length;
+    const foodTotals = combinedDayTotals(date, day.meals);
+
     root.innerHTML = `
       <div class="ph">
         <h2>${greeting(now)}, Scarllett</h2>
@@ -130,14 +128,17 @@ export const todayTab: Tab = {
 
       <section id="training-card">
         <div class="sec-title">
-          <span>Treino de hoje — ${trainingDay.label}</span>
+          <span>Treino de hoje</span>
           <span class="pill">${workout.focus}</span>
         </div>
         <div class="modality-switch">
           <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-modality="academia">Academia</button>
           <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-modality="casa">Casa</button>
         </div>
-        <div id="today-exercises"></div>
+        <div class="row" id="training-open-row">
+          <div class="rtxt"><strong>${workout.title}</strong><small>${exercisesDone} de ${workout.exercises.length} exercícios feitos</small></div>
+          <span class="badge-k">Abrir</span>
+        </div>
         <div class="sub-row" style="justify-content:space-between">
           <label style="display:flex;align-items:center;gap:8px;margin:0;text-transform:none;font-size:12.5px;color:var(--text-dim)">
             <span class="switch"><input type="checkbox" id="training-done" ${day.training?.done ? 'checked' : ''}/><span class="slider"></span></span>
@@ -155,7 +156,13 @@ export const todayTab: Tab = {
 
       <div class="priority-heading">Opcional</div>
 
-      <section id="meals-card"></section>
+      <section id="meals-card">
+        <div class="sec-title"><span>Alimentação</span><span class="badge-k">${foodTotals.kcal} kcal</span></div>
+        <div class="row" id="meals-open-row">
+          <div class="rtxt"><strong>${mealsLogged} de ${MEALS.length} refeições registadas</strong><small>Toca para abrir o plano completo</small></div>
+          <span class="badge-p">${foodTotals.protein}g prot</span>
+        </div>
+      </section>
 
       <section>
         <div class="sec-title">Hábitos de hoje</div>
@@ -164,11 +171,9 @@ export const todayTab: Tab = {
     `;
 
     renderGlasses(root, day.water, glassGoal);
-    renderExercises(root, workout, date);
     renderRoutine(root, date, day, weekdayKey, settings.wakeTime, settings.sleepTime);
-    renderMeals(root, date, day);
     renderHabits(root, date, day);
-    wireEvents(root, date, glassGoal, workout, weekdayKey);
+    wireEvents(root, date, glassGoal, workout);
   }
 };
 
@@ -189,7 +194,7 @@ function completionBannerHTML(animate: boolean): string {
       ${sparks}
       <div>
         <strong>Essenciais de hoje concluídos.</strong>
-        <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">O resto do dia é bónus — consistência é mais importante que perfeição.</div>
+        <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">O resto do dia é bónus. Consistência é mais importante que perfeição.</div>
       </div>
     </div>`;
 }
@@ -203,30 +208,6 @@ function renderGlasses(root: HTMLElement, water: number, goal: number) {
   el.innerHTML = html;
 }
 
-function renderExercises(root: HTMLElement, workout: ReturnType<typeof getTrainingDay>['academia'], date: string) {
-  const el = root.querySelector('#today-exercises') as HTMLElement;
-  const doneList = getDay(date).exercisesDone[workout.id] ?? [];
-  el.innerHTML = workout.exercises
-    .map((we) => {
-      const ex = EXERCISES[we.exerciseId];
-      if (!ex) return '';
-      const isDone = doneList.includes(we.exerciseId);
-      return `
-      <div class="ex-row ${isDone ? 'done' : ''}" data-exercise="${we.exerciseId}">
-        <div class="ex-main" data-select="${we.exerciseId}">
-          <strong>${ex.name}</strong>
-          <small>${we.sets}x ${we.reps} · descanso ${we.restSeconds}s${we.note ? ' · ' + we.note : ''}</small>
-          ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
-        </div>
-        <div class="ex-actions">
-          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">${infoIcon()}</button>
-          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">${timerIcon()}</button>
-        </div>
-      </div>`;
-    })
-    .join('');
-}
-
 function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof getDay>, weekday: Weekday, wake: string, sleep: string) {
   const el = root.querySelector('#routine-list') as HTMLElement;
   const fixed = getFixedCommitments().filter((f) => f.days.includes(weekday));
@@ -234,7 +215,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
   const blocks = computeDaySchedule(fixed, flexible, wake, sleep);
 
   if (!blocks.length) {
-    el.innerHTML = '<div class="empty">Sem rotina configurada para hoje — define-a na aba Rotina</div>';
+    el.innerHTML = '<div class="empty">Sem rotina configurada para hoje. Define-a na aba Rotina</div>';
     return;
   }
 
@@ -243,7 +224,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
       if (b.kind === 'unscheduled') {
         return `
         <div class="row" style="cursor:default">
-          <div class="rtxt"><strong>${b.label}</strong><small>Sem espaço hoje (${b.durationMin} min) — considera adiar</small></div>
+          <div class="rtxt"><strong>${b.label}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
         </div>`;
       }
       const h = (m: number) => `${Math.floor(m / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}`;
@@ -257,31 +238,6 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
     .join('');
 }
 
-function renderMeals(root: HTMLElement, date: string, day: ReturnType<typeof getDay>) {
-  const el = root.querySelector('#meals-card') as HTMLElement;
-  el.innerHTML = MEALS.map((meal) => {
-    const allOptions = allMealOptions(meal.id);
-    const visibleOptions = visibleMealOptions(meal.id);
-    const totalKcal = allOptions.reduce((s, o) => (day.meals[o.id] ? s + o.kcal : s), 0);
-    const totalP = allOptions.reduce((s, o) => (day.meals[o.id] ? s + o.protein : s), 0);
-    return `
-    <div style="border-bottom:1px solid var(--border)">
-      <div class="sec-title"><span>${meal.name} · ${meal.time}</span><span class="badge-k">~${meal.targetKcal} kcal</span></div>
-      ${visibleOptions
-        .map(
-          (o) => `
-        <div class="row ${day.meals[o.id] ? 'done' : ''}" data-meal="${meal.id}" data-option="${o.id}">
-          <div class="chk"></div>
-          <div class="rtxt"><strong>${o.label}</strong><small>${o.desc}</small></div>
-          <span class="kcal">${o.kcal} kcal</span>
-        </div>`
-        )
-        .join('')}
-      ${totalKcal > 0 ? `<div class="sub-row"><span class="badge-p">${totalP}g prot</span><span class="badge-k">${totalKcal} kcal</span></div>` : ''}
-    </div>`;
-  }).join('');
-}
-
 function renderHabits(root: HTMLElement, date: string, day: ReturnType<typeof getDay>) {
   const el = root.querySelector('#habits-list') as HTMLElement;
   el.innerHTML = HABITS.map(
@@ -293,13 +249,7 @@ function renderHabits(root: HTMLElement, date: string, day: ReturnType<typeof ge
   ).join('');
 }
 
-function wireEvents(
-  root: HTMLElement,
-  date: string,
-  glassGoal: number,
-  workout: ReturnType<typeof getTrainingDay>['academia'],
-  weekdayKey: ReturnType<typeof getTrainingDay>['weekday']
-) {
+function wireEvents(root: HTMLElement, date: string, glassGoal: number, workout: ReturnType<typeof getTrainingDay>['academia']) {
   root.querySelector('#water-plus')?.addEventListener('click', () => {
     const cur = getWater(date);
     if (cur < glassGoal + 4) setWater(date, cur + 1);
@@ -326,37 +276,13 @@ function wireEvents(
     });
   });
 
-  root.querySelector('#today-exercises')?.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const infoBtn = target.closest<HTMLElement>('[data-info]');
-    const timerBtn = target.closest<HTMLElement>('[data-timer]');
-    const selectArea = target.closest<HTMLElement>('[data-select]');
-    if (infoBtn) {
-      const ex = EXERCISES[infoBtn.dataset.info as string];
-      if (ex) openExerciseModal(ex);
-      return;
-    }
-    if (timerBtn) {
-      openTimerModal(Number(timerBtn.dataset.timer));
-      return;
-    }
-    if (selectArea) {
-      toggleExercise(date, workout.id, selectArea.dataset.select as string);
-      refreshActive();
-    }
-  });
+  root.querySelector('#training-open-row')?.addEventListener('click', () => switchTab('treino'));
+  root.querySelector('#meals-open-row')?.addEventListener('click', () => switchTab('dieta'));
 
   root.querySelector('#training-done')?.addEventListener('change', (e) => {
     const checked = (e.target as HTMLInputElement).checked;
     setTrainingDone(date, modality, workout.id, checked);
     if (checked) showToast('Treino de hoje registado!');
-    refreshActive();
-  });
-
-  root.querySelector('#meals-card')?.addEventListener('click', (e) => {
-    const row = (e.target as HTMLElement).closest<HTMLElement>('[data-meal]');
-    if (!row) return;
-    toggleMeal(date, row.dataset.option as string);
     refreshActive();
   });
 
@@ -374,7 +300,6 @@ function wireEvents(
     refreshActive();
   });
 
-  void weekdayKey;
   // shortcut: tapping the hero opens Progresso for quick weight entry
   root.querySelector('.hero')?.addEventListener('click', () => switchTab('progresso'));
 }
