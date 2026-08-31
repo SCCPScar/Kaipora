@@ -8,6 +8,14 @@ describe('food database (Contador de Calorias)', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('covers real-world takeaway/fast-food and traditional Portuguese dishes, not just the curated meal plan', () => {
+    // The user explicitly asked for these so Diário Livre can log what she
+    // actually ate, independent of the "sem carne vermelha" meal plan.
+    for (const id of ['fd_frango_frito', 'fd_nuggets', 'fd_feijoada']) {
+      expect(getFoodDatabaseItem(id), `missing expected item ${id}`).toBeDefined();
+    }
+  });
+
   it('never includes red meat, matching the app-wide dietary restriction', () => {
     const redMeatWords = ['vaca', 'bovina', 'porco', 'novilho', 'borrego', 'bife'];
     for (const item of FOOD_DATABASE) {
@@ -26,6 +34,12 @@ describe('food database (Contador de Calorias)', () => {
   it('returns nothing for an empty query rather than the whole database', () => {
     expect(searchFoodDatabase('')).toEqual([]);
     expect(searchFoodDatabase('   ')).toEqual([]);
+  });
+
+  it('searches accent-insensitively, so a phone keyboard without accents still finds matches', () => {
+    expect(searchFoodDatabase('feijao').some((f) => f.id === 'fd_feijao_preto')).toBe(true);
+    expect(searchFoodDatabase('ananas').some((f) => f.id === 'fd_ananas')).toBe(true);
+    expect(searchFoodDatabase('pao').some((f) => f.id === 'fd_pao_forma')).toBe(true);
   });
 
   it('looks up a single item by id', () => {

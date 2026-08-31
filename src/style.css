@@ -85,7 +85,7 @@
   --secondary: #cd8f39;
   --secondary-glow: #d8973c;
   --accent: #fd9bb7;
-  --accent-glow: #feb4c9;
+  --accent-glow: #9c1c40;
   --gold: #cc8829;
   --green: #cc8829;
 
@@ -130,7 +130,7 @@
     --secondary: #cd8f39;
     --secondary-glow: #d8973c;
     --accent: #fd9bb7;
-    --accent-glow: #feb4c9;
+    --accent-glow: #9c1c40;
     --gold: #cc8829;
     --green: #cc8829;
     --gradient-main: linear-gradient(135deg, #ad2831 0%, #d8973c 100%);
@@ -301,8 +301,8 @@ section, .card {
 .wcard-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .wcard-lbl { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--electric-glow); }
 .wcard-ml { font-size: 13px; font-weight: 800; color: var(--text-dim); }
-.glasses { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-.glass { flex: 1; min-width: 24px; height: 28px; border-radius: 6px; border: 2px solid var(--border-strong); background: var(--bg-elevated); cursor: pointer; transition: all .15s; }
+.glasses { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
+.glass { flex: 0 0 30px; width: 30px; height: 28px; border-radius: 6px; border: 2px solid var(--border-strong); background: var(--bg-elevated); cursor: pointer; transition: all .15s; }
 .glass.full { background: var(--gradient-main); border-color: transparent; box-shadow: 0 0 8px var(--tint-secondary-glow); }
 .wbar { height: 8px; border-radius: 4px; background: var(--bg-elevated); overflow: hidden; }
 .wbar-fill { height: 100%; background: var(--gradient-main); border-radius: 4px; transition: width .3s; }
