@@ -2,8 +2,8 @@ import type { Tab } from '../nav';
 import { getChallenges, addChallenge, deleteChallenge } from '../../lib/storage';
 import { challengeStats } from '../../lib/challengeStats';
 import { essentialsCompletedFlags } from '../../lib/dayHistory';
-import { todayISO } from '../../lib/dates';
-import { refreshActive } from '../nav';
+import { todayISO, addDays, toISO, fromISO } from '../../lib/dates';
+import { refreshActive, switchTab } from '../nav';
 import { showToast } from '../components/toast';
 
 let addingChallenge = false;
@@ -19,6 +19,15 @@ export const desafiosTab: Tab = {
         <h2>Desafios</h2>
         <div class="ph-title">Kaipora 75 e outros desafios pessoais</div>
         <div class="ph-sub">Um dia falhado nunca reinicia o desafio. A contagem continua</div>
+      </div>
+
+      <div class="alert">
+        <span>
+          <strong>Como funciona o Kaipora 75:</strong> é um desafio de 75 dias em que cada dia conta como
+          cumprido quando fechas os teus Essenciais (água + treino) no ecrã Hoje. Não há regras extra
+          para memorizar. Se te esqueceres um dia, esse dia simplesmente não conta: o desafio não reinicia
+          nem termina antes do prazo, continua sempre a contar até chegares aos 75 dias.
+        </span>
       </div>
 
       <section>
@@ -42,6 +51,9 @@ function renderChallenges(root: HTMLElement) {
         .map((c, i) => {
           const flags = essentialsCompletedFlags(c.startDate, today);
           const stats = challengeStats(flags, c.totalDays);
+          const lastDayOfChallenge = toISO(addDays(fromISO(c.startDate), c.totalDays - 1));
+          const todayCountsTowardChallenge = !stats.finished && today >= c.startDate && today <= lastDayOfChallenge;
+          const todayDone = todayCountsTowardChallenge ? flags[flags.length - 1] : false;
           return `
       <div class="day-card open">
         <div class="day-head" style="cursor:default">
@@ -52,6 +64,14 @@ function renderChallenges(root: HTMLElement) {
           <button class="log-del" data-del-challenge="${i}">✕</button>
         </div>
         <div class="day-body">
+          ${
+            todayCountsTowardChallenge
+              ? `<div class="row" data-goto-hoje>
+                  <div class="rtxt"><strong>Hoje</strong><small>${todayDone ? 'Essenciais já cumpridos: o dia conta' : 'Essenciais ainda por cumprir'}</small></div>
+                  <span class="badge-${todayDone ? 'p' : 'k'}">${todayDone ? 'Cumprido' : 'Ir para Hoje'}</span>
+                </div>`
+              : ''
+          }
           <div class="sub-row">
             <span class="badge-p">${stats.daysCompleted}/${c.totalDays} cumpridos</span>
             <span class="badge-k">${stats.daysRemaining} dia(s) restantes</span>
@@ -86,7 +106,15 @@ function renderChallenges(root: HTMLElement) {
 
 function wireEvents(root: HTMLElement) {
   root.querySelector('#challenge-list')?.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-del-challenge]');
+    const target = e.target as HTMLElement;
+
+    const gotoHoje = target.closest<HTMLElement>('[data-goto-hoje]');
+    if (gotoHoje) {
+      switchTab('hoje');
+      return;
+    }
+
+    const btn = target.closest<HTMLElement>('[data-del-challenge]');
     if (!btn) return;
     if (!confirm('Remover este desafio? O teu histórico de dias mantém-se guardado.')) return;
     deleteChallenge(Number(btn.dataset.delChallenge));
