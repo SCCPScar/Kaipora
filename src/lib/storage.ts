@@ -5,7 +5,7 @@ import type { FixedCommitment, FlexibleActivity } from '../data/types-routine';
 import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
 import type { CustomExercise, CustomWorkout, WorkoutExercise } from '../data/types-training';
 import type { Skill, SkillSession, Reward } from '../data/types-skills';
-import type { Challenge } from '../data/types-challenges';
+import type { Challenge, ChallengeDayLog } from '../data/types-challenges';
 
 export const PFX = 'vp';
 
@@ -608,4 +608,35 @@ export function addChallenge(entry: Omit<Challenge, 'updatedAt' | 'deleted'>): v
 
 export function deleteChallenge(visibleIndex: number): void {
   rawSet(`${PFX}_challenges`, withSoftDeleted(getChallengesRaw(), visibleIndex, (a, b) => a.id === b.id));
+}
+
+// ---- Kaipora 75: per-day manual check-ins (dieta + atividade extra) ----
+
+function getChallengeDayLogsRaw(): ChallengeDayLog[] {
+  return rawGet<ChallengeDayLog[]>(`${PFX}_challenge_day_logs`, []);
+}
+
+export function getChallengeDayLogs(challengeId?: string): ChallengeDayLog[] {
+  const all = visible(getChallengeDayLogsRaw());
+  return challengeId ? all.filter((l) => l.challengeId === challengeId) : all;
+}
+
+export function getChallengeDayLog(challengeId: string, date: string): { dietOk: boolean; extraActivity: boolean } {
+  const found = getChallengeDayLogs(challengeId).find((l) => l.date === date);
+  return { dietOk: found?.dietOk ?? false, extraActivity: found?.extraActivity ?? false };
+}
+
+/** Edit-like claimReward/replaceCustomWorkoutExercises: tombstone the old
+ * log for this day (if any) and add the patched version, matched by id. */
+export function setChallengeDayLog(
+  challengeId: string,
+  date: string,
+  patch: Partial<{ dietOk: boolean; extraActivity: boolean }>
+): void {
+  const id = `${challengeId}_${date}`;
+  const raw = getChallengeDayLogsRaw();
+  const current = getChallengeDayLog(challengeId, date);
+  const idx = visible(raw).findIndex((l) => l.id === id);
+  const tombstoned = idx >= 0 ? withSoftDeleted(raw, idx, (a, b) => a.id === b.id) : raw;
+  rawSet(`${PFX}_challenge_day_logs`, withAdded(tombstoned, { id, challengeId, date, ...current, ...patch }));
 }

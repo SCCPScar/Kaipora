@@ -462,6 +462,9 @@ label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim
 .dot-water { background: var(--electric); }
 .dot-food { background: var(--gold); }
 .dot-train { background: var(--burgundy-glow); }
+.dot-skill { background: var(--primary); }
+.dot-diet { background: var(--gold); }
+.cal-day.k75-done { background: var(--tint-secondary-low); border-color: var(--secondary); color: var(--text); }
 
 .week-row { display: flex; gap: 6px; padding: 10px 14px; }
 .wday { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 2px; border-radius: 9px; background: var(--bg-elevated); border: 1px solid transparent; cursor: pointer; }

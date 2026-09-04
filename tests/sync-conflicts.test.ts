@@ -7,6 +7,7 @@ import type { FoodLogEntry } from '../src/data/types-diet';
 import type { CustomWorkout } from '../src/data/types-training';
 import type { SkillSession } from '../src/data/types-skills';
 import type { JournalEntry } from '../src/lib/types';
+import type { ChallengeDayLog } from '../src/data/types-challenges';
 
 // These exercise sync.ts's reconcile() directly against seeded localStorage,
 // simulating what happens when this device processes one row pulled from
@@ -238,5 +239,33 @@ describe('reconcile — vp_journal (Diário) never loses an entry written offlin
     expect(merged).toHaveLength(3);
     expect(merged.some((e) => e.text === 'Entrada B (offline)')).toBe(true);
     expect(merged.some((e) => e.text === 'Entrada C (outro dispositivo)')).toBe(true);
+  });
+});
+
+describe('reconcile — vp_challenge_day_logs unions Kaipora 75 day check-ins across devices', () => {
+  it('never loses a day log (dieta/atividade) written offline on either device', () => {
+    const local: ChallengeDayLog[] = [{ id: 'ch1_2026-01-01', challengeId: 'ch1', date: '2026-01-01', dietOk: true, extraActivity: false, updatedAt: 100 }];
+    rawSet('vp_challenge_day_logs', local);
+    markTouched('vp_challenge_day_logs', 100);
+
+    // Local logs a new day offline at T=200.
+    rawSet('vp_challenge_day_logs', [
+      ...local,
+      { id: 'ch1_2026-01-02', challengeId: 'ch1', date: '2026-01-02', dietOk: false, extraActivity: true, updatedAt: 200 }
+    ]);
+    markTouched('vp_challenge_day_logs', 200);
+
+    // Remote logs a different day concurrently, pushed at T=250.
+    const remote: ChallengeDayLog[] = [
+      ...local,
+      { id: 'ch1_2026-01-03', challengeId: 'ch1', date: '2026-01-03', dietOk: true, extraActivity: true, updatedAt: 250 }
+    ];
+
+    const result = reconcile('vp_challenge_day_logs', remote, 250, 100);
+    expect(result.isMerge).toBe(true);
+    const merged = result.value as ChallengeDayLog[];
+    expect(merged).toHaveLength(3);
+    expect(merged.some((l) => l.date === '2026-01-02' && l.extraActivity)).toBe(true);
+    expect(merged.some((l) => l.date === '2026-01-03' && l.dietOk)).toBe(true);
   });
 });

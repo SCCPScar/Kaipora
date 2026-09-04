@@ -58,7 +58,10 @@ import {
   deleteJournalEntry,
   getChallenges,
   addChallenge,
-  deleteChallenge
+  deleteChallenge,
+  getChallengeDayLog,
+  getChallengeDayLogs,
+  setChallengeDayLog
 } from '../src/lib/storage';
 import { touchedAt } from '../src/lib/meta';
 
@@ -541,6 +544,37 @@ describe('desafios: Kaipora 75 e outros desafios pessoais', () => {
     deleteChallenge(0);
     expect(getChallenges()).toHaveLength(0);
     expect(getWater('2026-01-01')).toBe(8); // untouched
+  });
+});
+
+describe('Kaipora 75: per-day manual check-ins (dieta + atividade extra)', () => {
+  it('defaults to false/false for a day with no log yet', () => {
+    expect(getChallengeDayLog('ch1', '2026-01-01')).toEqual({ dietOk: false, extraActivity: false });
+  });
+
+  it('stores a patch and reads it back, leaving other fields untouched', () => {
+    setChallengeDayLog('ch1', '2026-01-01', { dietOk: true });
+    expect(getChallengeDayLog('ch1', '2026-01-01')).toEqual({ dietOk: true, extraActivity: false });
+
+    setChallengeDayLog('ch1', '2026-01-01', { extraActivity: true });
+    expect(getChallengeDayLog('ch1', '2026-01-01')).toEqual({ dietOk: true, extraActivity: true });
+  });
+
+  it('edits by tombstoning the old log and adding the patched one, matched by id', () => {
+    setChallengeDayLog('ch1', '2026-01-01', { dietOk: true });
+    setChallengeDayLog('ch1', '2026-01-01', { dietOk: false });
+    expect(getChallengeDayLogs('ch1')).toHaveLength(1);
+    expect(getChallengeDayLogs('ch1')[0].dietOk).toBe(false);
+  });
+
+  it('keeps logs for different challenges and different days independent', () => {
+    setChallengeDayLog('ch1', '2026-01-01', { dietOk: true });
+    setChallengeDayLog('ch2', '2026-01-01', { dietOk: false, extraActivity: true });
+    setChallengeDayLog('ch1', '2026-01-02', { extraActivity: true });
+
+    expect(getChallengeDayLog('ch1', '2026-01-01')).toEqual({ dietOk: true, extraActivity: false });
+    expect(getChallengeDayLog('ch2', '2026-01-01')).toEqual({ dietOk: false, extraActivity: true });
+    expect(getChallengeDayLogs('ch1')).toHaveLength(2);
   });
 });
 
