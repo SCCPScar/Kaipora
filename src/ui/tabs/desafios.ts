@@ -99,7 +99,7 @@ function renderChallenges(root: HTMLElement) {
         <div class="day-body">
           ${
             c.kind === 'kaipora75'
-              ? `<div class="form-row" style="padding-top:0"><button class="btn sm ghost" data-open-calendar="${c.id}">Ver os 75 dias</button></div>`
+              ? `<div class="form-row"><button class="btn sm ghost" data-open-calendar="${c.id}">Ver os 75 dias</button></div>`
               : todayCountsTowardChallenge
                 ? `<div class="row" data-goto-hoje>
                     <div class="rtxt"><strong>Hoje</strong><small>${todayDone ? 'Essenciais já cumpridos: o dia conta' : 'Essenciais ainda por cumprir'}</small></div>
