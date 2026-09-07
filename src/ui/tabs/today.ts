@@ -26,28 +26,6 @@ let modality: BuiltInModality = 'academia';
  * water adjusted) don't replay it on every click once the day is done. */
 let celebratedDate: string | null = null;
 
-function computeProgress(date: string): { done: number; total: number } {
-  const day = getDay(date);
-  const settings = getSettings();
-  const glassGoal = Math.max(1, Math.round(settings.waterGoalMl / 250));
-  let done = 0;
-  let total = 0;
-
-  total += MEALS.length;
-  done += MEALS.filter((m) => m.options.some((o) => day.meals[o.id])).length;
-
-  total += 1;
-  if (day.water >= glassGoal) done += 1;
-
-  total += 1;
-  if (day.training?.done) done += 1;
-
-  total += HABITS.length;
-  done += HABITS.filter((h) => day.habits[h.id]).length;
-
-  return { done, total };
-}
-
 export const todayTab: Tab = {
   id: 'hoje',
   label: 'Hoje',
@@ -61,11 +39,6 @@ export const todayTab: Tab = {
     const weekdayKey = WEEKDAY_KEYS[now.getDay()] as ReturnType<typeof getTrainingDay>['weekday'];
     const trainingDay = getTrainingDay(weekdayKey);
     const workout = trainingDay[modality];
-
-    const { done, total } = computeProgress(date);
-    const pct = total ? Math.round((done / total) * 100) : 0;
-    const RING_C = 2 * Math.PI * 32;
-    const offset = RING_C - (pct / 100) * RING_C;
 
     const glassGoal = Math.max(1, Math.round(settings.waterGoalMl / 250));
     const mlEach = Math.round(settings.waterGoalMl / glassGoal);
@@ -87,26 +60,6 @@ export const todayTab: Tab = {
         <h2>${greeting(now)}, Scarllett</h2>
         <div class="ph-title">Hoje</div>
         <div class="ph-sub">${formatLong(now)}</div>
-      </div>
-
-      <div class="hero">
-        <div class="hero-row">
-          <div class="ring-wrap">
-            <svg width="72" height="72" viewBox="0 0 72 72">
-              <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" style="stop-color:var(--primary)"/><stop offset="1" style="stop-color:var(--secondary)"/>
-              </linearGradient></defs>
-              <circle class="ring-bg" cx="36" cy="36" r="32"/>
-              <circle class="ring-fg" cx="36" cy="36" r="32" stroke-dasharray="${RING_C}" stroke-dashoffset="${offset}"/>
-            </svg>
-            <div class="ring-pct">${pct}%</div>
-          </div>
-          <div class="hero-txt">
-            <strong>Progresso do dia</strong>
-            <span>${done} de ${total} itens concluídos</span>
-            <span>Foco: recomposição corporal, não só a balança</span>
-          </div>
-        </div>
       </div>
 
       ${essentialsDone ? completionBannerHTML(justCelebrated) : ''}
@@ -299,7 +252,4 @@ function wireEvents(root: HTMLElement, date: string, glassGoal: number, workout:
     toggleRoutineItem(date, row.dataset.routine as string);
     refreshActive();
   });
-
-  // shortcut: tapping the hero opens Progresso for quick weight entry
-  root.querySelector('.hero')?.addEventListener('click', () => switchTab('progresso'));
 }

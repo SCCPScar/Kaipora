@@ -39,7 +39,6 @@
   --glow-3: rgba(91, 28, 46, 0.2);
 
   --bg-translucent: rgba(37, 16, 77, 0.86);
-  --ring-track: rgba(255, 255, 255, 0.08);
   --tint-primary-low: rgba(194, 40, 107, 0.12);
   --tint-primary-med: rgba(194, 40, 107, 0.22);
   --tint-primary-strong: rgba(194, 40, 107, 0.32);
@@ -99,7 +98,6 @@
   --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(173, 40, 49, 0.18);
 
   --bg-translucent: rgba(243, 230, 189, 0.86);
-  --ring-track: rgba(28, 29, 36, 0.08);
   --tint-primary-low: rgba(173, 40, 49, 0.08);
   --tint-primary-med: rgba(173, 40, 49, 0.16);
   --tint-primary-strong: rgba(173, 40, 49, 0.26);
@@ -140,7 +138,6 @@
     --glow-3: rgba(253, 155, 183, 0.16);
     --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(173, 40, 49, 0.18);
     --bg-translucent: rgba(243, 230, 189, 0.86);
-    --ring-track: rgba(28, 29, 36, 0.08);
     --tint-primary-low: rgba(173, 40, 49, 0.08);
     --tint-primary-med: rgba(173, 40, 49, 0.16);
     --tint-primary-strong: rgba(173, 40, 49, 0.26);
@@ -288,15 +285,6 @@ section, .card {
   0% { opacity: 1; transform: translate(0, 0) scale(1); }
   100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
 }
-
-.hero { background: linear-gradient(160deg, var(--tint-primary-med), var(--tint-secondary-low)); margin: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border-strong); padding: 16px; }
-.hero-row { display: flex; align-items: center; gap: 16px; }
-.ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
-.ring-bg { fill: none; stroke: var(--ring-track); stroke-width: 6; }
-.ring-fg { fill: none; stroke: url(#ringGrad); stroke-width: 6; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset .4s ease; }
-.ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; }
-.hero-txt strong { display: block; font-size: 16px; font-weight: 900; }
-.hero-txt span { display: block; font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 
 .wcard { background: var(--bg-card); margin: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border); padding: 14px 16px; }
 .wcard-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -449,6 +437,8 @@ label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim
 .stat small { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: .5px; }
 
 .meds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 14px; }
+.meds-grid > div { min-width: 0; }
+.meds-grid .finp { width: 100%; min-width: 0; }
 
 /* ---- calendar ---- */
 .cal-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
