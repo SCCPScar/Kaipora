@@ -222,17 +222,16 @@ function renderCalendarView(root: HTMLElement, c: Challenge) {
       continue;
     }
     const status = kaipora75DayStatus(c.id, iso);
+    const doneCount = [status.water, status.training, status.skill, status.diet].filter(Boolean).length;
+    const pct = Math.round((doneCount / 4) * 100);
     const cls = ['cal-day'];
     if (iso === todayIso) cls.push('today');
     if (status.allDone) cls.push('k75-done');
     cells.push(`
       <div class="${cls.join(' ')}" data-k75-date="${iso}">
-        <span>${d}</span>
-        <div class="cal-dots">
-          ${status.water ? '<span class="cal-dot dot-water"></span>' : ''}
-          ${status.training ? '<span class="cal-dot dot-train"></span>' : ''}
-          ${status.skill ? '<span class="cal-dot dot-skill"></span>' : ''}
-          ${status.diet ? '<span class="cal-dot dot-diet"></span>' : ''}
+        <div class="k75-ring-wrap" style="--pct:${pct}">
+          <div class="k75-ring"></div>
+          <span class="k75-daynum">${d}</span>
         </div>
       </div>`);
   }
@@ -240,33 +239,33 @@ function renderCalendarView(root: HTMLElement, c: Challenge) {
   root.innerHTML = `
     <div class="ph">
       <button class="btn sm ghost" id="k75-back">‹ Voltar aos desafios</button>
-      <h2>${c.title}</h2>
+      <div class="ph-title" style="margin-top:10px">${c.title}</div>
       <div class="ph-sub">Toca num dia para veres e registares o que fizeste nesse dia</div>
     </div>
 
     <div class="alert">
       <span>
         <strong>Regras de cada dia:</strong> água até à meta, o treino do dia (ou outra atividade física),
-        uma sessão de qualquer Habilidade, e a dieta sem exceções nem álcool. Um dia só fica marcado como
-        cumprido quando os quatro estão feitos nesse mesmo dia. Um dia falhado não reinicia o desafio.
+        uma sessão de qualquer Habilidade, e a dieta sem exceções nem álcool. O anel de cada dia enche à
+        medida que cumpres cada regra, e fica cheio quando as quatro estão feitas. Um dia falhado não
+        reinicia o desafio.
       </span>
     </div>
 
-    <section>
-      <div class="cal-head">
-        <button class="cal-nav" id="k75-prev">‹</button>
-        <span class="pill">${MONTH_NAMES[calViewMonth]} de ${calViewYear}</span>
-        <button class="cal-nav" id="k75-next">›</button>
+    <section class="k75-cal-card">
+      <div class="k75-cal-header">
+        <div>
+          <div class="k75-cal-month">${MONTH_NAMES[calViewMonth]}</div>
+          <div class="k75-cal-year">${calViewYear}</div>
+        </div>
+        <div class="k75-cal-nav">
+          <button class="cal-nav" id="k75-prev">‹</button>
+          <button class="cal-nav" id="k75-next">›</button>
+        </div>
       </div>
       <div class="cal-grid">
         ${DAY_ABBR.map((a) => `<div class="cal-dow">${a}</div>`).join('')}
         ${cells.join('')}
-      </div>
-      <div class="sub-row" style="padding:0 16px 14px;flex-wrap:wrap">
-        <span class="badge-k">● água</span>
-        <span class="badge-k">● treino/atividade</span>
-        <span class="badge-k">● habilidade</span>
-        <span class="badge-k">● dieta</span>
       </div>
     </section>
   `;

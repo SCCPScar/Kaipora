@@ -462,9 +462,27 @@ label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim
 .dot-water { background: var(--electric); }
 .dot-food { background: var(--gold); }
 .dot-train { background: var(--burgundy-glow); }
-.dot-skill { background: var(--primary); }
-.dot-diet { background: var(--gold); }
-.cal-day.k75-done { background: var(--tint-secondary-low); border-color: var(--secondary); color: var(--text); }
+
+/* ---- Kaipora 75: 75-day calendar, styled as its own little poster rather
+   than a plain grid — big month type, one ring per day instead of a row of
+   status dots, filling as the day's rules get met. ---- */
+.k75-cal-card { background: var(--bg-card); margin: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-glow); padding: 4px 0 14px; overflow: hidden; }
+.k75-cal-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding: 18px 18px 14px; }
+.k75-cal-month { font-family: Georgia, 'Times New Roman', serif; font-size: 32px; font-weight: 900; line-height: 1; letter-spacing: -0.5px; text-transform: capitalize; background: var(--gradient-main); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.k75-cal-year { font-size: 11px; font-weight: 700; color: var(--text-faint); letter-spacing: .3px; margin-top: 4px; }
+.k75-cal-nav { display: flex; gap: 6px; }
+.k75-cal-card .cal-day { background: none; border-color: transparent; }
+.k75-cal-card .cal-day.today { border-color: var(--electric); }
+.k75-ring-wrap { position: relative; width: 30px; height: 30px; }
+.k75-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(var(--secondary) calc(var(--pct, 0) * 1%), var(--tint-secondary-low) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+}
+.k75-daynum { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-dim); }
+.cal-day.k75-done .k75-ring { background: var(--gradient-main); }
+.cal-day.k75-done .k75-daynum { color: var(--text); font-weight: 900; }
 
 .week-row { display: flex; gap: 6px; padding: 10px 14px; }
 .wday { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 2px; border-radius: 9px; background: var(--bg-elevated); border: 1px solid transparent; cursor: pointer; }
