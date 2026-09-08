@@ -46,6 +46,14 @@ export interface JournalEntry extends Tombstonable {
   text: string;
 }
 
+/** A single free-text intention set for a given week, keyed by the ISO date
+ * of that week's start (Sunday) — see startOfWeek in dates.ts. One entry
+ * per week: setting a new one for the same week replaces the old text. */
+export interface WeeklyIntention extends Tombstonable {
+  weekKey: string;
+  text: string;
+}
+
 export interface DayRecord {
   meals: Record<string, boolean>;
   water: number;
@@ -59,6 +67,9 @@ export interface DayRecord {
 export type ThemePreference = 'system' | 'dark' | 'light';
 
 export interface Settings {
+  /** Shown in greetings (Hoje, Progresso) instead of a hardcoded name — empty
+   * means no name is inserted at all. */
+  userName: string;
   waterGoalMl: number;
   calorieGoal: number;
   proteinGoal: number;
@@ -67,6 +78,9 @@ export interface Settings {
   goalWeightKg: number;
   heightCm: number;
   notificationsEnabled: boolean;
+  /** `water` is kept only for backward-compat with existing saved settings —
+   * the water reminder now fires based on how much is still missing to the
+   * goal, not a fixed schedule (see notifications.ts). */
   reminderTimes: { water: string[]; meals: string[]; training: string[] };
   reducedMotion: boolean;
   theme: ThemePreference;
@@ -81,6 +95,7 @@ export interface Settings {
 // carbGoal/fatGoal derived from the average carbs/fat across all options of
 // each meal slot in src/data/diet.ts, the same way calorieGoal/proteinGoal were.
 export const DEFAULT_SETTINGS: Settings = {
+  userName: '',
   waterGoalMl: 2000,
   calorieGoal: 1615,
   proteinGoal: 135,

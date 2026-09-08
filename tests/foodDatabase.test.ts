@@ -8,6 +8,18 @@ describe('food database (Contador de Calorias)', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('embeds the TACO table (500+ whole foods) offline, on top of the curated list', () => {
+    expect(FOOD_DATABASE.length).toBeGreaterThan(500);
+    const taco = getFoodDatabaseItem('taco_1');
+    expect(taco?.label).toContain('Arroz');
+    expect(taco?.kcal).toBeGreaterThan(0);
+  });
+
+  it('caps search results so a broad TACO-heavy query does not flood the list', () => {
+    const results = searchFoodDatabase('a'); // matches virtually everything
+    expect(results.length).toBeLessThanOrEqual(20);
+  });
+
   it('covers real-world takeaway/fast-food and traditional Portuguese dishes, not just the curated meal plan', () => {
     // The user explicitly asked for these so Diário Livre can log what she
     // actually ate, independent of the "sem carne vermelha" meal plan.
@@ -17,11 +29,15 @@ describe('food database (Contador de Calorias)', () => {
   });
 
   it('never includes red meat, matching the app-wide dietary restriction', () => {
-    const redMeatWords = ['vaca', 'bovina', 'porco', 'novilho', 'borrego', 'bife'];
+    // Whole-word matches only: a substring check would also flag "Leite,
+    // de vaca" (cow's milk) or "Alfavaca" (an herb) as red meat, which
+    // they obviously aren't — see the TACO import filter in
+    // src/data/foodDatabase.ts for the full exclusion list this mirrors.
+    const redMeatWords = ['bovina', 'bovino', 'porco', 'novilho', 'borrego', 'bife', 'cordeiro', 'vitela', 'vaca atolada'];
     for (const item of FOOD_DATABASE) {
       const text = item.label.toLowerCase();
       for (const word of redMeatWords) {
-        expect(text).not.toContain(word);
+        expect(text).not.toMatch(new RegExp(`\\b${word}\\b`, 'i'));
       }
     }
   });

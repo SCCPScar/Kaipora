@@ -199,13 +199,3 @@ export function getWorkoutById(workoutId: string): Workout | undefined {
   }
   return undefined;
 }
-
-/** All workouts (academia + casa) tagged as part of the dedicated glute program. */
-export function getGluteWorkouts(): Workout[] {
-  const out: Workout[] = [];
-  for (const day of TRAINING_WEEK) {
-    if (day.academia.tags?.includes('gluteos')) out.push(day.academia);
-    if (day.casa.tags?.includes('gluteos')) out.push(day.casa);
-  }
-  return out;
-}

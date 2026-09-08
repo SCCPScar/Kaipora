@@ -3,6 +3,7 @@ import { getJournalEntries, addJournalEntry, deleteJournalEntry } from '../../li
 import { todayISO } from '../../lib/dates';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
+import { escapeHtml } from '../../lib/sanitize';
 
 export const diarioTab: Tab = {
   id: 'diario',
@@ -45,8 +46,8 @@ function renderJournal(root: HTMLElement) {
         .map(
           (entry, i) => `
       <div class="log-item" style="align-items:flex-start">
-        <div class="log-txt"><div class="log-date">${entry.date}</div><strong style="font-weight:400;white-space:pre-wrap">${entry.text}</strong></div>
-        <button class="log-del" data-del-journal="${i}">✕</button>
+        <div class="log-txt"><div class="log-date">${entry.date}</div><strong style="font-weight:400;white-space:pre-wrap">${escapeHtml(entry.text)}</strong></div>
+        <button class="log-del" data-del-journal="${i}" aria-label="Remover">✕</button>
       </div>`
         )
         .join('')

@@ -1,9 +1,12 @@
-// Base de dados local de alimentos comuns para o Contador de Calorias —
+import tacoData from './taco-data.json';
+
+// Base de dados local para o Contador de Calorias, com duas camadas:
+// a TACO (abaixo) para alimentos in natura, e esta lista curada para
+// pratos preparados, comida rápida e produtos que a TACO não cobre —
 // valores de referência por 100g, na mesma linha dos macros já usados no
-// resto do plano alimentar (src/data/diet.ts): estimativas de composição
-// nutricional padrão para alimentos genéricos, não uma tabela nutricional
-// certificada nem dados de um produto específico. Fica local e estática de
-// propósito para funcionar sem ligação à internet.
+// resto do plano alimentar (src/data/diet.ts). Fica local e estática de
+// propósito para funcionar sem ligação à internet (ver openFoodFacts.ts
+// para a camada online de produtos de marca).
 export interface FoodDatabaseItem {
   id: string;
   label: string;
@@ -13,7 +16,22 @@ export interface FoodDatabaseItem {
   fat: number;
 }
 
-export const FOOD_DATABASE: FoodDatabaseItem[] = [
+/**
+ * Tabela Brasileira de Composição de Alimentos (TACO), 4ª edição,
+ * NEPA/UNICAMP — 502 alimentos in natura (arroz, frutas, legumes, peixe,
+ * aves, laticínios, etc.), embutidos offline como decidido no redesign.
+ * Dados em JSON via https://github.com/marcelosanto/tabela_taco (MIT).
+ *
+ * Itens de carne bovina e suína e seus derivados (carne bovina em todos os
+ * cortes, porco, presunto, toucinho, mortadela, salame, quibe, hambúrguer
+ * bovino, bife, "vaca atolada", etc. — 95 no total) foram excluídos na
+ * conversão do ficheiro original, coerente com a restrição "sem carne
+ * vermelha" já aplicada ao resto da app (ver o teste correspondente em
+ * tests/foodDatabase.test.ts).
+ */
+const TACO_DATABASE: FoodDatabaseItem[] = tacoData as FoodDatabaseItem[];
+
+const CURATED_DATABASE: FoodDatabaseItem[] = [
   { id: 'fd_arroz_branco', label: 'Arroz branco cozido', kcal: 130, protein: 2.7, carbs: 28, fat: 0.3 },
   { id: 'fd_arroz_integral', label: 'Arroz integral cozido', kcal: 123, protein: 2.7, carbs: 26, fat: 1.0 },
   { id: 'fd_massa', label: 'Massa cozida', kcal: 131, protein: 5.0, carbs: 25, fat: 1.1 },
@@ -119,7 +137,12 @@ export const FOOD_DATABASE: FoodDatabaseItem[] = [
   { id: 'fd_ervilhas', label: 'Ervilhas cozidas', kcal: 84, protein: 5.4, carbs: 14, fat: 0.4 }
 ];
 
-/** Strips accents so "acucar" still finds "açúcar": with 90+ entries now,
+// Curated entries first: they're hand-picked for relevance (fast food,
+// Portuguese dishes TACO doesn't have), so a capped search should surface
+// them before the many near-duplicate cru/cozido TACO variants.
+export const FOOD_DATABASE: FoodDatabaseItem[] = [...CURATED_DATABASE, ...TACO_DATABASE];
+
+/** Strips accents so "acucar" still finds "açúcar": with 500+ entries now,
  * users typing quickly on a phone shouldn't need exact diacritics. */
 function normalize(s: string): string {
   return s
@@ -128,10 +151,15 @@ function normalize(s: string): string {
     .toLowerCase();
 }
 
+const MAX_RESULTS = 20;
+
+/** Capped at MAX_RESULTS: with the TACO table merged in, a broad query
+ * like "frango" can otherwise match dozens of near-duplicate cru/cozido
+ * variants and flood the list. */
 export function searchFoodDatabase(query: string): FoodDatabaseItem[] {
   const q = normalize(query.trim());
   if (!q) return [];
-  return FOOD_DATABASE.filter((f) => normalize(f.label).includes(q));
+  return FOOD_DATABASE.filter((f) => normalize(f.label).includes(q)).slice(0, MAX_RESULTS);
 }
 
 export function getFoodDatabaseItem(id: string): FoodDatabaseItem | undefined {

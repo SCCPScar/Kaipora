@@ -6,15 +6,17 @@ import { todayISO } from '../../lib/dates';
 import { drawLineChart } from './chart';
 import { showToast } from './toast';
 import { EXERCISE_DIAGRAMS } from '../../data/exerciseDiagrams';
+import { escapeHtml } from '../../lib/sanitize';
 
 export function openExerciseModal(ex: ExerciseLike): void {
   const diagram = EXERCISE_DIAGRAMS[ex.id];
-  openModal(
+  let close: () => void;
+  close = openModal(
     `
-    <button class="modal-close" data-close></button>
-    <h3>${ex.name}</h3>
+    <button class="modal-close" data-close aria-label="Fechar"></button>
+    <h3>${escapeHtml(ex.name)}</h3>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
-      ${ex.muscles.map((m) => `<span class="pill">${m}</span>`).join('')}
+      ${ex.muscles.map((m) => `<span class="pill">${escapeHtml(m)}</span>`).join('')}
       ${ex.gluteFocus ? '<span class="pill" style="color:var(--burgundy-glow)">Glúteos</span>' : ''}
     </div>
     ${
@@ -23,9 +25,9 @@ export function openExerciseModal(ex: ExerciseLike): void {
            <div style="font-size:10.5px;color:var(--text-faint);margin:6px 0 14px;text-align:center">Diagrama esquemático simplificado. A descrição abaixo é a referência principal.</div>`
         : ''
     }
-    <p style="font-size:14px;line-height:1.6;color:var(--text)">${ex.desc}</p>
+    <p style="font-size:14px;line-height:1.6;color:var(--text)">${escapeHtml(ex.desc)}</p>
     <div class="alert" style="margin:14px 0 0">
-      <span>${ex.tip}</span>
+      <span>${escapeHtml(ex.tip)}</span>
     </div>
 
     <div class="sec-title" style="margin:18px -20px 0;border-radius:0">Carga e progressão</div>
@@ -47,9 +49,7 @@ export function openExerciseModal(ex: ExerciseLike): void {
     <div id="load-log"></div>
   `,
     (modal) => {
-      modal.querySelector('[data-close]')?.addEventListener('click', () => {
-        modal.closest('.modal-backdrop')?.remove();
-      });
+      modal.querySelector('[data-close]')?.addEventListener('click', () => close());
 
       renderLoads(modal, ex.id);
 
@@ -88,7 +88,7 @@ function summarize(l: ExerciseLogEntry): string {
       l.weightKg !== undefined ? `${l.weightKg} kg` : null,
       l.reps !== undefined ? `${l.reps} reps` : null,
       l.seconds !== undefined ? `${l.seconds}s` : null,
-      l.note ?? null
+      l.note ? escapeHtml(l.note) : null
     ]
       .filter(Boolean)
       .join(' · ') || '(sem detalhes)'
@@ -119,13 +119,13 @@ function renderLoads(modal: HTMLElement, exerciseId: string): void {
     let delta = '';
     if (latest.weightKg !== undefined && previous.weightKg !== undefined) {
       const diff = +(latest.weightKg - previous.weightKg).toFixed(1);
-      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--burgundy-glow)'};font-weight:800">${diff > 0 ? '+' : ''}${diff}kg</span>`;
+      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--primary)'};font-weight:600">${diff > 0 ? '+' : ''}${diff}kg</span>`;
     } else if (latest.reps !== undefined && previous.reps !== undefined) {
       const diff = latest.reps - previous.reps;
-      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--burgundy-glow)'};font-weight:800">${diff > 0 ? '+' : ''}${diff} reps</span>`;
+      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--primary)'};font-weight:600">${diff > 0 ? '+' : ''}${diff} reps</span>`;
     } else if (latest.seconds !== undefined && previous.seconds !== undefined) {
       const diff = latest.seconds - previous.seconds;
-      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--burgundy-glow)'};font-weight:800">${diff > 0 ? '+' : ''}${diff}s</span>`;
+      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--primary)'};font-weight:600">${diff > 0 ? '+' : ''}${diff}s</span>`;
     }
     compare.innerHTML = `
       <div class="alert" style="margin:10px 0">
@@ -146,7 +146,7 @@ function renderLoads(modal: HTMLElement, exerciseId: string): void {
       (l, i) => `
       <div class="log-item">
         <div class="log-txt"><strong>${summarize(l)}</strong><div class="log-date">${l.date}</div></div>
-        <button class="log-del" data-del-load="${i}"></button>
+        <button class="log-del" data-del-load="${i}" aria-label="Remover">✕</button>
       </div>`
     )
     .join('');

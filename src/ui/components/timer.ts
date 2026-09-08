@@ -1,4 +1,5 @@
 import { openModal } from './modal';
+import { MASCOT_IMAGES } from '../../data/mascot';
 
 const PRESETS = [30, 45, 60, 90, 120];
 
@@ -58,7 +59,7 @@ export function openTimerModal(initialSeconds = 60): void {
 
   const close = openModal(
     `
-    <button class="modal-close" data-close></button>
+    <button class="modal-close" data-close aria-label="Fechar"></button>
     <h3>Temporizador de descanso</h3>
     <div class="timer-display" id="tmr-display">${fmt(remaining)}</div>
     <div class="timer-presets" id="tmr-presets">
@@ -112,6 +113,75 @@ export function openTimerModal(initialSeconds = 60): void {
         presetsEl.querySelectorAll('.timer-preset').forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
       });
+      modal.querySelector('[data-close]')?.addEventListener('click', () => {
+        stop();
+        void audioCtx?.close();
+        close();
+      });
+    }
+  );
+}
+
+const BREATH_PHASES = [
+  { label: 'Inspira', seconds: 4 },
+  { label: 'Segura', seconds: 4 },
+  { label: 'Expira', seconds: 4 }
+];
+
+/**
+ * A 4-4-4 breathing exercise, for a hard moment rather than a rest between
+ * sets — reuses openTimerModal's own building blocks (modal, audio unlock
+ * inside the tap gesture, beep/vibrate on transition) instead of a second
+ * timer implementation, cycling through phases indefinitely until closed.
+ */
+export function openBreathingModal(): void {
+  let phaseIndex = 0;
+  let remaining = BREATH_PHASES[0].seconds;
+  let interval: ReturnType<typeof setInterval> | undefined;
+  let running = false;
+  let audioCtx: AudioContext | undefined;
+
+  const mascotSrc = `${import.meta.env.BASE_URL}${MASCOT_IMAGES.breathe}`;
+  const close = openModal(
+    `
+    <button class="modal-close" data-close aria-label="Fechar"></button>
+    <h3>Respirar</h3>
+    <img src="${mascotSrc}" alt="Kaipora" width="152" style="display:block;height:auto;margin:0 auto 14px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))" />
+    <div class="timer-display" id="breath-phase" style="font-size:20px">${BREATH_PHASES[0].label}</div>
+    <div class="timer-display" id="breath-display">${fmt(remaining)}</div>
+    <div class="timer-btns">
+      <button class="btn" id="breath-toggle">Iniciar</button>
+    </div>
+    <p style="text-align:center;color:var(--text-dim);font-size:12.5px;margin-top:10px">Inspira, segura e expira, cada fase com 4 segundos. Repete o tempo que precisares.</p>
+  `,
+    (modal) => {
+      const phaseEl = modal.querySelector('#breath-phase') as HTMLElement;
+      const display = modal.querySelector('#breath-display') as HTMLElement;
+      const toggleBtn = modal.querySelector('#breath-toggle') as HTMLButtonElement;
+
+      function tick() {
+        remaining--;
+        if (remaining <= 0) {
+          phaseIndex = (phaseIndex + 1) % BREATH_PHASES.length;
+          remaining = BREATH_PHASES[phaseIndex].seconds;
+          phaseEl.textContent = BREATH_PHASES[phaseIndex].label;
+          beep(audioCtx);
+        }
+        display.textContent = fmt(remaining);
+      }
+      function start() {
+        if (!audioCtx) audioCtx = unlockAudioContext(); // must happen inside this click handler, not later
+        running = true;
+        toggleBtn.textContent = 'Pausar';
+        interval = setInterval(tick, 1000);
+      }
+      function stop() {
+        running = false;
+        toggleBtn.textContent = 'Iniciar';
+        if (interval) clearInterval(interval);
+      }
+
+      toggleBtn.addEventListener('click', () => (running ? stop() : start()));
       modal.querySelector('[data-close]')?.addEventListener('click', () => {
         stop();
         void audioCtx?.close();

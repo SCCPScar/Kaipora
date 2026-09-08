@@ -1,5 +1,5 @@
 import type { Tab } from '../nav';
-import { todayISO, formatLong, greeting, WEEKDAY_KEYS } from '../../lib/dates';
+import { todayISO, formatLong, greeting, WEEKDAY_KEYS, addDays, fromISO, toISO } from '../../lib/dates';
 import { getTrainingDay } from '../../data/training';
 import { MEALS, allMealOptions, combinedDayTotals } from '../../data/diet';
 import { HABITS } from '../../data/habits';
@@ -12,13 +12,29 @@ import {
   toggleRoutineItem,
   getFixedCommitments,
   getFlexibleActivities,
-  getSettings
+  getSettings,
+  getMascotComeBackShownDate,
+  setMascotComeBackShownDate,
+  isMinDay,
+  toggleMinDay,
+  getSnoozedReminderDate,
+  setSnoozedReminderDate,
+  getWeeklyIntention,
+  setWeeklyIntention
 } from '../../lib/storage';
 import type { BuiltInModality, Weekday } from '../../lib/types';
 import { refreshActive, switchTab } from '../nav';
 import { showToast } from '../components/toast';
 import { isDayComplete } from '../../lib/dayCompletion';
 import { computeDaySchedule } from '../../lib/routineSchedule';
+import { escapeHtml } from '../../lib/sanitize';
+import { essentialsCompletedFlags } from '../../lib/dayHistory';
+import { shouldShowComeBack, shouldShowReminder, consecutiveDifficultDays, shouldUseAdaptiveTone } from '../../lib/mascotState';
+import { MASCOT_IMAGES, MASCOT_LINES } from '../../data/mascot';
+import { mascotCardHTML } from '../components/mascot';
+import { openModal } from '../components/modal';
+import { openBreathingModal } from '../components/timer';
+import { startOfWeek } from '../../lib/dates';
 
 let modality: BuiltInModality = 'academia';
 /** The date (YYYY-MM-DD) for which the completion celebration has already
@@ -43,13 +59,42 @@ export const todayTab: Tab = {
     const glassGoal = Math.max(1, Math.round(settings.waterGoalMl / 250));
     const mlEach = Math.round(settings.waterGoalMl / glassGoal);
 
+    const waterDone = day.water >= glassGoal;
+    const trainingDone = Boolean(day.training?.done);
+    const minDay = isMinDay(date);
     const essentialsDone = isDayComplete({
       waterGlasses: day.water,
       waterGoalGlasses: glassGoal,
-      trainingDone: Boolean(day.training?.done)
+      trainingDone,
+      minDay
     });
     const justCelebrated = essentialsDone && celebratedDate !== date;
     if (essentialsDone) celebratedDate = date;
+
+    const yesterday = toISO(addDays(fromISO(date), -1));
+    const yesterdayFlags = essentialsCompletedFlags(yesterday, yesterday);
+    const yesterdayDone = yesterdayFlags.length ? yesterdayFlags[0] : null;
+    const showComeBack = shouldShowComeBack(yesterdayDone, getMascotComeBackShownDate() === date);
+    if (showComeBack) setMascotComeBackShownDate(date);
+
+    const recentFlags = essentialsCompletedFlags(toISO(addDays(fromISO(date), -5)), yesterday).reverse();
+    const difficultStreak = consecutiveDifficultDays(recentFlags);
+    const useAdaptiveTone = shouldUseAdaptiveTone(difficultStreak);
+
+    const snoozedToday = getSnoozedReminderDate() === date;
+    let reminderText: string | null = null;
+    if (!essentialsDone && !snoozedToday) {
+      const hour = now.getHours();
+      if (shouldShowReminder(hour, trainingDone)) {
+        reminderText = MASCOT_LINES.reminderTraining;
+      } else if (shouldShowReminder(hour, waterDone)) {
+        const remainingMl = Math.max(0, settings.waterGoalMl - day.water * mlEach);
+        reminderText = MASCOT_LINES.reminderWater(remainingMl);
+      }
+    }
+
+    const weekKey = toISO(startOfWeek(fromISO(date)));
+    const weeklyIntention = getWeeklyIntention(weekKey);
 
     const exercisesDone = (day.exercisesDone[workout.id] ?? []).length;
     const mealsLogged = MEALS.filter((m) => allMealOptions(m.id).some((o) => day.meals[o.id])).length;
@@ -57,14 +102,25 @@ export const todayTab: Tab = {
 
     root.innerHTML = `
       <div class="ph">
-        <h2>${greeting(now)}, Scarllett</h2>
+        <h2>${greeting(now)}${settings.userName ? `, ${escapeHtml(settings.userName)}` : ''}</h2>
         <div class="ph-title">Hoje</div>
         <div class="ph-sub">${formatLong(now)}</div>
       </div>
 
+      <div class="form-row" style="padding-top:0">
+        <button class="btn ghost" id="breathe-open" type="button">Respirar</button>
+      </div>
+
+      ${showComeBack ? mascotCardHTML(useAdaptiveTone ? MASCOT_LINES.comeBackSoft : MASCOT_LINES.comeBack, MASCOT_IMAGES.comeBack) : ''}
+      ${reminderText ? mascotCardHTML(reminderText, MASCOT_IMAGES.reminder, { dismissible: true }) : ''}
       ${essentialsDone ? completionBannerHTML(justCelebrated) : ''}
 
       <div class="priority-heading">Essencial</div>
+
+      <div class="row" style="cursor:default">
+        <div class="rtxt"><strong>Dia mínimo</strong><small>Em dias difíceis, só precisas de um Essencial, não os dois</small></div>
+        <span class="switch"><input type="checkbox" id="min-day-toggle" ${minDay ? 'checked' : ''}/><span class="slider"></span></span>
+      </div>
 
       <div class="wcard">
         <div class="wcard-top">
@@ -103,6 +159,14 @@ export const todayTab: Tab = {
       <div class="priority-heading">Importante</div>
 
       <section>
+        <div class="sec-title">Intenção da semana</div>
+        <div class="row" id="intention-open-row">
+          <div class="rtxt"><strong>${weeklyIntention ? escapeHtml(weeklyIntention) : 'Ainda não definida'}</strong><small>Toca para ${weeklyIntention ? 'editar' : 'definir'}</small></div>
+          <span class="badge-k">${weeklyIntention ? 'Editar' : 'Definir'}</span>
+        </div>
+      </section>
+
+      <section>
         <div class="sec-title">Rotina de hoje</div>
         <div id="routine-list"></div>
       </section>
@@ -110,10 +174,10 @@ export const todayTab: Tab = {
       <div class="priority-heading">Opcional</div>
 
       <section id="meals-card">
-        <div class="sec-title"><span>Alimentação</span><span class="badge-k">${foodTotals.kcal} kcal</span></div>
+        <div class="sec-title"><span>Alimentação</span><span class="macro-line">${foodTotals.kcal} kcal</span></div>
         <div class="row" id="meals-open-row">
           <div class="rtxt"><strong>${mealsLogged} de ${MEALS.length} refeições registadas</strong><small>Toca para abrir o plano completo</small></div>
-          <span class="badge-p">${foodTotals.protein}g prot</span>
+          <span class="macro-line">${foodTotals.protein}g prot</span>
         </div>
       </section>
 
@@ -126,7 +190,7 @@ export const todayTab: Tab = {
     renderGlasses(root, day.water, glassGoal);
     renderRoutine(root, date, day, weekdayKey, settings.wakeTime, settings.sleepTime);
     renderHabits(root, date, day);
-    wireEvents(root, date, glassGoal, workout);
+    wireEvents(root, date, glassGoal, workout, weekKey, weeklyIntention);
   }
 };
 
@@ -142,9 +206,11 @@ function completionBannerHTML(animate: boolean): string {
         return `<span class="spark" style="--dx:${dx}px;--dy:${dy}px;animation-delay:${i * 30}ms"></span>`;
       }).join('')
     : '';
+  const mascotSrc = `${import.meta.env.BASE_URL}${MASCOT_IMAGES.celebrate}`;
   return `
     <div class="day-complete-banner ${animate ? 'animate' : ''}">
       ${sparks}
+      <img src="${mascotSrc}" alt="Kaipora" width="40" style="height:auto;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))" />
       <div>
         <strong>Essenciais de hoje concluídos.</strong>
         <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">O resto do dia é bónus. Consistência é mais importante que perfeição.</div>
@@ -177,7 +243,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
       if (b.kind === 'unscheduled') {
         return `
         <div class="row" style="cursor:default">
-          <div class="rtxt"><strong>${b.label}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
+          <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
         </div>`;
       }
       const h = (m: number) => `${Math.floor(m / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}`;
@@ -185,7 +251,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
       return `
       <div class="row ${isDone ? 'done' : ''}" data-routine="${b.id}">
         <div class="chk"></div>
-        <div class="rtxt"><strong>${b.label}</strong><small>${h(b.startMin)} – ${h(b.endMin)}</small></div>
+        <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>${h(b.startMin)} – ${h(b.endMin)}</small></div>
       </div>`;
     })
     .join('');
@@ -202,7 +268,33 @@ function renderHabits(root: HTMLElement, date: string, day: ReturnType<typeof ge
   ).join('');
 }
 
-function wireEvents(root: HTMLElement, date: string, glassGoal: number, workout: ReturnType<typeof getTrainingDay>['academia']) {
+function wireEvents(
+  root: HTMLElement,
+  date: string,
+  glassGoal: number,
+  workout: ReturnType<typeof getTrainingDay>['academia'],
+  weekKey: string,
+  weeklyIntention: string
+) {
+  root.querySelector('#breathe-open')?.addEventListener('click', () => openBreathingModal());
+
+  root.querySelector('#min-day-toggle')?.addEventListener('change', () => {
+    toggleMinDay(date);
+    refreshActive();
+  });
+
+  root.querySelector('[data-mascot-dismiss]')?.addEventListener('click', () => {
+    setSnoozedReminderDate(date);
+    refreshActive();
+  });
+
+  root.querySelector('#intention-open-row')?.addEventListener('click', () => {
+    openIntentionModal(weeklyIntention, (text) => {
+      setWeeklyIntention(weekKey, text);
+      refreshActive();
+    });
+  });
+
   root.querySelector('#water-plus')?.addEventListener('click', () => {
     const cur = getWater(date);
     if (cur < glassGoal + 4) setWater(date, cur + 1);
@@ -252,4 +344,27 @@ function wireEvents(root: HTMLElement, date: string, glassGoal: number, workout:
     toggleRoutineItem(date, row.dataset.routine as string);
     refreshActive();
   });
+}
+
+function openIntentionModal(current: string, onSave: (text: string) => void): void {
+  const close = openModal(
+    `
+    <button class="modal-close" data-close aria-label="Fechar"></button>
+    <h3>Intenção da semana</h3>
+    <div class="form-row">
+      <textarea class="finp" id="intention-text" rows="3" placeholder="O que queres priorizar esta semana?" style="flex:1;resize:vertical;font-family:inherit">${escapeHtml(current)}</textarea>
+    </div>
+    <div class="form-row" style="padding-top:0">
+      <button class="btn block" id="intention-save">Guardar</button>
+    </div>
+  `,
+    (modal) => {
+      modal.querySelector('#intention-save')?.addEventListener('click', () => {
+        const text = (modal.querySelector('#intention-text') as HTMLTextAreaElement).value.trim();
+        onSave(text);
+        close();
+      });
+      modal.querySelector('[data-close]')?.addEventListener('click', () => close());
+    }
+  );
 }

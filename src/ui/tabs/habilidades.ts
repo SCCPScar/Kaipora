@@ -16,11 +16,14 @@ import { totalMinutesForSkill, totalMinutesAllSkills, lastPracticedDate, daysPra
 import { todayISO } from '../../lib/dates';
 import { refreshActive, switchTab } from '../nav';
 import { showToast } from '../components/toast';
+import { escapeHtml } from '../../lib/sanitize';
 
 /** skill id currently showing its "log session" mini-form, or null. */
 let loggingToSkill: string | null = null;
 let addingSkill = false;
 let addingReward = false;
+/** id of the reward whose claim animation should play on this render only. */
+let justClaimedRewardId: string | null = null;
 
 function hoursLabel(minutes: number): string {
   if (minutes < 60) return `${minutes} min`;
@@ -81,10 +84,10 @@ function renderSkills(root: HTMLElement, skills: ReturnType<typeof getSkills>, s
       <div class="day-card open">
         <div class="day-head" style="cursor:default">
           <div class="day-info">
-            <div class="day-nm">${skill.name}</div>
+            <div class="day-nm">${escapeHtml(skill.name)}</div>
             <div class="day-focus">${hoursLabel(total)} · ${days} dia${days === 1 ? '' : 's'} praticados${last ? ` · última vez ${last}` : ''}</div>
           </div>
-          <button class="log-del" data-del-skill="${i}">✕</button>
+          <button class="log-del" data-del-skill="${i}" aria-label="Remover">✕</button>
         </div>
         <div class="day-body">
           ${
@@ -140,10 +143,12 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
           .map((r, i) => {
             const pct = Math.min(100, Math.round((total / r.targetMinutes) * 100));
             const canClaim = total >= r.targetMinutes && !r.claimed;
+            const justClaimed = r.claimed && r.id === justClaimedRewardId;
             return `
-      <div class="row" style="cursor:default">
+      <div class="row reward-claim-burst ${justClaimed ? 'animate' : ''}" style="cursor:default">
+        ${justClaimed ? sparksHTML() : ''}
         <div class="rtxt">
-          <strong>${r.title}${r.claimed ? ' · conquistada' : ''}</strong>
+          <strong>${escapeHtml(r.title)}${r.claimed ? ' · conquistada' : ''}</strong>
           <small>${hoursLabel(Math.min(total, r.targetMinutes))} / ${hoursLabel(r.targetMinutes)} (${pct}%)</small>
         </div>
         ${
@@ -151,7 +156,7 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
             ? '<span class="pill">Conquistada</span>'
             : `<button class="btn sm ${canClaim ? '' : 'ghost'}" data-claim-reward="${r.id}" ${canClaim ? '' : 'disabled'}>Resgatar</button>`
         }
-        <button class="log-del" data-del-reward="${i}">✕</button>
+        <button class="log-del" data-del-reward="${i}" aria-label="Remover">✕</button>
       </div>`;
           })
           .join('')
@@ -166,6 +171,19 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
         <button class="btn block" id="reward-save">Guardar recompensa</button>
       </div>`
       : `<div class="form-row" style="padding-top:0"><button class="btn block" id="reward-toggle">+ Nova recompensa</button></div>`);
+
+  justClaimedRewardId = null;
+}
+
+/** 6 small dots bursting outward — same language as the Hoje completion
+ * banner, reused here for unlocking a reward. */
+function sparksHTML(): string {
+  return Array.from({ length: 6 }, (_, i) => {
+    const angle = (i / 6) * Math.PI * 2;
+    const dx = Math.round(Math.cos(angle) * 46);
+    const dy = Math.round(Math.sin(angle) * 46);
+    return `<span class="spark" style="--dx:${dx}px;--dy:${dy}px;animation-delay:${i * 30}ms"></span>`;
+  }).join('');
 }
 
 function wireEvents(root: HTMLElement) {
@@ -234,7 +252,9 @@ function wireEvents(root: HTMLElement) {
 
     const claimBtn = target.closest<HTMLButtonElement>('[data-claim-reward]');
     if (claimBtn && !claimBtn.disabled) {
-      claimReward(claimBtn.dataset.claimReward as string, todayISO());
+      const rewardId = claimBtn.dataset.claimReward as string;
+      claimReward(rewardId, todayISO());
+      justClaimedRewardId = rewardId;
       showToast('Recompensa conquistada!');
       refreshActive();
       return;

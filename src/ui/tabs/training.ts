@@ -1,5 +1,5 @@
 import type { Tab } from '../nav';
-import { TRAINING_WEEK, getGluteWorkouts } from '../../data/training';
+import { TRAINING_WEEK } from '../../data/training';
 import { EXERCISES, getExerciseById } from '../../data/exercises';
 import type { Workout, TrainingDay, CustomWorkout, WorkoutExercise } from '../../data/types-training';
 import type { BuiltInModality } from '../../lib/types';
@@ -20,6 +20,7 @@ import { todayISO } from '../../lib/dates';
 import { refreshActive } from '../nav';
 import { openTimerModal } from '../components/timer';
 import { openExerciseModal } from '../components/exerciseModal';
+import { escapeHtml } from '../../lib/sanitize';
 import { showToast } from '../components/toast';
 import { infoIcon, timerIcon } from '../components/icons';
 
@@ -68,15 +69,6 @@ export const trainingTab: Tab = {
         <div id="week-days"></div>
 
         <section>
-          <div class="sec-title"><span>Programa Intensivo de Glúteos</span></div>
-          <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-            Trabalho dedicado a glúteo máximo e médio, distribuído ao longo da semana para evitar volume excessivo.
-            Aparece nos dias de pernas (Qua, Qui, Sáb). Aqui tens a lista completa dos treinos que fazem parte do programa.
-          </div>
-          <div id="glute-list"></div>
-        </section>
-
-        <section>
           <div class="sec-title"><span>Os Meus Exercícios</span></div>
           <div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
             Exercícios que a biblioteca não tem, como algo que o teu personal trainer te ensinou. Ficam disponíveis para qualquer treino teu.
@@ -97,7 +89,6 @@ export const trainingTab: Tab = {
     `;
 
     renderWeek(root, date);
-    renderGluteList(root);
     renderCustomExercises(root);
     renderCustomWorkouts(root, date);
     wireEvents(root.querySelector('#treino-content') as HTMLElement, date);
@@ -120,7 +111,7 @@ function dayCardHTML(day: TrainingDay, date: string): string {
       <div class="day-head" data-toggle="${day.weekday}">
         <div class="day-pill" style="background:${PILL_COLORS[day.weekday]}">${day.weekday.toUpperCase()}</div>
         <div class="day-info">
-          <div class="day-nm">${day.label}${isTodayDone ? '' : ''}</div>
+          <div class="day-nm">${day.label}</div>
           <div class="day-focus">${workout.focus}</div>
         </div>
         <div class="icon-btn">${isOpen ? '−' : '+'}</div>
@@ -156,28 +147,11 @@ function exerciseListHTML(workout: Workout, date: string): string {
           ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
         </div>
         <div class="ex-actions">
-          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">${infoIcon()}</button>
-          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">${timerIcon()}</button>
+          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar" aria-label="Como executar">${infoIcon()}</button>
+          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador" aria-label="Temporizador">${timerIcon()}</button>
         </div>
       </div>`;
     })
-    .join('');
-}
-
-function renderGluteList(root: HTMLElement) {
-  const el = root.querySelector('#glute-list') as HTMLElement;
-  const workouts = getGluteWorkouts();
-  el.innerHTML = workouts
-    .map(
-      (w) => `
-    <div class="row" style="cursor:default">
-      <div class="rtxt">
-        <strong>${w.title}</strong>
-        <small>${w.exercises.map((e) => EXERCISES[e.exerciseId]?.name).filter(Boolean).join(' · ')}</small>
-      </div>
-      <span class="pill">${w.location === 'academia' ? 'Academia' : 'Casa'}</span>
-    </div>`
-    )
     .join('');
 }
 
@@ -190,10 +164,10 @@ function renderCustomExercises(root: HTMLElement) {
           (ex, i) => `
       <div class="log-item">
         <div class="log-txt">
-          <strong>${ex.name}</strong>
-          <div class="log-date">${[ex.muscles.join(', '), ex.desc].filter(Boolean).join(' · ') || 'Sem detalhes adicionais'}</div>
+          <strong>${escapeHtml(ex.name)}</strong>
+          <div class="log-date">${escapeHtml([ex.muscles.join(', '), ex.desc].filter(Boolean).join(' · ')) || 'Sem detalhes adicionais'}</div>
         </div>
-        <button class="log-del" data-del-exercise="${i}">✕</button>
+        <button class="log-del" data-del-exercise="${i}" aria-label="Remover">✕</button>
       </div>`
         )
         .join('')
@@ -223,11 +197,11 @@ function exerciseOptionsHTML(): string {
   const custom = getCustomExercises();
   return `
     <optgroup label="Biblioteca">
-      ${builtIn.map((ex) => `<option value="${ex.id}">${ex.name}</option>`).join('')}
+      ${builtIn.map((ex) => `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`).join('')}
     </optgroup>
     ${
       custom.length
-        ? `<optgroup label="Meus exercícios">${custom.map((ex) => `<option value="${ex.id}">${ex.name}</option>`).join('')}</optgroup>`
+        ? `<optgroup label="Meus exercícios">${custom.map((ex) => `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`).join('')}</optgroup>`
         : ''
     }
   `;
@@ -243,14 +217,14 @@ function customWorkoutExerciseListHTML(workout: CustomWorkout, date: string): st
       return `
       <div class="ex-row ${isDone ? 'done' : ''}" data-exercise="${we.exerciseId}">
         <div class="ex-main" data-select="${workout.id}:${we.exerciseId}">
-          <strong>${ex.name}</strong>
-          <small>${we.sets}x ${we.reps} · descanso ${we.restSeconds}s${we.note ? ' · ' + we.note : ''}</small>
+          <strong>${escapeHtml(ex.name)}</strong>
+          <small>${we.sets}x ${escapeHtml(we.reps)} · descanso ${we.restSeconds}s${we.note ? ' · ' + escapeHtml(we.note) : ''}</small>
           ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
         </div>
         <div class="ex-actions">
-          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">${infoIcon()}</button>
-          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">${timerIcon()}</button>
-          <button class="log-del" data-remove-exercise="${workout.id}:${idx}">✕</button>
+          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar" aria-label="Como executar">${infoIcon()}</button>
+          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador" aria-label="Temporizador">${timerIcon()}</button>
+          <button class="log-del" data-remove-exercise="${workout.id}:${idx}" aria-label="Remover">✕</button>
         </div>
       </div>`;
     })
@@ -270,12 +244,12 @@ function renderCustomWorkouts(root: HTMLElement, date: string) {
           return `
       <div class="day-card open">
         <div class="day-head" style="cursor:default">
-          <div class="day-pill" style="background:var(--accent)">${w.category.slice(0, 3).toUpperCase()}</div>
+          <div class="day-pill" style="background:var(--accent)">${escapeHtml(w.category.slice(0, 3).toUpperCase())}</div>
           <div class="day-info">
-            <div class="day-nm">${w.title}</div>
-            <div class="day-focus">${w.focus || w.category}</div>
+            <div class="day-nm">${escapeHtml(w.title)}</div>
+            <div class="day-focus">${escapeHtml(w.focus || w.category)}</div>
           </div>
-          <button class="log-del" data-del-workout="${i}">✕</button>
+          <button class="log-del" data-del-workout="${i}" aria-label="Remover">✕</button>
         </div>
         <div class="day-body">
           ${customWorkoutExerciseListHTML(w, date) || '<div class="empty">Ainda sem exercícios neste treino</div>'}

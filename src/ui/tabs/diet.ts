@@ -2,6 +2,7 @@ import type { Tab } from '../nav';
 import { MEALS, allMealOptions, combinedDayTotals } from '../../data/diet';
 import { SUPPLEMENTS, DIET_NOTES } from '../../data/types-diet';
 import { searchFoodDatabase, scaleFood, type FoodDatabaseItem } from '../../data/foodDatabase';
+import { searchOpenFoodFacts, type OpenFoodFactsItem } from '../../lib/openFoodFacts';
 import {
   getDay,
   toggleMeal,
@@ -18,11 +19,22 @@ import {
 import { todayISO, toISO, addDays } from '../../lib/dates';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
+import { escapeHtml } from '../../lib/sanitize';
 
 type DietView = 'plano' | 'diario';
 let view: DietView = 'plano';
 /** meal id currently showing its "add custom food" mini-form, or null. */
 let addingCustomToMeal: string | null = null;
+
+/** Results of the last resolved Open Food Facts search, so the "+" click
+ * handler (synchronous) can look an item up by id without re-fetching —
+ * see renderOpenFoodFactsResults. */
+let offResultsCache: OpenFoodFactsItem[] = [];
+/** Bumped on every new search so a slow, now-stale response can't overwrite
+ * the results of a newer one that already resolved (out-of-order network
+ * replies). */
+let offSearchToken = 0;
+let offSearchDebounce: ReturnType<typeof setTimeout> | undefined;
 
 export const dietTab: Tab = {
   id: 'dieta',
@@ -47,13 +59,9 @@ export const dietTab: Tab = {
       <div class="stat-row">
         <div class="stat"><strong>${totals.kcal}</strong><small>consumido</small></div>
         <div class="stat"><strong>${settings.calorieGoal}</strong><small>meta kcal</small></div>
-        <div class="stat"><strong style="color:${remaining < 0 ? 'var(--burgundy-glow)' : 'var(--green)'}">${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? 'restante' : 'acima da meta'}</small></div>
+        <div class="stat"><strong>${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? 'restante' : 'acima da meta'}</small></div>
       </div>
-      <div class="stat-row">
-        <div class="stat"><strong>${totals.protein}g</strong><small>proteína / ${settings.proteinGoal}g</small></div>
-        <div class="stat"><strong>${totals.carbs}g</strong><small>carboidr. / ${settings.carbGoal}g</small></div>
-        <div class="stat"><strong>${totals.fat}g</strong><small>gordura / ${settings.fatGoal}g</small></div>
-      </div>
+      <div class="macro-line" style="padding:0 14px 12px">P ${totals.protein}g / ${settings.proteinGoal}g &middot; HC ${totals.carbs}g / ${settings.carbGoal}g &middot; G ${totals.fat}g / ${settings.fatGoal}g</div>
 
       <div class="modality-switch">
         <button class="modality-btn ${view === 'plano' ? 'active' : ''}" data-view="plano">Meu Plano</button>
@@ -89,7 +97,7 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
       const isAdding = addingCustomToMeal === meal.id;
       return `
       <section>
-        <div class="sec-title"><span>${meal.name} · ${meal.time}</span><span class="badge-k">~${meal.targetKcal} kcal</span></div>
+        <div class="sec-title"><span>${meal.name} · ${meal.time}</span><span class="macro-line">~${meal.targetKcal} kcal</span></div>
         ${options
           .map((o) => {
             const isCustom = allCustom.some((c) => c.id === o.id);
@@ -98,18 +106,17 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
           <div class="row ${day.meals[o.id] ? 'done' : ''} ${isHidden ? 'muted-row' : ''}" data-option="${o.id}">
             <div class="chk"></div>
             <div class="rtxt">
-              <strong>${o.label}</strong>
-              <small>${o.desc}</small>
+              <strong>${escapeHtml(o.label)}</strong>
+              <small>${escapeHtml(o.desc)}</small>
               <small>P: ${o.protein}g · HC: ${o.carbs}g · G: ${o.fat}g</small>
             </div>
             <span class="kcal">${o.kcal} kcal</span>
-            ${isCustom ? `<button class="log-del" data-del-custom="${allCustom.indexOf(allCustom.find((c) => c.id === o.id)!)}">✕</button>` : `<button class="log-del" data-hide-option="${o.id}" style="font-size:11px">${isHidden ? 'Mostrar' : 'Ocultar'}</button>`}
+            ${isCustom ? `<button class="log-del" data-del-custom="${allCustom.indexOf(allCustom.find((c) => c.id === o.id)!)}" aria-label="Remover">✕</button>` : `<button class="log-del" data-hide-option="${o.id}" style="font-size:11px">${isHidden ? 'Mostrar' : 'Ocultar'}</button>`}
           </div>`;
           })
           .join('')}
         <div class="sub-row">
-          <span class="badge-p">${totalP}g prot</span>
-          <span class="badge-k">${totalKcal} kcal</span>
+          <span class="macro-line">${totalKcal} kcal &middot; P ${totalP}g</span>
         </div>
         ${
           isAdding
@@ -151,7 +158,7 @@ function renderDiario(root: HTMLElement, date: string) {
   const todays = allLog.filter((e) => e.date === date);
 
   el.innerHTML = `
-    <div class="alert"><span>Regista aqui o que comeste fora do plano: pesquisa um alimento (valores por 100g) ou adiciona manualmente.</span></div>
+    <div class="alert"><span>Regista aqui o que comeste fora do plano: pesquisa um alimento (valores por 100g) ou adiciona manualmente. A pesquisa cruza a base de dados local com o Open Food Facts quando há ligação.</span></div>
 
     <section>
       <div class="sec-title">Contador de Calorias</div>
@@ -159,6 +166,7 @@ function renderDiario(root: HTMLElement, date: string) {
         <input class="finp" id="food-search" type="text" placeholder="Pesquisar alimento (ex: frango, arroz, iogurte)" style="flex:1" />
       </div>
       <div id="food-search-results"></div>
+      <div id="off-search-results"></div>
     </section>
 
     <section>
@@ -184,6 +192,7 @@ function renderDiario(root: HTMLElement, date: string) {
   `;
 
   renderFoodResults(root, '');
+  void renderOpenFoodFactsResults(root, '');
 
   const listEl = root.querySelector('#food-log-list') as HTMLElement;
   listEl.innerHTML = todays.length
@@ -191,8 +200,8 @@ function renderDiario(root: HTMLElement, date: string) {
         .map(
           (entry) => `
       <div class="log-item">
-        <div class="log-txt"><strong>${entry.label}</strong><div class="log-date">${entry.kcal} kcal · P:${entry.protein}g HC:${entry.carbs}g G:${entry.fat}g${entry.grams ? ` · ${entry.grams}g` : ''}</div></div>
-        <button class="log-del" data-del-log="${allLog.indexOf(entry)}">✕</button>
+        <div class="log-txt"><strong>${escapeHtml(entry.label)}</strong><div class="log-date">${entry.kcal} kcal · P:${entry.protein}g HC:${entry.carbs}g G:${entry.fat}g${entry.grams ? ` · ${entry.grams}g` : ''}</div></div>
+        <button class="log-del" data-del-log="${allLog.indexOf(entry)}" aria-label="Remover">✕</button>
       </div>`
         )
         .join('')
@@ -219,6 +228,45 @@ function renderFoodResults(root: HTMLElement, query: string) {
         )
         .join('')
     : '<div class="empty">Nenhum alimento encontrado</div>';
+}
+
+/**
+ * Live, best-effort augment of the local search with branded/packaged
+ * products from Open Food Facts — for products the curated local database
+ * doesn't have (a specific supermarket brand, say). Debounced by the
+ * caller; silently shows no results when there's no connection instead of
+ * erroring, since this must never get in the way of the always-available
+ * local search and manual entry above it.
+ */
+async function renderOpenFoodFactsResults(root: HTMLElement, query: string): Promise<void> {
+  const el = root.querySelector('#off-search-results') as HTMLElement | null;
+  if (!el) return;
+  if (!query.trim()) {
+    el.innerHTML = '';
+    offResultsCache = [];
+    return;
+  }
+
+  const token = ++offSearchToken;
+  el.innerHTML = '<div class="sec-title" style="margin-top:6px">Open Food Facts (online)</div><div class="empty">A pesquisar…</div>';
+  const results = await searchOpenFoodFacts(query);
+  if (token !== offSearchToken) return; // a newer search already superseded this one
+
+  offResultsCache = results;
+  el.innerHTML =
+    '<div class="sec-title" style="margin-top:6px">Open Food Facts (online)</div>' +
+    (results.length
+      ? results
+          .map(
+            (item) => `
+      <div class="row" style="cursor:default" data-off-row="${item.id}">
+        <div class="rtxt"><strong>${escapeHtml(item.label)}</strong><small>${item.kcal} kcal / 100g · P:${item.protein}g HC:${item.carbs}g G:${item.fat}g</small></div>
+        <input class="finp off-grams" type="number" min="1" value="100" style="width:64px;flex:none;padding:8px 6px" />
+        <button class="btn" data-add-off="${item.id}" style="flex:none;padding:8px 12px">+</button>
+      </div>`
+          )
+          .join('')
+      : '<div class="empty">Sem resultados online (ou sem ligação)</div>');
 }
 
 function renderHistory(root: HTMLElement, date: string) {
@@ -302,7 +350,11 @@ function wireEvents(root: HTMLElement, date: string) {
   });
 
   const searchInput = root.querySelector('#food-search') as HTMLInputElement | null;
-  searchInput?.addEventListener('input', () => renderFoodResults(root, searchInput.value));
+  searchInput?.addEventListener('input', () => {
+    renderFoodResults(root, searchInput.value);
+    if (offSearchDebounce) clearTimeout(offSearchDebounce);
+    offSearchDebounce = setTimeout(() => void renderOpenFoodFactsResults(root, searchInput.value), 500);
+  });
 
   root.querySelector('#food-search-results')?.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-add-food]');
@@ -313,6 +365,19 @@ function wireEvents(root: HTMLElement, date: string) {
     );
     if (!row || !item) return;
     const grams = Number((row.querySelector('.food-grams') as HTMLInputElement).value) || 100;
+    const scaled = scaleFood(item, grams);
+    addFoodLogEntry({ date, label: item.label, grams, ...scaled });
+    showToast(`${item.label} adicionado ao diário`);
+    refreshActive();
+  });
+
+  root.querySelector('#off-search-results')?.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-add-off]');
+    if (!btn) return;
+    const row = btn.closest<HTMLElement>('[data-off-row]');
+    const item = offResultsCache.find((f) => f.id === btn.dataset.addOff);
+    if (!row || !item) return;
+    const grams = Number((row.querySelector('.off-grams') as HTMLInputElement).value) || 100;
     const scaled = scaleFood(item, grams);
     addFoodLogEntry({ date, label: item.label, grams, ...scaled });
     showToast(`${item.label} adicionado ao diário`);

@@ -1,4 +1,4 @@
-import type { DayRecord, MeasurementEntry, NoteEntry, JournalEntry, Settings, WeightEntry, Modality, Tombstonable } from './types';
+import type { DayRecord, MeasurementEntry, NoteEntry, JournalEntry, WeeklyIntention, Settings, WeightEntry, Modality, Tombstonable } from './types';
 import { DEFAULT_SETTINGS } from './types';
 import { visible, withAdded, withSoftDeleted } from './tombstoneList';
 import type { FixedCommitment, FlexibleActivity } from '../data/types-routine';
@@ -53,7 +53,13 @@ export function rawRemove(key: string): void {
  * vp_last_synced_at pulled from another device would corrupt this device's
  * sync cursor) and never included in backups.
  */
-const INTERNAL_KEYS = new Set([`${PFX}_meta`, `${PFX}_last_synced_at`, `${PFX}_migrated_from_scar`]);
+const INTERNAL_KEYS = new Set([
+  `${PFX}_meta`,
+  `${PFX}_last_synced_at`,
+  `${PFX}_migrated_from_scar`,
+  `${PFX}_last_backup_at`,
+  `${PFX}_mascot_comeback_shown`
+]);
 
 /** Every user-data key currently in localStorage, for backup/export/sync. */
 export function allKeys(): string[] {
@@ -146,6 +152,31 @@ export function toggleRoutineItem(date: string, itemId: string): boolean {
   }
   setDay(date, day);
   return done;
+}
+
+/**
+ * "Dia mínimo" — dates the user has deliberately marked as hard, where
+ * isDayComplete() only requires ONE of água/treino instead of both (see
+ * dayCompletion.ts). A plain date array, like getHiddenMealOptionIds: a
+ * low-stakes toggle, not an append-only log, so no tombstones needed.
+ */
+export function isMinDay(date: string): boolean {
+  return rawGet<string[]>(`${PFX}_min_days`, []).includes(date);
+}
+
+export function toggleMinDay(date: string): boolean {
+  const days = rawGet<string[]>(`${PFX}_min_days`, []);
+  const idx = days.indexOf(date);
+  let enabled: boolean;
+  if (idx >= 0) {
+    days.splice(idx, 1);
+    enabled = false;
+  } else {
+    days.push(date);
+    enabled = true;
+  }
+  rawSet(`${PFX}_min_days`, days);
+  return enabled;
 }
 
 // ---- Weights ----
@@ -270,6 +301,37 @@ export function importBackup(backup: Backup): void {
   for (const [key, value] of Object.entries(backup.data)) {
     if (key.startsWith(PFX + '_') && !INTERNAL_KEYS.has(key)) rawSet(key, value);
   }
+}
+
+/** Last time the user exported a backup, for the periodic reminder in
+ * Ajustes — not part of the exported data itself (see INTERNAL_KEYS). */
+export function getLastBackupAt(): string | null {
+  return rawGet<string | null>(`${PFX}_last_backup_at`, null);
+}
+
+export function recordBackupExported(): void {
+  rawSet(`${PFX}_last_backup_at`, new Date().toISOString());
+}
+
+/** Which date (YYYY-MM-DD) the mascot's "come back" message was last shown
+ * for — so it appears once per missed day, not on every render. */
+export function getMascotComeBackShownDate(): string | null {
+  return rawGet<string | null>(`${PFX}_mascot_comeback_shown`, null);
+}
+
+export function setMascotComeBackShownDate(date: string): void {
+  rawSet(`${PFX}_mascot_comeback_shown`, date);
+}
+
+/** The one date (YYYY-MM-DD) for which the user asked Kaipora not to show
+ * same-day nudge reminders — "não me lembres hoje". Resets naturally the
+ * next day since it's compared against today's date wherever it's read. */
+export function getSnoozedReminderDate(): string | null {
+  return rawGet<string | null>(`${PFX}_snoozed_reminder_date`, null);
+}
+
+export function setSnoozedReminderDate(date: string): void {
+  rawSet(`${PFX}_snoozed_reminder_date`, date);
 }
 
 // ---- Exercise load / strength progression ----
@@ -587,6 +649,30 @@ export function deleteJournalEntry(visibleIndex: number): void {
     `${PFX}_journal`,
     withSoftDeleted(getJournalRaw(), visibleIndex, (a, b) => a.date === b.date && a.text === b.text)
   );
+}
+
+// ---- Intenção da semana: uma frase livre, uma por semana ----
+// Edited like updateMeasurement/claimReward: tombstone the old text for that
+// week (if any) and add the edited one, matched by weekKey — never mutated
+// in place, so a sync merge never turns an edit into a duplicate.
+
+function getWeeklyIntentionsRaw(): WeeklyIntention[] {
+  return rawGet<WeeklyIntention[]>(`${PFX}_weekly_intentions`, []);
+}
+
+export function getWeeklyIntentions(): WeeklyIntention[] {
+  return visible(getWeeklyIntentionsRaw());
+}
+
+export function getWeeklyIntention(weekKey: string): string {
+  return getWeeklyIntentions().find((w) => w.weekKey === weekKey)?.text ?? '';
+}
+
+export function setWeeklyIntention(weekKey: string, text: string): void {
+  const raw = getWeeklyIntentionsRaw();
+  const idx = visible(raw).findIndex((w) => w.weekKey === weekKey);
+  const tombstoned = idx >= 0 ? withSoftDeleted(raw, idx, (a, b) => a.weekKey === b.weekKey) : raw;
+  rawSet(`${PFX}_weekly_intentions`, withAdded(tombstoned, { weekKey, text }));
 }
 
 // ---- Desafios: Kaipora 75 e outros desafios pessoais ----
