@@ -26,7 +26,7 @@ function renderBootError(): void {
   const app = document.getElementById('app') as HTMLElement;
   app.innerHTML = `
     <div style="max-width:420px;margin:15vh auto 0;padding:0 20px;text-align:center;font-family:'Manrope',-apple-system,sans-serif">
-      <div class="boot-mark" style="font-size:34px;margin-bottom:18px">K</div>
+      <img class="boot-mark" src="${import.meta.env.BASE_URL}icons/icon-192.png" alt="Kaipora" style="width:64px;height:64px;margin-bottom:18px" />
       <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Algo correu mal a abrir a app</div>
       <div style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:20px">
         Os teus dados continuam guardados neste aparelho. Tenta recarregar a página; se continuar

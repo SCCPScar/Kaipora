@@ -36,7 +36,7 @@ export function initNav(container: HTMLElement, allTabs: Tab[], startTab: string
   sidebarEl.innerHTML = `
     <div class="sidebar-head">
       <div class="brand-bar">
-        <div class="brand-mark">K</div>
+        <img class="brand-mark" src="${import.meta.env.BASE_URL}icons/icon-192.png" alt="Kaipora" />
         <div class="brand-name">Kaipora</div>
       </div>
       <button class="sidebar-close" aria-label="Fechar menu">${closeIcon()}</button>

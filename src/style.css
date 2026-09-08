@@ -184,7 +184,7 @@ body::before {
 }
 
 .boot { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 999; }
-.boot-mark { font-family: Georgia, serif; font-size: 48px; font-weight: 800; color: transparent; background: var(--gradient-main); -webkit-background-clip: text; background-clip: text; animation: pulse 1.4s ease-in-out infinite; }
+.boot-mark { width: 80px; height: 80px; border-radius: 20px; object-fit: cover; animation: pulse 1.4s ease-in-out infinite; }
 @keyframes pulse { 0%,100% { opacity: .5; transform: scale(.96); } 50% { opacity: 1; transform: scale(1.04); } }
 
 #app { position: relative; z-index: 1; }
@@ -210,9 +210,8 @@ body::before {
   padding: calc(14px + var(--safe-top)) 18px 10px;
 }
 .brand-mark {
-  width: 34px; height: 34px; border-radius: 9px;
-  background: var(--gradient-main); display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 17px; color: #0a0912; box-shadow: 0 0 18px var(--tint-primary-glow);
+  width: 34px; height: 34px; border-radius: 9px; object-fit: cover;
+  box-shadow: 0 0 18px var(--tint-primary-glow);
 }
 .brand-name { font-size: 15px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
 .brand-name b { color: var(--electric-glow); }
