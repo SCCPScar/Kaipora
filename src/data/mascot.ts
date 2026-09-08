@@ -17,8 +17,8 @@
  * each moment triggers) — cropped bust-level portraits from the approved
  * multi-pose reference art, background removed (transparent PNG) so each
  * appearance shows just the drawing's own outline, never boxed or
- * circle-masked. `neutral` isn't wired to any moment yet; kept as a
- * spare for future use.
+ * circle-masked. `neutral` and `greeting` aren't wired to any moment yet;
+ * kept as spares for future use.
  */
 export const MASCOT_IMAGES = {
   /** Contextual same-day nudge (água/treino ainda por fazer). */
@@ -29,7 +29,9 @@ export const MASCOT_IMAGES = {
   comeBack: 'mascot/kaipora-kneeling.png',
   /** Exercício de respiração 4-4-4. */
   breathe: 'mascot/kaipora-breathing.png',
-  neutral: 'mascot/kaipora-neutral.png'
+  neutral: 'mascot/kaipora-neutral.png',
+  /** Aceno de saudação — ainda sem momento atribuído. */
+  greeting: 'mascot/kaipora-greeting.png'
 };
 
 export const MASCOT_LINES = {
