@@ -14,7 +14,13 @@ import {
   getFlexibleActivities,
   getSettings,
   getMascotComeBackShownDate,
-  setMascotComeBackShownDate
+  setMascotComeBackShownDate,
+  isMinDay,
+  toggleMinDay,
+  getSnoozedReminderDate,
+  setSnoozedReminderDate,
+  getWeeklyIntention,
+  setWeeklyIntention
 } from '../../lib/storage';
 import type { BuiltInModality, Weekday } from '../../lib/types';
 import { refreshActive, switchTab } from '../nav';
@@ -23,9 +29,12 @@ import { isDayComplete } from '../../lib/dayCompletion';
 import { computeDaySchedule } from '../../lib/routineSchedule';
 import { escapeHtml } from '../../lib/sanitize';
 import { essentialsCompletedFlags } from '../../lib/dayHistory';
-import { shouldShowComeBack, shouldShowReminder } from '../../lib/mascotState';
+import { shouldShowComeBack, shouldShowReminder, consecutiveDifficultDays, shouldUseAdaptiveTone } from '../../lib/mascotState';
 import { MASCOT_IMAGE, MASCOT_LINES } from '../../data/mascot';
 import { mascotCardHTML } from '../components/mascot';
+import { openModal } from '../components/modal';
+import { openBreathingModal } from '../components/timer';
+import { startOfWeek } from '../../lib/dates';
 
 let modality: BuiltInModality = 'academia';
 /** The date (YYYY-MM-DD) for which the completion celebration has already
@@ -52,10 +61,12 @@ export const todayTab: Tab = {
 
     const waterDone = day.water >= glassGoal;
     const trainingDone = Boolean(day.training?.done);
+    const minDay = isMinDay(date);
     const essentialsDone = isDayComplete({
       waterGlasses: day.water,
       waterGoalGlasses: glassGoal,
-      trainingDone
+      trainingDone,
+      minDay
     });
     const justCelebrated = essentialsDone && celebratedDate !== date;
     if (essentialsDone) celebratedDate = date;
@@ -66,8 +77,13 @@ export const todayTab: Tab = {
     const showComeBack = shouldShowComeBack(yesterdayDone, getMascotComeBackShownDate() === date);
     if (showComeBack) setMascotComeBackShownDate(date);
 
+    const recentFlags = essentialsCompletedFlags(toISO(addDays(fromISO(date), -5)), yesterday).reverse();
+    const difficultStreak = consecutiveDifficultDays(recentFlags);
+    const useAdaptiveTone = shouldUseAdaptiveTone(difficultStreak);
+
+    const snoozedToday = getSnoozedReminderDate() === date;
     let reminderText: string | null = null;
-    if (!essentialsDone) {
+    if (!essentialsDone && !snoozedToday) {
       const hour = now.getHours();
       if (shouldShowReminder(hour, trainingDone)) {
         reminderText = MASCOT_LINES.reminderTraining;
@@ -76,6 +92,9 @@ export const todayTab: Tab = {
         reminderText = MASCOT_LINES.reminderWater(remainingMl);
       }
     }
+
+    const weekKey = toISO(startOfWeek(fromISO(date)));
+    const weeklyIntention = getWeeklyIntention(weekKey);
 
     const exercisesDone = (day.exercisesDone[workout.id] ?? []).length;
     const mealsLogged = MEALS.filter((m) => allMealOptions(m.id).some((o) => day.meals[o.id])).length;
@@ -88,11 +107,20 @@ export const todayTab: Tab = {
         <div class="ph-sub">${formatLong(now)}</div>
       </div>
 
-      ${showComeBack ? mascotCardHTML(MASCOT_LINES.comeBack) : ''}
-      ${reminderText ? mascotCardHTML(reminderText) : ''}
+      <div class="form-row" style="padding-top:0">
+        <button class="btn ghost" id="breathe-open" type="button">Respirar</button>
+      </div>
+
+      ${showComeBack ? mascotCardHTML(useAdaptiveTone ? MASCOT_LINES.comeBackSoft : MASCOT_LINES.comeBack) : ''}
+      ${reminderText ? mascotCardHTML(reminderText, { dismissible: true }) : ''}
       ${essentialsDone ? completionBannerHTML(justCelebrated) : ''}
 
       <div class="priority-heading">Essencial</div>
+
+      <div class="row" style="cursor:default">
+        <div class="rtxt"><strong>Dia mínimo</strong><small>Em dias difíceis, só precisas de um Essencial, não os dois</small></div>
+        <span class="switch"><input type="checkbox" id="min-day-toggle" ${minDay ? 'checked' : ''}/><span class="slider"></span></span>
+      </div>
 
       <div class="wcard">
         <div class="wcard-top">
@@ -131,6 +159,14 @@ export const todayTab: Tab = {
       <div class="priority-heading">Importante</div>
 
       <section>
+        <div class="sec-title">Intenção da semana</div>
+        <div class="row" id="intention-open-row">
+          <div class="rtxt"><strong>${weeklyIntention ? escapeHtml(weeklyIntention) : 'Ainda não definida'}</strong><small>Toca para ${weeklyIntention ? 'editar' : 'definir'}</small></div>
+          <span class="badge-k">${weeklyIntention ? 'Editar' : 'Definir'}</span>
+        </div>
+      </section>
+
+      <section>
         <div class="sec-title">Rotina de hoje</div>
         <div id="routine-list"></div>
       </section>
@@ -154,7 +190,7 @@ export const todayTab: Tab = {
     renderGlasses(root, day.water, glassGoal);
     renderRoutine(root, date, day, weekdayKey, settings.wakeTime, settings.sleepTime);
     renderHabits(root, date, day);
-    wireEvents(root, date, glassGoal, workout);
+    wireEvents(root, date, glassGoal, workout, weekKey, weeklyIntention);
   }
 };
 
@@ -232,7 +268,33 @@ function renderHabits(root: HTMLElement, date: string, day: ReturnType<typeof ge
   ).join('');
 }
 
-function wireEvents(root: HTMLElement, date: string, glassGoal: number, workout: ReturnType<typeof getTrainingDay>['academia']) {
+function wireEvents(
+  root: HTMLElement,
+  date: string,
+  glassGoal: number,
+  workout: ReturnType<typeof getTrainingDay>['academia'],
+  weekKey: string,
+  weeklyIntention: string
+) {
+  root.querySelector('#breathe-open')?.addEventListener('click', () => openBreathingModal());
+
+  root.querySelector('#min-day-toggle')?.addEventListener('change', () => {
+    toggleMinDay(date);
+    refreshActive();
+  });
+
+  root.querySelector('[data-mascot-dismiss]')?.addEventListener('click', () => {
+    setSnoozedReminderDate(date);
+    refreshActive();
+  });
+
+  root.querySelector('#intention-open-row')?.addEventListener('click', () => {
+    openIntentionModal(weeklyIntention, (text) => {
+      setWeeklyIntention(weekKey, text);
+      refreshActive();
+    });
+  });
+
   root.querySelector('#water-plus')?.addEventListener('click', () => {
     const cur = getWater(date);
     if (cur < glassGoal + 4) setWater(date, cur + 1);
@@ -282,4 +344,27 @@ function wireEvents(root: HTMLElement, date: string, glassGoal: number, workout:
     toggleRoutineItem(date, row.dataset.routine as string);
     refreshActive();
   });
+}
+
+function openIntentionModal(current: string, onSave: (text: string) => void): void {
+  const close = openModal(
+    `
+    <button class="modal-close" data-close aria-label="Fechar"></button>
+    <h3>Intenção da semana</h3>
+    <div class="form-row">
+      <textarea class="finp" id="intention-text" rows="3" placeholder="O que queres priorizar esta semana?" style="flex:1;resize:vertical;font-family:inherit">${escapeHtml(current)}</textarea>
+    </div>
+    <div class="form-row" style="padding-top:0">
+      <button class="btn block" id="intention-save">Guardar</button>
+    </div>
+  `,
+    (modal) => {
+      modal.querySelector('#intention-save')?.addEventListener('click', () => {
+        const text = (modal.querySelector('#intention-text') as HTMLTextAreaElement).value.trim();
+        onSave(text);
+        close();
+      });
+      modal.querySelector('[data-close]')?.addEventListener('click', () => close());
+    }
+  );
 }

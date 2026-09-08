@@ -1,4 +1,4 @@
-import { getDay, getSettings } from './storage';
+import { getDay, getSettings, isMinDay } from './storage';
 import { isDayComplete } from './dayCompletion';
 import { toISO, addDays, fromISO } from './dates';
 
@@ -18,8 +18,16 @@ export function essentialsCompletedFlags(startDate: string, endDate: string): bo
 
   const flags: boolean[] = [];
   for (let d = start; d <= end; d = addDays(d, 1)) {
-    const day = getDay(toISO(d));
-    flags.push(isDayComplete({ waterGlasses: day.water, waterGoalGlasses: glassGoal, trainingDone: Boolean(day.training?.done) }));
+    const dateStr = toISO(d);
+    const day = getDay(dateStr);
+    flags.push(
+      isDayComplete({
+        waterGlasses: day.water,
+        waterGoalGlasses: glassGoal,
+        trainingDone: Boolean(day.training?.done),
+        minDay: isMinDay(dateStr)
+      })
+    );
   }
   return flags;
 }

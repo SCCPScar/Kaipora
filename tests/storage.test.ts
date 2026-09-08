@@ -65,7 +65,14 @@ import {
   getLastBackupAt,
   recordBackupExported,
   getMascotComeBackShownDate,
-  setMascotComeBackShownDate
+  setMascotComeBackShownDate,
+  isMinDay,
+  toggleMinDay,
+  getSnoozedReminderDate,
+  setSnoozedReminderDate,
+  getWeeklyIntentions,
+  getWeeklyIntention,
+  setWeeklyIntention
 } from '../src/lib/storage';
 import { touchedAt } from '../src/lib/meta';
 
@@ -308,6 +315,54 @@ describe('backup reminder + mascot come-back bookkeeping', () => {
     expect(getMascotComeBackShownDate()).toBeNull();
     setMascotComeBackShownDate('2026-01-01');
     expect(getMascotComeBackShownDate()).toBe('2026-01-01');
+  });
+});
+
+describe('dia mínimo', () => {
+  it('is off by default and toggles on/off per date', () => {
+    expect(isMinDay('2026-01-01')).toBe(false);
+    expect(toggleMinDay('2026-01-01')).toBe(true);
+    expect(isMinDay('2026-01-01')).toBe(true);
+    expect(toggleMinDay('2026-01-01')).toBe(false);
+    expect(isMinDay('2026-01-01')).toBe(false);
+  });
+
+  it('does not affect other dates', () => {
+    toggleMinDay('2026-01-01');
+    expect(isMinDay('2026-01-02')).toBe(false);
+  });
+});
+
+describe('snoozed reminder ("não me lembres hoje")', () => {
+  it('has no snoozed date until set', () => {
+    expect(getSnoozedReminderDate()).toBeNull();
+    setSnoozedReminderDate('2026-01-01');
+    expect(getSnoozedReminderDate()).toBe('2026-01-01');
+  });
+});
+
+describe('intenção da semana', () => {
+  it('is empty for a week with no intention set', () => {
+    expect(getWeeklyIntention('2026-01-04')).toBe('');
+  });
+
+  it('sets and reads back an intention for a given week', () => {
+    setWeeklyIntention('2026-01-04', 'Dormir mais cedo');
+    expect(getWeeklyIntention('2026-01-04')).toBe('Dormir mais cedo');
+  });
+
+  it('editing replaces the text for that week instead of duplicating it', () => {
+    setWeeklyIntention('2026-01-04', 'Dormir mais cedo');
+    setWeeklyIntention('2026-01-04', 'Beber mais água');
+    expect(getWeeklyIntention('2026-01-04')).toBe('Beber mais água');
+    expect(getWeeklyIntentions()).toHaveLength(1);
+  });
+
+  it('keeps different weeks independent', () => {
+    setWeeklyIntention('2026-01-04', 'Semana 1');
+    setWeeklyIntention('2026-01-11', 'Semana 2');
+    expect(getWeeklyIntention('2026-01-04')).toBe('Semana 1');
+    expect(getWeeklyIntention('2026-01-11')).toBe('Semana 2');
   });
 });
 

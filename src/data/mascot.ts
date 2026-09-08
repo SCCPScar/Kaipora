@@ -23,5 +23,9 @@ export const MASCOT_IMAGE = 'mascot/kaipora-placeholder.jpg';
 export const MASCOT_LINES = {
   reminderWater: (remainingMl: number) => `Ainda faltam ${remainingMl}ml para a tua meta de água hoje.`,
   reminderTraining: 'Ainda não treinaste hoje. Ainda dá tempo de fazer uma sessão curta.',
-  comeBack: 'Hoje não deu. Tudo bem. Amanhã é um novo dia.'
+  comeBack: 'Hoje não deu. Tudo bem. Amanhã é um novo dia.',
+  /** Used instead of comeBack once shouldUseAdaptiveTone() is true — two or
+   * more difficult days in a row, never a single one. */
+  comeBackSoft:
+    'Têm sido uns dias mais difíceis. Não precisas de recuperar tudo de uma vez — só o próximo copo de água ou o próximo treino já conta.'
 };

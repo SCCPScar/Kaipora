@@ -277,6 +277,10 @@ section, .card {
 .mascot-card { display: flex; gap: 12px; align-items: center; margin: 12px 14px; padding: 12px 14px; border-radius: var(--radius); background: var(--tint-primary-low); border: 1px solid var(--border-strong); }
 .mascot-card img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border-strong); }
 .mascot-card span { font-size: 12.5px; color: var(--text-dim); line-height: 1.5; }
+.mascot-dismiss { display: block; margin-top: 6px; padding: 0; background: none; border: none; font-size: 11px; font-weight: 600; color: var(--primary); text-decoration: underline; cursor: pointer; }
+
+.milestone-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px 16px; }
+.pill.earned { background: var(--tint-primary-low); border-color: var(--primary); color: var(--primary); }
 
 .priority-heading { padding: 10px 18px 2px; font-size: 11px; font-weight: 600; letter-spacing: 1.8px; text-transform: uppercase; color: var(--text-faint); }
 

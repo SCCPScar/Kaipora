@@ -46,6 +46,14 @@ export interface JournalEntry extends Tombstonable {
   text: string;
 }
 
+/** A single free-text intention set for a given week, keyed by the ISO date
+ * of that week's start (Sunday) — see startOfWeek in dates.ts. One entry
+ * per week: setting a new one for the same week replaces the old text. */
+export interface WeeklyIntention extends Tombstonable {
+  weekKey: string;
+  text: string;
+}
+
 export interface DayRecord {
   meals: Record<string, boolean>;
   water: number;

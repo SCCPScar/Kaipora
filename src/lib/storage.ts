@@ -1,4 +1,4 @@
-import type { DayRecord, MeasurementEntry, NoteEntry, JournalEntry, Settings, WeightEntry, Modality, Tombstonable } from './types';
+import type { DayRecord, MeasurementEntry, NoteEntry, JournalEntry, WeeklyIntention, Settings, WeightEntry, Modality, Tombstonable } from './types';
 import { DEFAULT_SETTINGS } from './types';
 import { visible, withAdded, withSoftDeleted } from './tombstoneList';
 import type { FixedCommitment, FlexibleActivity } from '../data/types-routine';
@@ -154,6 +154,31 @@ export function toggleRoutineItem(date: string, itemId: string): boolean {
   return done;
 }
 
+/**
+ * "Dia mínimo" — dates the user has deliberately marked as hard, where
+ * isDayComplete() only requires ONE of água/treino instead of both (see
+ * dayCompletion.ts). A plain date array, like getHiddenMealOptionIds: a
+ * low-stakes toggle, not an append-only log, so no tombstones needed.
+ */
+export function isMinDay(date: string): boolean {
+  return rawGet<string[]>(`${PFX}_min_days`, []).includes(date);
+}
+
+export function toggleMinDay(date: string): boolean {
+  const days = rawGet<string[]>(`${PFX}_min_days`, []);
+  const idx = days.indexOf(date);
+  let enabled: boolean;
+  if (idx >= 0) {
+    days.splice(idx, 1);
+    enabled = false;
+  } else {
+    days.push(date);
+    enabled = true;
+  }
+  rawSet(`${PFX}_min_days`, days);
+  return enabled;
+}
+
 // ---- Weights ----
 // Deletes are soft (tombstoned), never spliced out, so a delete made offline
 // on one device can't be silently undone by a stale copy still held by
@@ -296,6 +321,17 @@ export function getMascotComeBackShownDate(): string | null {
 
 export function setMascotComeBackShownDate(date: string): void {
   rawSet(`${PFX}_mascot_comeback_shown`, date);
+}
+
+/** The one date (YYYY-MM-DD) for which the user asked Kaipora not to show
+ * same-day nudge reminders — "não me lembres hoje". Resets naturally the
+ * next day since it's compared against today's date wherever it's read. */
+export function getSnoozedReminderDate(): string | null {
+  return rawGet<string | null>(`${PFX}_snoozed_reminder_date`, null);
+}
+
+export function setSnoozedReminderDate(date: string): void {
+  rawSet(`${PFX}_snoozed_reminder_date`, date);
 }
 
 // ---- Exercise load / strength progression ----
@@ -613,6 +649,30 @@ export function deleteJournalEntry(visibleIndex: number): void {
     `${PFX}_journal`,
     withSoftDeleted(getJournalRaw(), visibleIndex, (a, b) => a.date === b.date && a.text === b.text)
   );
+}
+
+// ---- Intenção da semana: uma frase livre, uma por semana ----
+// Edited like updateMeasurement/claimReward: tombstone the old text for that
+// week (if any) and add the edited one, matched by weekKey — never mutated
+// in place, so a sync merge never turns an edit into a duplicate.
+
+function getWeeklyIntentionsRaw(): WeeklyIntention[] {
+  return rawGet<WeeklyIntention[]>(`${PFX}_weekly_intentions`, []);
+}
+
+export function getWeeklyIntentions(): WeeklyIntention[] {
+  return visible(getWeeklyIntentionsRaw());
+}
+
+export function getWeeklyIntention(weekKey: string): string {
+  return getWeeklyIntentions().find((w) => w.weekKey === weekKey)?.text ?? '';
+}
+
+export function setWeeklyIntention(weekKey: string, text: string): void {
+  const raw = getWeeklyIntentionsRaw();
+  const idx = visible(raw).findIndex((w) => w.weekKey === weekKey);
+  const tombstoned = idx >= 0 ? withSoftDeleted(raw, idx, (a, b) => a.weekKey === b.weekKey) : raw;
+  rawSet(`${PFX}_weekly_intentions`, withAdded(tombstoned, { weekKey, text }));
 }
 
 // ---- Desafios: Kaipora 75 e outros desafios pessoais ----

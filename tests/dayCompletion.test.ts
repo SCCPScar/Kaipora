@@ -26,4 +26,22 @@ describe('isDayComplete', () => {
     // Same essentials, wildly different "extra" context — must not matter.
     expect(isDayComplete({ waterGlasses: 8, waterGoalGlasses: 8, trainingDone: true })).toBe(true);
   });
+
+  describe('minDay ("dia mínimo")', () => {
+    it('is complete with only water done', () => {
+      expect(isDayComplete({ waterGlasses: 8, waterGoalGlasses: 8, trainingDone: false, minDay: true })).toBe(true);
+    });
+
+    it('is complete with only training done', () => {
+      expect(isDayComplete({ waterGlasses: 0, waterGoalGlasses: 8, trainingDone: true, minDay: true })).toBe(true);
+    });
+
+    it('is still incomplete when neither is done', () => {
+      expect(isDayComplete({ waterGlasses: 0, waterGoalGlasses: 8, trainingDone: false, minDay: true })).toBe(false);
+    });
+
+    it('does not relax the rule when minDay is false', () => {
+      expect(isDayComplete({ waterGlasses: 8, waterGoalGlasses: 8, trainingDone: false, minDay: false })).toBe(false);
+    });
+  });
 });

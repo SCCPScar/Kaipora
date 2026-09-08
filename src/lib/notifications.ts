@@ -1,4 +1,4 @@
-import { getSettings, getDay } from './storage';
+import { getSettings, getDay, getSnoozedReminderDate } from './storage';
 import { todayISO } from './dates';
 import { MASCOT_LINES } from '../data/mascot';
 
@@ -51,6 +51,7 @@ export function startReminderLoop(): void {
     const settings = getSettings();
     if (!settings.notificationsEnabled) return;
     const now = new Date();
+    if (getSnoozedReminderDate() === todayISO()) return;
     const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const todayKey = `${now.toDateString()}_${hhmm}`;
 
