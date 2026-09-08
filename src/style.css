@@ -274,8 +274,11 @@ section, .card {
 /* ---- alerts / hero ---- */
 .alert { display: flex; gap: 10px; align-items: flex-start; margin: 12px 14px; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--tint-primary-low); border: 1px solid var(--border-strong); font-size: 12.5px; color: var(--text-dim); }
 
-.mascot-card { display: flex; gap: 12px; align-items: center; margin: 12px 14px; padding: 12px 14px; border-radius: var(--radius); background: var(--tint-primary-low); border: 1px solid var(--border-strong); }
-.mascot-card img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border-strong); }
+/* The avatar floats above the bubble, overlapping its top edge, instead
+   of sitting inside it — the bubble itself holds only the text. */
+.mascot-card { position: relative; margin: 30px 14px 12px; padding: 14px 14px 14px 20px; border-radius: var(--radius); background: var(--tint-primary-low); border: 1px solid var(--border-strong); }
+.mascot-card img { position: absolute; top: -26px; left: 16px; width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg); box-shadow: 0 4px 10px rgba(0,0,0,.2); }
+.mascot-card > div { padding-top: 16px; }
 .mascot-card span { font-size: 12.5px; color: var(--text-dim); line-height: 1.5; }
 .mascot-dismiss { display: block; margin-top: 6px; padding: 0; background: none; border: none; font-size: 11px; font-weight: 600; color: var(--primary); text-decoration: underline; cursor: pointer; }
 
@@ -466,6 +469,10 @@ label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim
 .meds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 14px; }
 .meds-grid > div { min-width: 0; }
 .meds-grid .finp { width: 100%; min-width: 0; }
+/* type="time" has a native rendering width some mobile browsers won't
+   shrink below, however narrow the grid column — auto-fit lets a column
+   drop to its own row instead of overflowing/clipping past the screen. */
+.meds-grid.time-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
 
 /* ---- calendar ---- */
 .cal-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }

@@ -146,7 +146,7 @@ export function openBreathingModal(): void {
     `
     <button class="modal-close" data-close aria-label="Fechar"></button>
     <h3>Respirar</h3>
-    <img src="${mascotSrc}" alt="Kaipora" width="88" height="88" style="display:block;margin:0 auto 12px;border-radius:50%;object-fit:cover;border:2px solid var(--border-strong)" />
+    <img src="${mascotSrc}" alt="Kaipora" width="152" height="152" style="display:block;margin:0 auto 14px;border-radius:50%;object-fit:cover;border:2px solid var(--border-strong)" />
     <div class="timer-display" id="breath-phase" style="font-size:20px">${BREATH_PHASES[0].label}</div>
     <div class="timer-display" id="breath-display">${fmt(remaining)}</div>
     <div class="timer-btns">

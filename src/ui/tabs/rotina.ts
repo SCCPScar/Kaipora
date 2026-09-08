@@ -69,7 +69,7 @@ export const rotinaTab: Tab = {
 
       <section>
         <div class="sec-title">Janela do dia</div>
-        <div class="meds-grid">
+        <div class="meds-grid time-grid">
           <div><label>Acordar</label><input class="finp" id="wake-time" type="time" value="${settings.wakeTime}" /></div>
           <div><label>Dormir</label><input class="finp" id="sleep-time" type="time" value="${settings.sleepTime}" /></div>
         </div>
@@ -105,7 +105,7 @@ export const rotinaTab: Tab = {
         </div>
         ${
           commitmentType === 'fixed'
-            ? `<div class="meds-grid" style="padding-top:0">
+            ? `<div class="meds-grid time-grid" style="padding-top:0">
                 <div><label>Início</label><input class="finp" id="cm-start" type="time" /></div>
                 <div><label>Fim</label><input class="finp" id="cm-end" type="time" /></div>
               </div>`
