@@ -34,6 +34,8 @@ function todayWeekday(): Weekday {
 }
 
 let selectedDay: Weekday = todayWeekday();
+type CommitmentType = 'fixed' | 'flexible';
+let commitmentType: CommitmentType = 'fixed';
 
 function minToHHMM(min: number): string {
   const h = Math.floor(min / 60)
@@ -85,31 +87,37 @@ export const rotinaTab: Tab = {
       <section>
         <div class="sec-title">Compromissos fixos</div>
         <div id="fixed-list"></div>
-        <div class="form-row">
-          <input class="finp" id="fx-label" type="text" placeholder="Ex: Trabalho" style="flex:2" />
-          <input class="finp" id="fx-start" type="time" style="flex:1;min-width:90px" />
-          <input class="finp" id="fx-end" type="time" style="flex:1;min-width:90px" />
-        </div>
-        <div class="form-row" style="padding-top:0;flex-wrap:wrap">
-          ${WEEKDAYS.map((d) => `<label class="pill" style="cursor:pointer"><input type="checkbox" class="fx-day" value="${d}" style="margin-right:4px" />${WEEKDAY_LABELS[d].slice(0, 3)}</label>`).join('')}
-        </div>
-        <div class="form-row" style="padding-top:0">
-          <button class="btn block" id="fx-add">+ Adicionar compromisso</button>
-        </div>
       </section>
 
       <section>
         <div class="sec-title">Atividades flexíveis</div>
         <div id="flexible-list"></div>
-        <div class="form-row">
-          <input class="finp" id="fl-label" type="text" placeholder="Ex: Programação" style="flex:2" />
-          <input class="finp" id="fl-duration" type="number" min="5" step="5" placeholder="min" style="flex:1;min-width:80px" />
+      </section>
+
+      <section>
+        <div class="sec-title">Adicionar à rotina</div>
+        <div class="modality-switch">
+          <button class="modality-btn ${commitmentType === 'fixed' ? 'active' : ''}" data-commitment-type="fixed">Fixo</button>
+          <button class="modality-btn ${commitmentType === 'flexible' ? 'active' : ''}" data-commitment-type="flexible">Flexível</button>
         </div>
+        <div class="form-row">
+          <input class="finp" id="cm-label" type="text" placeholder="${commitmentType === 'fixed' ? 'Ex: Trabalho' : 'Ex: Programação'}" style="flex:1" />
+        </div>
+        ${
+          commitmentType === 'fixed'
+            ? `<div class="meds-grid" style="padding-top:0">
+                <div><label>Início</label><input class="finp" id="cm-start" type="time" /></div>
+                <div><label>Fim</label><input class="finp" id="cm-end" type="time" /></div>
+              </div>`
+            : `<div class="form-row" style="padding-top:0">
+                <input class="finp" id="cm-duration" type="number" min="5" step="5" placeholder="Duração em minutos" style="flex:1" />
+              </div>`
+        }
         <div class="form-row" style="padding-top:0;flex-wrap:wrap">
-          ${WEEKDAYS.map((d) => `<label class="pill" style="cursor:pointer"><input type="checkbox" class="fl-day" value="${d}" style="margin-right:4px" />${WEEKDAY_LABELS[d].slice(0, 3)}</label>`).join('')}
+          ${WEEKDAYS.map((d) => `<label class="pill" style="cursor:pointer"><input type="checkbox" class="cm-day" value="${d}" style="margin-right:4px" />${WEEKDAY_LABELS[d].slice(0, 3)}</label>`).join('')}
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn block" id="fl-add">+ Adicionar atividade</button>
+          <button class="btn block" id="cm-add">+ Adicionar ${commitmentType === 'fixed' ? 'compromisso' : 'atividade'}</button>
         </div>
       </section>
 
@@ -205,30 +213,35 @@ function wireEvents(root: HTMLElement) {
     refreshActive();
   });
 
-  root.querySelector('#fx-add')?.addEventListener('click', () => {
-    const label = (root.querySelector('#fx-label') as HTMLInputElement).value.trim();
-    const start = (root.querySelector('#fx-start') as HTMLInputElement).value;
-    const end = (root.querySelector('#fx-end') as HTMLInputElement).value;
-    const days = [...root.querySelectorAll<HTMLInputElement>('.fx-day:checked')].map((i) => i.value as Weekday);
-    if (!label || !start || !end || !days.length) {
-      showToast('Preenche o nome, horário e pelo menos um dia');
-      return;
-    }
-    addFixedCommitment({ id: `fx_${Date.now()}`, label, days, startMin: timeToMin(start), endMin: timeToMin(end) });
-    showToast('Compromisso adicionado');
-    refreshActive();
+  root.querySelectorAll<HTMLButtonElement>('[data-commitment-type]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      commitmentType = btn.dataset.commitmentType as CommitmentType;
+      refreshActive();
+    });
   });
 
-  root.querySelector('#fl-add')?.addEventListener('click', () => {
-    const label = (root.querySelector('#fl-label') as HTMLInputElement).value.trim();
-    const duration = Number((root.querySelector('#fl-duration') as HTMLInputElement).value);
-    const days = [...root.querySelectorAll<HTMLInputElement>('.fl-day:checked')].map((i) => i.value as Weekday);
-    if (!label || !duration || !days.length) {
-      showToast('Preenche o nome, duração e pelo menos um dia');
-      return;
+  root.querySelector('#cm-add')?.addEventListener('click', () => {
+    const label = (root.querySelector('#cm-label') as HTMLInputElement).value.trim();
+    const days = [...root.querySelectorAll<HTMLInputElement>('.cm-day:checked')].map((i) => i.value as Weekday);
+
+    if (commitmentType === 'fixed') {
+      const start = (root.querySelector('#cm-start') as HTMLInputElement).value;
+      const end = (root.querySelector('#cm-end') as HTMLInputElement).value;
+      if (!label || !start || !end || !days.length) {
+        showToast('Preenche o nome, horário e pelo menos um dia');
+        return;
+      }
+      addFixedCommitment({ id: `fx_${Date.now()}`, label, days, startMin: timeToMin(start), endMin: timeToMin(end) });
+      showToast('Compromisso adicionado');
+    } else {
+      const duration = Number((root.querySelector('#cm-duration') as HTMLInputElement).value);
+      if (!label || !duration || !days.length) {
+        showToast('Preenche o nome, duração e pelo menos um dia');
+        return;
+      }
+      addFlexibleActivity({ id: `fl_${Date.now()}`, label, days, durationMin: duration });
+      showToast('Atividade adicionada');
     }
-    addFlexibleActivity({ id: `fl_${Date.now()}`, label, days, durationMin: duration });
-    showToast('Atividade adicionada');
     refreshActive();
   });
 

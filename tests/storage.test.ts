@@ -203,6 +203,12 @@ describe('settings', () => {
     expect(getSettings().waterGoalMl).toBe(2500);
     expect(getSettings().calorieGoal).toBe(1615); // untouched default preserved
   });
+
+  it('has no user name until one is set, never a hardcoded default', () => {
+    expect(getSettings().userName).toBe('');
+    saveSettings({ userName: 'Ana' });
+    expect(getSettings().userName).toBe('Ana');
+  });
 });
 
 describe('backup export/import', () => {

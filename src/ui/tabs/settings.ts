@@ -38,6 +38,16 @@ export const settingsTab: Tab = {
       </div>
 
       <section>
+        <div class="sec-title">Perfil</div>
+        <div class="form-row">
+          <input class="finp" id="s-name" type="text" placeholder="O teu nome (usado nas saudações)" value="${escapeHtml(settings.userName)}" style="flex:1" />
+        </div>
+        <div class="form-row" style="padding-top:0">
+          <button class="btn block" id="s-save-name">Guardar nome</button>
+        </div>
+      </section>
+
+      <section>
         <div class="sec-title">Aparência</div>
         <div style="padding:12px 16px 4px;font-size:12.5px;color:var(--text-dim)">Dark e Light Mode partilham a mesma identidade. Escolhe o que preferires.</div>
         <div class="form-row">
@@ -190,6 +200,12 @@ function wireEvents(root: HTMLElement) {
       applyTheme(theme);
       refreshActive();
     });
+  });
+
+  root.querySelector('#s-save-name')?.addEventListener('click', () => {
+    saveSettings({ userName: (root.querySelector('#s-name') as HTMLInputElement).value.trim() });
+    showToast('Nome guardado');
+    refreshActive();
   });
 
   root.querySelector('#s-save-goals')?.addEventListener('click', () => {

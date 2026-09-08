@@ -1,5 +1,5 @@
 import type { Tab } from '../nav';
-import { TRAINING_WEEK, getGluteWorkouts } from '../../data/training';
+import { TRAINING_WEEK } from '../../data/training';
 import { EXERCISES, getExerciseById } from '../../data/exercises';
 import type { Workout, TrainingDay, CustomWorkout, WorkoutExercise } from '../../data/types-training';
 import type { BuiltInModality } from '../../lib/types';
@@ -69,15 +69,6 @@ export const trainingTab: Tab = {
         <div id="week-days"></div>
 
         <section>
-          <div class="sec-title"><span>Programa Intensivo de Glúteos</span></div>
-          <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-            Trabalho dedicado a glúteo máximo e médio, distribuído ao longo da semana para evitar volume excessivo.
-            Aparece nos dias de pernas (Qua, Qui, Sáb). Aqui tens a lista completa dos treinos que fazem parte do programa.
-          </div>
-          <div id="glute-list"></div>
-        </section>
-
-        <section>
           <div class="sec-title"><span>Os Meus Exercícios</span></div>
           <div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
             Exercícios que a biblioteca não tem, como algo que o teu personal trainer te ensinou. Ficam disponíveis para qualquer treino teu.
@@ -98,7 +89,6 @@ export const trainingTab: Tab = {
     `;
 
     renderWeek(root, date);
-    renderGluteList(root);
     renderCustomExercises(root);
     renderCustomWorkouts(root, date);
     wireEvents(root.querySelector('#treino-content') as HTMLElement, date);
@@ -162,23 +152,6 @@ function exerciseListHTML(workout: Workout, date: string): string {
         </div>
       </div>`;
     })
-    .join('');
-}
-
-function renderGluteList(root: HTMLElement) {
-  const el = root.querySelector('#glute-list') as HTMLElement;
-  const workouts = getGluteWorkouts();
-  el.innerHTML = workouts
-    .map(
-      (w) => `
-    <div class="row" style="cursor:default">
-      <div class="rtxt">
-        <strong>${w.title}</strong>
-        <small>${w.exercises.map((e) => EXERCISES[e.exerciseId]?.name).filter(Boolean).join(' · ')}</small>
-      </div>
-      <span class="pill">${w.location === 'academia' ? 'Academia' : 'Casa'}</span>
-    </div>`
-    )
     .join('');
 }
 

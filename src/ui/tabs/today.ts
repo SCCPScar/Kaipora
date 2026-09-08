@@ -102,7 +102,7 @@ export const todayTab: Tab = {
 
     root.innerHTML = `
       <div class="ph">
-        <h2>${greeting(now)}, Scarllett</h2>
+        <h2>${greeting(now)}${settings.userName ? `, ${escapeHtml(settings.userName)}` : ''}</h2>
         <div class="ph-title">Hoje</div>
         <div class="ph-sub">${formatLong(now)}</div>
       </div>

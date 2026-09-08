@@ -67,6 +67,9 @@ export interface DayRecord {
 export type ThemePreference = 'system' | 'dark' | 'light';
 
 export interface Settings {
+  /** Shown in greetings (Hoje, Progresso) instead of a hardcoded name — empty
+   * means no name is inserted at all. */
+  userName: string;
   waterGoalMl: number;
   calorieGoal: number;
   proteinGoal: number;
@@ -92,6 +95,7 @@ export interface Settings {
 // carbGoal/fatGoal derived from the average carbs/fat across all options of
 // each meal slot in src/data/diet.ts, the same way calorieGoal/proteinGoal were.
 export const DEFAULT_SETTINGS: Settings = {
+  userName: '',
   waterGoalMl: 2000,
   calorieGoal: 1615,
   proteinGoal: 135,

@@ -7,9 +7,6 @@ import {
   addMeasurement,
   updateMeasurement,
   deleteMeasurement,
-  getNotes,
-  addNote,
-  deleteNote,
   getSettings
 } from '../../lib/storage';
 import { todayISO } from '../../lib/dates';
@@ -28,13 +25,12 @@ export const progressTab: Tab = {
   render(root: HTMLElement) {
     const weights = getWeights();
     const measurements = getMeasurements();
-    const notes = getNotes();
     const settings = getSettings();
 
     root.innerHTML = `
       <div class="ph">
         <h2>Progresso</h2>
-        <div class="ph-title">O teu historial, Scarllett</div>
+        <div class="ph-title">O teu historial${settings.userName ? `, ${escapeHtml(settings.userName)}` : ''}</div>
         <div class="ph-sub">Recomposição corporal, mais do que a balança</div>
       </div>
 
@@ -76,21 +72,11 @@ export const progressTab: Tab = {
         <div style="padding:0 16px 4px;font-size:11px;color:var(--text-faint)">Toca num registo abaixo para o editar.</div>
         <div id="mlog"></div>
       </section>
-
-      <section>
-        <div class="sec-title">Diário</div>
-        <div class="form-row">
-          <input class="finp" id="ni" type="text" placeholder="Como foi hoje, Scarllett?" />
-          <button class="fsave" id="nsave">Guardar</button>
-        </div>
-        <div id="nlog"></div>
-      </section>
     `;
 
     renderChart(root, weights, settings.goalWeightKg);
     renderWeightLog(root, weights);
     renderMeasurements(root, measurements);
-    renderNotes(root, notes);
     prefillMeasurementForm(root, measurements);
     wireEvents(root);
   }
@@ -175,23 +161,6 @@ function prefillMeasurementForm(root: HTMLElement, measurements: ReturnType<type
   }
 }
 
-function renderNotes(root: HTMLElement, list: ReturnType<typeof getNotes>) {
-  const el = root.querySelector('#nlog') as HTMLElement;
-  if (!list.length) {
-    el.innerHTML = '<div class="empty">Ainda sem notas</div>';
-    return;
-  }
-  el.innerHTML = list
-    .map(
-      (n, i) => `
-    <div class="log-item">
-      <div class="log-txt"><strong>${escapeHtml(n.text)}</strong><div class="log-date">${n.date}</div></div>
-      <button class="log-del" data-del-note="${i}" aria-label="Remover">✕</button>
-    </div>`
-    )
-    .join('');
-}
-
 function wireEvents(root: HTMLElement) {
   root.querySelector('#wsave')?.addEventListener('click', () => {
     const input = root.querySelector('#wi') as HTMLInputElement;
@@ -236,13 +205,6 @@ function wireEvents(root: HTMLElement) {
     refreshActive();
   });
 
-  root.querySelector('#nsave')?.addEventListener('click', () => {
-    const input = root.querySelector('#ni') as HTMLInputElement;
-    if (!input.value.trim()) return;
-    addNote(input.value.trim(), todayISO());
-    refreshActive();
-  });
-
   root.querySelector('#wlog')?.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-del-weight]');
     if (!btn) return;
@@ -266,13 +228,5 @@ function wireEvents(root: HTMLElement) {
       editingMeasurementIndex = Number(row.dataset.editMeasurement);
       refreshActive();
     }
-  });
-
-  root.querySelector('#nlog')?.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-del-note]');
-    if (!btn) return;
-    if (!confirm('Remover esta nota?')) return;
-    deleteNote(Number(btn.dataset.delNote));
-    refreshActive();
   });
 }

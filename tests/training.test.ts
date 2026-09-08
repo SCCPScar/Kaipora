@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TRAINING_WEEK, getWorkoutById, getGluteWorkouts, getTrainingDay } from '../src/data/training';
+import { TRAINING_WEEK, getWorkoutById, getTrainingDay } from '../src/data/training';
 import { EXERCISES, getExerciseById } from '../src/data/exercises';
 import { EXERCISE_DIAGRAMS } from '../src/data/exerciseDiagrams';
 import { addCustomExercise } from '../src/lib/storage';
@@ -32,17 +32,6 @@ describe('training plan', () => {
           expect(EXERCISES[we.exerciseId], `missing exercise ${we.exerciseId} in ${workout.id}`).toBeDefined();
         }
       }
-    }
-  });
-
-  it('includes a dedicated glute program spanning both modalities', () => {
-    const gluteWorkouts = getGluteWorkouts();
-    expect(gluteWorkouts.length).toBeGreaterThanOrEqual(2);
-    expect(gluteWorkouts.some((w) => w.location === 'academia')).toBe(true);
-    expect(gluteWorkouts.some((w) => w.location === 'casa')).toBe(true);
-    for (const workout of gluteWorkouts) {
-      const hasGluteExercise = workout.exercises.some((we) => EXERCISES[we.exerciseId]?.gluteFocus);
-      expect(hasGluteExercise).toBe(true);
     }
   });
 
