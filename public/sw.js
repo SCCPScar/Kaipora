@@ -12,9 +12,9 @@ const APP_SHELL = [
   SCOPE,
   SCOPE + 'index.html',
   SCOPE + 'manifest.webmanifest',
-  SCOPE + 'icons/icon.svg',
-  SCOPE + 'icons/icon-192.png',
-  SCOPE + 'icons/icon-512.png'
+  SCOPE + 'icons/icon.svg?v=2',
+  SCOPE + 'icons/icon-192.png?v=2',
+  SCOPE + 'icons/icon-512.png?v=2'
 ];
 
 self.addEventListener('install', (event) => {

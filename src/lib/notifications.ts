@@ -17,7 +17,7 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
 
 function notify(title: string, body: string) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  new Notification(title, { body, icon: `${import.meta.env.BASE_URL}icons/icon-192.png` });
+  new Notification(title, { body, icon: `${import.meta.env.BASE_URL}icons/icon-192.png?v=2` });
 }
 
 /** Content-based, not clock-based: only nudges about water when there is
