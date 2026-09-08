@@ -61,7 +61,11 @@ import {
   deleteChallenge,
   getChallengeDayLog,
   getChallengeDayLogs,
-  setChallengeDayLog
+  setChallengeDayLog,
+  getLastBackupAt,
+  recordBackupExported,
+  getMascotComeBackShownDate,
+  setMascotComeBackShownDate
 } from '../src/lib/storage';
 import { touchedAt } from '../src/lib/meta';
 
@@ -282,10 +286,28 @@ describe('allKeys', () => {
     addWeight(75, '2026-01-01');
     rawSet('vp_last_synced_at', Date.now());
     rawSet('vp_migrated_from_scar', true);
+    rawSet('vp_last_backup_at', new Date().toISOString());
+    rawSet('vp_mascot_comeback_shown', '2026-01-01');
     expect(allKeys()).toContain('vp_weights');
     expect(allKeys()).not.toContain('vp_meta');
     expect(allKeys()).not.toContain('vp_last_synced_at');
     expect(allKeys()).not.toContain('vp_migrated_from_scar');
+    expect(allKeys()).not.toContain('vp_last_backup_at');
+    expect(allKeys()).not.toContain('vp_mascot_comeback_shown');
+  });
+});
+
+describe('backup reminder + mascot come-back bookkeeping', () => {
+  it('has no backup timestamp until one is recorded', () => {
+    expect(getLastBackupAt()).toBeNull();
+    recordBackupExported();
+    expect(getLastBackupAt()).not.toBeNull();
+  });
+
+  it('tracks which date the mascot come-back message was last shown for', () => {
+    expect(getMascotComeBackShownDate()).toBeNull();
+    setMascotComeBackShownDate('2026-01-01');
+    expect(getMascotComeBackShownDate()).toBe('2026-01-01');
   });
 });
 

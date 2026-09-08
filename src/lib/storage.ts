@@ -53,7 +53,13 @@ export function rawRemove(key: string): void {
  * vp_last_synced_at pulled from another device would corrupt this device's
  * sync cursor) and never included in backups.
  */
-const INTERNAL_KEYS = new Set([`${PFX}_meta`, `${PFX}_last_synced_at`, `${PFX}_migrated_from_scar`, `${PFX}_last_backup_at`]);
+const INTERNAL_KEYS = new Set([
+  `${PFX}_meta`,
+  `${PFX}_last_synced_at`,
+  `${PFX}_migrated_from_scar`,
+  `${PFX}_last_backup_at`,
+  `${PFX}_mascot_comeback_shown`
+]);
 
 /** Every user-data key currently in localStorage, for backup/export/sync. */
 export function allKeys(): string[] {
@@ -280,6 +286,16 @@ export function getLastBackupAt(): string | null {
 
 export function recordBackupExported(): void {
   rawSet(`${PFX}_last_backup_at`, new Date().toISOString());
+}
+
+/** Which date (YYYY-MM-DD) the mascot's "come back" message was last shown
+ * for — so it appears once per missed day, not on every render. */
+export function getMascotComeBackShownDate(): string | null {
+  return rawGet<string | null>(`${PFX}_mascot_comeback_shown`, null);
+}
+
+export function setMascotComeBackShownDate(date: string): void {
+  rawSet(`${PFX}_mascot_comeback_shown`, date);
 }
 
 // ---- Exercise load / strength progression ----

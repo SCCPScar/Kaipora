@@ -1,5 +1,5 @@
 import type { Tab } from '../nav';
-import { todayISO, formatLong, greeting, WEEKDAY_KEYS } from '../../lib/dates';
+import { todayISO, formatLong, greeting, WEEKDAY_KEYS, addDays, fromISO, toISO } from '../../lib/dates';
 import { getTrainingDay } from '../../data/training';
 import { MEALS, allMealOptions, combinedDayTotals } from '../../data/diet';
 import { HABITS } from '../../data/habits';
@@ -12,7 +12,9 @@ import {
   toggleRoutineItem,
   getFixedCommitments,
   getFlexibleActivities,
-  getSettings
+  getSettings,
+  getMascotComeBackShownDate,
+  setMascotComeBackShownDate
 } from '../../lib/storage';
 import type { BuiltInModality, Weekday } from '../../lib/types';
 import { refreshActive, switchTab } from '../nav';
@@ -20,6 +22,10 @@ import { showToast } from '../components/toast';
 import { isDayComplete } from '../../lib/dayCompletion';
 import { computeDaySchedule } from '../../lib/routineSchedule';
 import { escapeHtml } from '../../lib/sanitize';
+import { essentialsCompletedFlags } from '../../lib/dayHistory';
+import { shouldShowComeBack, shouldShowReminder } from '../../lib/mascotState';
+import { MASCOT_IMAGE, MASCOT_LINES } from '../../data/mascot';
+import { mascotCardHTML } from '../components/mascot';
 
 let modality: BuiltInModality = 'academia';
 /** The date (YYYY-MM-DD) for which the completion celebration has already
@@ -44,13 +50,32 @@ export const todayTab: Tab = {
     const glassGoal = Math.max(1, Math.round(settings.waterGoalMl / 250));
     const mlEach = Math.round(settings.waterGoalMl / glassGoal);
 
+    const waterDone = day.water >= glassGoal;
+    const trainingDone = Boolean(day.training?.done);
     const essentialsDone = isDayComplete({
       waterGlasses: day.water,
       waterGoalGlasses: glassGoal,
-      trainingDone: Boolean(day.training?.done)
+      trainingDone
     });
     const justCelebrated = essentialsDone && celebratedDate !== date;
     if (essentialsDone) celebratedDate = date;
+
+    const yesterday = toISO(addDays(fromISO(date), -1));
+    const yesterdayFlags = essentialsCompletedFlags(yesterday, yesterday);
+    const yesterdayDone = yesterdayFlags.length ? yesterdayFlags[0] : null;
+    const showComeBack = shouldShowComeBack(yesterdayDone, getMascotComeBackShownDate() === date);
+    if (showComeBack) setMascotComeBackShownDate(date);
+
+    let reminderText: string | null = null;
+    if (!essentialsDone) {
+      const hour = now.getHours();
+      if (shouldShowReminder(hour, trainingDone)) {
+        reminderText = MASCOT_LINES.reminderTraining;
+      } else if (shouldShowReminder(hour, waterDone)) {
+        const remainingMl = Math.max(0, settings.waterGoalMl - day.water * mlEach);
+        reminderText = MASCOT_LINES.reminderWater(remainingMl);
+      }
+    }
 
     const exercisesDone = (day.exercisesDone[workout.id] ?? []).length;
     const mealsLogged = MEALS.filter((m) => allMealOptions(m.id).some((o) => day.meals[o.id])).length;
@@ -63,6 +88,8 @@ export const todayTab: Tab = {
         <div class="ph-sub">${formatLong(now)}</div>
       </div>
 
+      ${showComeBack ? mascotCardHTML(MASCOT_LINES.comeBack) : ''}
+      ${reminderText ? mascotCardHTML(reminderText) : ''}
       ${essentialsDone ? completionBannerHTML(justCelebrated) : ''}
 
       <div class="priority-heading">Essencial</div>
@@ -143,9 +170,11 @@ function completionBannerHTML(animate: boolean): string {
         return `<span class="spark" style="--dx:${dx}px;--dy:${dy}px;animation-delay:${i * 30}ms"></span>`;
       }).join('')
     : '';
+  const mascotSrc = `${import.meta.env.BASE_URL}${MASCOT_IMAGE}`;
   return `
     <div class="day-complete-banner ${animate ? 'animate' : ''}">
       ${sparks}
+      <img src="${mascotSrc}" alt="Kaipora" width="40" height="40" style="border-radius:50%;border:2px solid rgba(255,255,255,.5);flex-shrink:0;object-fit:cover" />
       <div>
         <strong>Essenciais de hoje concluídos.</strong>
         <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">O resto do dia é bónus. Consistência é mais importante que perfeição.</div>

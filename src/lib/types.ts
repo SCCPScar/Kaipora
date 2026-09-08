@@ -67,6 +67,9 @@ export interface Settings {
   goalWeightKg: number;
   heightCm: number;
   notificationsEnabled: boolean;
+  /** `water` is kept only for backward-compat with existing saved settings —
+   * the water reminder now fires based on how much is still missing to the
+   * goal, not a fixed schedule (see notifications.ts). */
   reminderTimes: { water: string[]; meals: string[]; training: string[] };
   reducedMotion: boolean;
   theme: ThemePreference;

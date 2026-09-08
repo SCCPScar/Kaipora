@@ -48,7 +48,7 @@ export const dietTab: Tab = {
       <div class="stat-row">
         <div class="stat"><strong style="font-weight:900">${totals.kcal}</strong><small>consumido</small></div>
         <div class="stat"><strong>${settings.calorieGoal}</strong><small>meta kcal</small></div>
-        <div class="stat"><strong style="color:${remaining < 0 ? 'var(--primary)' : 'var(--green)'}">${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? 'restante' : 'acima da meta'}</small></div>
+        <div class="stat"><strong>${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? 'restante' : 'acima da meta'}</small></div>
       </div>
       <div class="macro-line" style="padding:0 14px 12px">P ${totals.protein}g / ${settings.proteinGoal}g &middot; HC ${totals.carbs}g / ${settings.carbGoal}g &middot; G ${totals.fat}g / ${settings.fatGoal}g</div>
 
