@@ -1,4 +1,5 @@
 import { openModal } from './modal';
+import { MASCOT_IMAGES } from '../../data/mascot';
 
 const PRESETS = [30, 45, 60, 90, 120];
 
@@ -140,10 +141,12 @@ export function openBreathingModal(): void {
   let running = false;
   let audioCtx: AudioContext | undefined;
 
+  const mascotSrc = `${import.meta.env.BASE_URL}${MASCOT_IMAGES.breathe}`;
   const close = openModal(
     `
     <button class="modal-close" data-close aria-label="Fechar"></button>
     <h3>Respirar</h3>
+    <img src="${mascotSrc}" alt="Kaipora" width="88" height="88" style="display:block;margin:0 auto 12px;border-radius:50%;object-fit:cover;border:2px solid var(--border-strong)" />
     <div class="timer-display" id="breath-phase" style="font-size:20px">${BREATH_PHASES[0].label}</div>
     <div class="timer-display" id="breath-display">${fmt(remaining)}</div>
     <div class="timer-btns">

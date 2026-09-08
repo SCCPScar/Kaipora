@@ -5,20 +5,30 @@
  * falhado com suavidade antes de convidar para o dia seguinte — nunca finge
  * que não aconteceu, nunca faz a pessoa sentir-se mal por isso.
  *
- * Visual direction (closed, referência gerada em Gemini — a arte final em
- * várias poses ainda não existe, só esta direção): cabelo ruivo-acobreado
- * em mullet despenteado com franja que emoldura o rosto sem tapar os
- * olhos; orelhas pontiagudas; pele de tom quente. Cardigã de tricô grosso
- * creme, aberto sobre camisola simples; colares dourados em camada; brinco
- * de folha; ramo de hera decorativo. Acompanhado de um porco-do-mato
- * pequeno e calmo. Traço adulto e sofisticado — nunca chibi, nunca
- * bochecha corada, nunca olhos grandes de desenho infantil.
+ * Visual direction: cabelo ruivo-acobreado em mullet despenteado com
+ * franja que emoldura o rosto sem tapar os olhos; orelhas pontiagudas;
+ * pele de tom quente. Cardigã de tricô grosso creme, aberto sobre
+ * camisola simples; colares dourados em camada; brinco de folha; ramo de
+ * hera decorativo. Acompanhado de um porco-do-mato pequeno e calmo.
+ * Traço adulto e sofisticado — nunca chibi, nunca bochecha corada, nunca
+ * olhos grandes de desenho infantil.
  *
- * MASCOT_IMAGE is a temporary placeholder (the reference portrait itself)
- * until real art in multiple poses is produced — do not swap it for a
- * generated image without that art existing first.
+ * MASCOT_IMAGES holds one pose per moment (see mascotState.ts for when
+ * each moment triggers) — cropped bust-level portraits from the approved
+ * multi-pose reference art. `neutral` isn't wired to any moment yet;
+ * kept as a spare for future use.
  */
-export const MASCOT_IMAGE = 'mascot/kaipora-placeholder.jpg';
+export const MASCOT_IMAGES = {
+  /** Contextual same-day nudge (água/treino ainda por fazer). */
+  reminder: 'mascot/kaipora-gesture.jpg',
+  /** Essenciais do dia concluídos. */
+  celebrate: 'mascot/kaipora-wave.jpg',
+  /** Regresso depois de um dia com Essenciais incompletos. */
+  comeBack: 'mascot/kaipora-kneeling.jpg',
+  /** Exercício de respiração 4-4-4. */
+  breathe: 'mascot/kaipora-breathing.jpg',
+  neutral: 'mascot/kaipora-neutral.jpg'
+};
 
 export const MASCOT_LINES = {
   reminderWater: (remainingMl: number) => `Ainda faltam ${remainingMl}ml para a tua meta de água hoje.`,

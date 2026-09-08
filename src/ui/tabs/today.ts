@@ -30,7 +30,7 @@ import { computeDaySchedule } from '../../lib/routineSchedule';
 import { escapeHtml } from '../../lib/sanitize';
 import { essentialsCompletedFlags } from '../../lib/dayHistory';
 import { shouldShowComeBack, shouldShowReminder, consecutiveDifficultDays, shouldUseAdaptiveTone } from '../../lib/mascotState';
-import { MASCOT_IMAGE, MASCOT_LINES } from '../../data/mascot';
+import { MASCOT_IMAGES, MASCOT_LINES } from '../../data/mascot';
 import { mascotCardHTML } from '../components/mascot';
 import { openModal } from '../components/modal';
 import { openBreathingModal } from '../components/timer';
@@ -111,8 +111,8 @@ export const todayTab: Tab = {
         <button class="btn ghost" id="breathe-open" type="button">Respirar</button>
       </div>
 
-      ${showComeBack ? mascotCardHTML(useAdaptiveTone ? MASCOT_LINES.comeBackSoft : MASCOT_LINES.comeBack) : ''}
-      ${reminderText ? mascotCardHTML(reminderText, { dismissible: true }) : ''}
+      ${showComeBack ? mascotCardHTML(useAdaptiveTone ? MASCOT_LINES.comeBackSoft : MASCOT_LINES.comeBack, MASCOT_IMAGES.comeBack) : ''}
+      ${reminderText ? mascotCardHTML(reminderText, MASCOT_IMAGES.reminder, { dismissible: true }) : ''}
       ${essentialsDone ? completionBannerHTML(justCelebrated) : ''}
 
       <div class="priority-heading">Essencial</div>
@@ -206,7 +206,7 @@ function completionBannerHTML(animate: boolean): string {
         return `<span class="spark" style="--dx:${dx}px;--dy:${dy}px;animation-delay:${i * 30}ms"></span>`;
       }).join('')
     : '';
-  const mascotSrc = `${import.meta.env.BASE_URL}${MASCOT_IMAGE}`;
+  const mascotSrc = `${import.meta.env.BASE_URL}${MASCOT_IMAGES.celebrate}`;
   return `
     <div class="day-complete-banner ${animate ? 'animate' : ''}">
       ${sparks}
