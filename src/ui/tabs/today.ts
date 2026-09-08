@@ -210,7 +210,7 @@ function completionBannerHTML(animate: boolean): string {
   return `
     <div class="day-complete-banner ${animate ? 'animate' : ''}">
       ${sparks}
-      <img src="${mascotSrc}" alt="Kaipora" width="40" height="40" style="border-radius:50%;border:2px solid rgba(255,255,255,.5);flex-shrink:0;object-fit:cover" />
+      <img src="${mascotSrc}" alt="Kaipora" width="40" style="height:auto;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))" />
       <div>
         <strong>Essenciais de hoje concluídos.</strong>
         <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">O resto do dia é bónus. Consistência é mais importante que perfeição.</div>
