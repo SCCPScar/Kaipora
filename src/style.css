@@ -57,6 +57,9 @@
   --shadow-glow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(0, 0, 0, 0.45);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
+  /* A slower, symmetric ease-in-out — motion that breathes in and out
+     rather than snapping linearly. Used for every transition in the app. */
+  --ease-breath: cubic-bezier(0.45, 0, 0.55, 1);
 
   /* legacy aliases — kept so nothing else in this file needs to change */
   --purple: var(--primary);
@@ -187,7 +190,7 @@ body::before {
 #app { position: relative; z-index: 1; }
 
 .tab { display: none; }
-.tab.active { display: block; animation: fadein .18s ease; }
+.tab.active { display: block; animation: fadein .26s var(--ease-breath); }
 @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 /* ---- header ---- */
@@ -245,7 +248,7 @@ section, .card {
   width: 24px; height: 24px; min-width: 24px; border-radius: 7px;
   border: 2px solid var(--border-strong); background: var(--bg-elevated);
   display: flex; align-items: center; justify-content: center; font-size: 13px; color: transparent;
-  transition: all .15s;
+  transition: all .2s var(--ease-breath);
 }
 .row.done .chk { background: var(--gradient-main); border-color: transparent; color: #fff; box-shadow: 0 0 10px var(--tint-primary-glow); }
 .row.done .rtxt strong { color: var(--text-dim); text-decoration: line-through; }
@@ -289,28 +292,37 @@ section, .card {
   position: absolute; top: 50%; left: 20px; width: 6px; height: 6px; border-radius: 50%;
   background: #fff; opacity: 0; pointer-events: none;
 }
-.day-complete-banner.animate .spark { animation: spark-pop .8s ease-out forwards; }
+.day-complete-banner.animate .spark { animation: spark-pop .8s var(--ease-breath) forwards; }
 @keyframes spark-pop {
   0% { opacity: 1; transform: translate(0, 0) scale(1); }
   100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
 }
+
+/* Same spark language as the Hoje completion banner, reused for unlocking
+   a reward — a small illustrated moment, not a new effect. */
+.reward-claim-burst { position: relative; overflow: visible; }
+.reward-claim-burst .spark {
+  position: absolute; top: 50%; right: 64px; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--secondary); opacity: 0; pointer-events: none;
+}
+.reward-claim-burst.animate .spark { animation: spark-pop .8s var(--ease-breath) forwards; }
 
 .wcard { background: var(--bg-card); margin: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border); padding: 14px 16px; }
 .wcard-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .wcard-lbl { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--electric-glow); }
 .wcard-ml { font-size: 13px; font-weight: 400; font-variant-numeric: tabular-nums; color: var(--text-dim); }
 .glasses { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
-.glass { flex: 0 0 30px; width: 30px; height: 28px; border-radius: 6px; border: 2px solid var(--border-strong); background: var(--bg-elevated); cursor: pointer; transition: all .15s; }
+.glass { flex: 0 0 30px; width: 30px; height: 28px; border-radius: 6px; border: 2px solid var(--border-strong); background: var(--bg-elevated); cursor: pointer; transition: all .2s var(--ease-breath); }
 .glass.full { background: var(--gradient-main); border-color: transparent; box-shadow: 0 0 8px var(--tint-secondary-glow); }
 .wbar { height: 8px; border-radius: 4px; background: var(--bg-elevated); overflow: hidden; }
-.wbar-fill { height: 100%; background: var(--gradient-main); border-radius: 4px; transition: width .3s; }
+.wbar-fill { height: 100%; background: var(--gradient-main); border-radius: 4px; transition: width .4s var(--ease-breath); }
 .wbtns { display: flex; gap: 8px; margin-top: 10px; }
 .wbtn { flex: 1; padding: 9px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg-elevated); color: var(--text); font-weight: 600; font-size: 13px; cursor: pointer; }
 .wbtn:active { background: var(--tint-primary-med); }
 
 /* ---- buttons / forms ---- */
 button { font-family: inherit; }
-.btn { border: none; border-radius: var(--radius-sm); padding: 11px 16px; font-weight: 600; font-size: 13px; cursor: pointer; color: #fff; background: var(--gradient-main); box-shadow: 0 4px 16px -6px var(--tint-primary-glow); }
+.btn { border: none; border-radius: var(--radius-sm); padding: 11px 16px; font-weight: 600; font-size: 13px; cursor: pointer; color: #fff; background: var(--gradient-main); box-shadow: 0 4px 16px -6px var(--tint-primary-glow); transition: filter .2s var(--ease-breath); }
 .btn:active { filter: brightness(.9); }
 .btn.ghost { background: transparent; border: 1px solid var(--border-strong); color: var(--text); box-shadow: none; }
 .btn.danger { background: var(--gradient-burgundy); }
@@ -345,7 +357,7 @@ label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim
   background: var(--bg-elevated);
   border-right: 1px solid var(--border);
   transform: translateX(-100%);
-  transition: transform .22s ease;
+  transition: transform .3s var(--ease-breath);
   display: flex; flex-direction: column;
   overflow-y: auto;
 }
@@ -379,7 +391,7 @@ label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim
   position: fixed; inset: 0; z-index: 90;
   background: rgba(0, 0, 0, 0.45);
   opacity: 0; pointer-events: none;
-  transition: opacity .22s ease;
+  transition: opacity .3s var(--ease-breath);
 }
 .sidebar-backdrop.open { opacity: 1; pointer-events: auto; }
 
@@ -443,6 +455,8 @@ label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim
 .stat-row { display: flex; gap: 10px; padding: 12px 14px 4px; }
 .stat { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; }
 .stat strong { display: block; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat strong.pulse { animation: stat-pulse .5s var(--ease-breath); }
+@keyframes stat-pulse { 0% { transform: scale(1); } 45% { transform: scale(1.28); color: var(--secondary); } 100% { transform: scale(1); } }
 .stat small { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: .5px; }
 
 .meds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 14px; }
@@ -483,6 +497,12 @@ label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim
 .k75-daynum { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-dim); }
 .cal-day.k75-done .k75-ring { background: var(--gradient-main); }
 .cal-day.k75-done .k75-daynum { color: var(--text); font-weight: 700; }
+.cal-day.k75-pop .k75-ring-wrap { animation: k75-day-pop .5s var(--ease-breath); }
+@keyframes k75-day-pop {
+  0% { transform: scale(0.55); opacity: 0.4; }
+  55% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 .week-row { display: flex; gap: 6px; padding: 10px 14px; }
 .wday { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 2px; border-radius: 9px; background: var(--bg-elevated); border: 1px solid transparent; cursor: pointer; }
@@ -496,8 +516,8 @@ label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim
 /* ---- toggle switch ---- */
 .switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
-.switch .slider { position: absolute; inset: 0; background: var(--bg-elevated); border: 1px solid var(--border-strong); border-radius: 20px; transition: .2s; cursor: pointer; }
-.switch .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 2px; background: var(--text-faint); border-radius: 50%; transition: .2s; }
+.switch .slider { position: absolute; inset: 0; background: var(--bg-elevated); border: 1px solid var(--border-strong); border-radius: 20px; transition: background-color .25s var(--ease-breath); cursor: pointer; }
+.switch .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 2px; background: var(--text-faint); border-radius: 50%; transition: transform .25s var(--ease-breath); }
 .switch input:checked + .slider { background: var(--gradient-main); border-color: transparent; }
 .switch input:checked + .slider::before { transform: translateX(18px); background: #fff; }
 

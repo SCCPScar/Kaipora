@@ -32,6 +32,27 @@ let openChallengeId: string | null = null;
 let calViewYear = new Date().getFullYear();
 let calViewMonth = new Date().getMonth();
 
+/** `${challengeId}_${date}` keys that have already played their "day just
+ * filled in" pop — so it plays once when a day first becomes fully done,
+ * not on every unrelated re-render of the calendar. */
+const poppedDoneDays = new Set<string>();
+/** Challenge ids whose already-done history has been pre-marked as
+ * "seen" — otherwise opening a challenge with existing history would pop
+ * every past completed day at once on the very first render. */
+const seededPopHistory = new Set<string>();
+
+function seedPopHistory(c: Challenge) {
+  if (seededPopHistory.has(c.id)) return;
+  seededPopHistory.add(c.id);
+  const lastDay = toISO(addDays(fromISO(c.startDate), c.totalDays - 1));
+  const end = todayISO() < lastDay ? todayISO() : lastDay;
+  if (fromISO(c.startDate) > fromISO(end)) return;
+  for (let d = fromISO(c.startDate); d <= fromISO(end); d = addDays(d, 1)) {
+    const iso = toISO(d);
+    if (kaipora75DayStatus(c.id, iso).allDone) poppedDoneDays.add(`${c.id}_${iso}`);
+  }
+}
+
 export const desafiosTab: Tab = {
   id: 'desafios',
   label: 'Desafios',
@@ -151,6 +172,7 @@ function wireListEvents(root: HTMLElement) {
         const start = fromISO(c.startDate);
         calViewYear = start.getFullYear();
         calViewMonth = start.getMonth();
+        seedPopHistory(c);
       }
       refreshActive();
       return;
@@ -226,7 +248,14 @@ function renderCalendarView(root: HTMLElement, c: Challenge) {
     const pct = Math.round((doneCount / 4) * 100);
     const cls = ['cal-day'];
     if (iso === todayIso) cls.push('today');
-    if (status.allDone) cls.push('k75-done');
+    if (status.allDone) {
+      cls.push('k75-done');
+      const popKey = `${c.id}_${iso}`;
+      if (!poppedDoneDays.has(popKey)) {
+        cls.push('k75-pop');
+        poppedDoneDays.add(popKey);
+      }
+    }
     cells.push(`
       <div class="${cls.join(' ')}" data-k75-date="${iso}">
         <div class="k75-ring-wrap" style="--pct:${pct}">

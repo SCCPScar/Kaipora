@@ -5,6 +5,10 @@ import { todayISO, toISO, addDays } from '../../lib/dates';
 
 const WINDOW_DAYS = 365;
 
+/** Last streak value seen rendered, so a genuine increase gets a brief
+ * pulse — not every re-render (e.g. reopening the tab unchanged). */
+let lastSeenStreak: number | null = null;
+
 export const conquistasTab: Tab = {
   id: 'conquistas',
   label: 'Conquistas',
@@ -18,6 +22,9 @@ export const conquistasTab: Tab = {
     const longest = longestStreak(flags);
     const daysDone = flags.filter(Boolean).length;
 
+    const streakRose = lastSeenStreak !== null && current > lastSeenStreak;
+    lastSeenStreak = current;
+
     root.innerHTML = `
       <div class="ph">
         <h2>Conquistas</h2>
@@ -26,7 +33,7 @@ export const conquistasTab: Tab = {
       </div>
 
       <div class="stat-row">
-        <div class="stat"><strong>${current}</strong><small>sequência atual</small></div>
+        <div class="stat"><strong class="${streakRose ? 'pulse' : ''}">${current}</strong><small>sequência atual</small></div>
         <div class="stat"><strong>${longest}</strong><small>melhor sequência</small></div>
         <div class="stat"><strong>${daysDone}</strong><small>dias nos últimos ${WINDOW_DAYS}</small></div>
       </div>
