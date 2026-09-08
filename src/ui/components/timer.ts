@@ -58,7 +58,7 @@ export function openTimerModal(initialSeconds = 60): void {
 
   const close = openModal(
     `
-    <button class="modal-close" data-close></button>
+    <button class="modal-close" data-close aria-label="Fechar"></button>
     <h3>Temporizador de descanso</h3>
     <div class="timer-display" id="tmr-display">${fmt(remaining)}</div>
     <div class="timer-presets" id="tmr-presets">

@@ -19,21 +19,47 @@ import { conquistasTab } from './ui/tabs/conquistas';
 import { settingsTab } from './ui/tabs/settings';
 import { showToast } from './ui/components/toast';
 
-applyTheme(getSettings().theme);
-
-const { migrated, warnings } = migrateFromLegacyApp();
-if (migrated) {
-  for (const w of warnings) console.info('[Kaipora migração]', w);
+/** Shown instead of a blank white screen if migration or the initial render
+ * throws — the underlying data in localStorage is untouched either way, so
+ * this is honest about that rather than looking like data loss. */
+function renderBootError(): void {
+  const app = document.getElementById('app') as HTMLElement;
+  app.innerHTML = `
+    <div style="max-width:420px;margin:15vh auto 0;padding:0 20px;text-align:center;font-family:'Manrope',-apple-system,sans-serif">
+      <div class="boot-mark" style="font-size:34px;margin-bottom:18px">K</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Algo correu mal a abrir a app</div>
+      <div style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:20px">
+        Os teus dados continuam guardados neste aparelho. Tenta recarregar a página; se continuar
+        a acontecer, exporta um backup em Ajustes assim que conseguires voltar a entrar.
+      </div>
+      <button class="btn" id="boot-reload">Recarregar</button>
+    </div>
+  `;
+  document.getElementById('boot-reload')?.addEventListener('click', () => location.reload());
 }
 
-const app = document.getElementById('app') as HTMLElement;
-app.innerHTML = '';
+let migrated = false;
+try {
+  applyTheme(getSettings().theme);
 
-initNav(
-  app,
-  [todayTab, rotinaTab, trainingTab, dietTab, progressTab, habilidadesTab, diarioTab, desafiosTab, calendarTab, conquistasTab, settingsTab],
-  'hoje'
-);
+  const migration = migrateFromLegacyApp();
+  migrated = migration.migrated;
+  if (migrated) {
+    for (const w of migration.warnings) console.info('[Kaipora migração]', w);
+  }
+
+  const app = document.getElementById('app') as HTMLElement;
+  app.innerHTML = '';
+
+  initNav(
+    app,
+    [todayTab, rotinaTab, trainingTab, dietTab, progressTab, habilidadesTab, diarioTab, desafiosTab, calendarTab, conquistasTab, settingsTab],
+    'hoje'
+  );
+} catch (err) {
+  console.error('[Kaipora] falha no arranque:', err);
+  renderBootError();
+}
 
 registerServiceWorker();
 startReminderLoop();

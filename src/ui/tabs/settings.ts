@@ -1,11 +1,26 @@
 import type { Tab } from '../nav';
-import { getSettings, saveSettings, exportBackup, importBackup } from '../../lib/storage';
+import { getSettings, saveSettings, exportBackup, importBackup, getLastBackupAt, recordBackupExported } from '../../lib/storage';
 import { isCloudConfigured, getSession, signInWithEmail, signOut, fullSync } from '../../lib/sync';
 import { requestNotificationPermission } from '../../lib/notifications';
 import { applyTheme } from '../../lib/theme';
 import type { ThemePreference } from '../../lib/types';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
+import { escapeHtml } from '../../lib/sanitize';
+
+const BACKUP_REMINDER_DAYS = 30;
+
+function backupReminderHTML(): string {
+  const lastBackupAt = getLastBackupAt();
+  const daysSince = lastBackupAt ? Math.floor((Date.now() - new Date(lastBackupAt).getTime()) / 86_400_000) : null;
+  if (daysSince !== null && daysSince < BACKUP_REMINDER_DAYS) return '';
+  const message = lastBackupAt
+    ? `Já lá vão ${daysSince} dias desde o último backup. Vale a pena exportar um novo.`
+    : 'Ainda não exportaste nenhum backup. É a tua rede de segurança caso percas o aparelho.';
+  return `<div class="alert" style="margin:10px 14px 0">
+    <span>${message}</span>
+  </div>`;
+}
 
 export const settingsTab: Tab = {
   id: 'ajustes',
@@ -66,6 +81,7 @@ export const settingsTab: Tab = {
       <section>
         <div class="sec-title">Backup</div>
         <div style="padding:12px 16px 4px;font-size:12.5px;color:var(--text-dim)">Exporta os teus dados regularmente: é a tua rede de segurança, mesmo com sincronização cloud ativa.</div>
+        ${backupReminderHTML()}
         <div class="form-row">
           <button class="btn ghost" id="s-export">Exportar backup (.json)</button>
         </div>
@@ -91,7 +107,12 @@ export const settingsTab: Tab = {
         </div>
       </section>
 
-      <div style="text-align:center;padding:20px;font-size:11px;color:var(--text-faint)">Kaipora · plataforma pessoal de Scarllett</div>
+      <div style="text-align:center;padding:20px;font-size:11px;color:var(--text-faint)">
+        Kaipora · plataforma pessoal de Scarllett<br />
+        <a href="privacidade.html" style="color:var(--text-faint);text-decoration:underline">Privacidade</a>
+        &nbsp;·&nbsp;
+        <a href="termos.html" style="color:var(--text-faint);text-decoration:underline">Termos de Uso</a>
+      </div>
     `;
 
     renderCloudSection(root);
@@ -114,7 +135,7 @@ function renderCloudSection(root: HTMLElement) {
   getSession().then((session) => {
     if (session) {
       el.innerHTML = `
-        <div style="padding:12px 16px;font-size:13px">Sessão iniciada como <strong>${session.user.email}</strong></div>
+        <div style="padding:12px 16px;font-size:13px">Sessão iniciada como <strong>${escapeHtml(session.user.email ?? '')}</strong></div>
         <div class="form-row">
           <button class="btn" id="s-sync-now">Sincronizar agora</button>
         </div>
@@ -206,7 +227,9 @@ function wireEvents(root: HTMLElement) {
     a.download = `kaipora-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    recordBackupExported();
     showToast('Backup exportado');
+    refreshActive();
   });
 
   root.querySelector('#s-import-btn')?.addEventListener('click', () => {

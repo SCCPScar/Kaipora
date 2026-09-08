@@ -6,15 +6,17 @@ import { todayISO } from '../../lib/dates';
 import { drawLineChart } from './chart';
 import { showToast } from './toast';
 import { EXERCISE_DIAGRAMS } from '../../data/exerciseDiagrams';
+import { escapeHtml } from '../../lib/sanitize';
 
 export function openExerciseModal(ex: ExerciseLike): void {
   const diagram = EXERCISE_DIAGRAMS[ex.id];
-  openModal(
+  let close: () => void;
+  close = openModal(
     `
-    <button class="modal-close" data-close></button>
-    <h3>${ex.name}</h3>
+    <button class="modal-close" data-close aria-label="Fechar"></button>
+    <h3>${escapeHtml(ex.name)}</h3>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
-      ${ex.muscles.map((m) => `<span class="pill">${m}</span>`).join('')}
+      ${ex.muscles.map((m) => `<span class="pill">${escapeHtml(m)}</span>`).join('')}
       ${ex.gluteFocus ? '<span class="pill" style="color:var(--burgundy-glow)">Glúteos</span>' : ''}
     </div>
     ${
@@ -23,9 +25,9 @@ export function openExerciseModal(ex: ExerciseLike): void {
            <div style="font-size:10.5px;color:var(--text-faint);margin:6px 0 14px;text-align:center">Diagrama esquemático simplificado. A descrição abaixo é a referência principal.</div>`
         : ''
     }
-    <p style="font-size:14px;line-height:1.6;color:var(--text)">${ex.desc}</p>
+    <p style="font-size:14px;line-height:1.6;color:var(--text)">${escapeHtml(ex.desc)}</p>
     <div class="alert" style="margin:14px 0 0">
-      <span>${ex.tip}</span>
+      <span>${escapeHtml(ex.tip)}</span>
     </div>
 
     <div class="sec-title" style="margin:18px -20px 0;border-radius:0">Carga e progressão</div>
@@ -47,9 +49,7 @@ export function openExerciseModal(ex: ExerciseLike): void {
     <div id="load-log"></div>
   `,
     (modal) => {
-      modal.querySelector('[data-close]')?.addEventListener('click', () => {
-        modal.closest('.modal-backdrop')?.remove();
-      });
+      modal.querySelector('[data-close]')?.addEventListener('click', () => close());
 
       renderLoads(modal, ex.id);
 

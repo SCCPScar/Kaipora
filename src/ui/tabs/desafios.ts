@@ -23,6 +23,7 @@ import { todayISO, addDays, toISO, fromISO, DAY_ABBR, MONTH_NAMES, WEEKDAY_KEYS 
 import { refreshActive, switchTab } from '../nav';
 import { showToast } from '../components/toast';
 import { openModal } from '../components/modal';
+import { escapeHtml } from '../../lib/sanitize';
 
 let addingChallenge = false;
 
@@ -91,7 +92,7 @@ function renderChallenges(root: HTMLElement) {
       <div class="day-card open">
         <div class="day-head" style="cursor:default">
           <div class="day-info">
-            <div class="day-nm">${c.title}${stats.finished ? ' · terminado' : ''}</div>
+            <div class="day-nm">${escapeHtml(c.title)}${stats.finished ? ' · terminado' : ''}</div>
             <div class="day-focus">Dia ${stats.daysElapsed} de ${c.totalDays} · ${stats.daysCompleted} dia(s) cumpridos</div>
           </div>
           <button class="log-del" data-del-challenge="${i}">✕</button>
@@ -238,7 +239,7 @@ function renderCalendarView(root: HTMLElement, c: Challenge) {
   root.innerHTML = `
     <div class="ph">
       <button class="btn sm ghost" id="k75-back">‹ Voltar aos desafios</button>
-      <div class="ph-title" style="margin-top:10px">${c.title}</div>
+      <div class="ph-title" style="margin-top:10px">${escapeHtml(c.title)}</div>
       <div class="ph-sub">Toca num dia para veres e registares o que fizeste nesse dia</div>
     </div>
 
@@ -308,7 +309,7 @@ function openDayDetail(c: Challenge, iso: string) {
     const sessionsToday = getSkillSessions().filter((s) => s.date === iso);
 
     modal.innerHTML = `
-      <button class="modal-close" data-close></button>
+      <button class="modal-close" data-close aria-label="Fechar"></button>
       <h3>Dia ${dayNum} de ${c.totalDays}</h3>
       <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:12px">${iso}${status.allDone ? ' · dia cumprido' : ''}</div>
 
@@ -342,7 +343,7 @@ function openDayDetail(c: Challenge, iso: string) {
               .map(
                 (s) => `
         <div class="row" style="cursor:default">
-          <div class="rtxt"><strong>${skills.find((sk) => sk.id === s.skillId)?.name ?? 'Habilidade'}</strong><small>${s.minutes} min</small></div>
+          <div class="rtxt"><strong>${escapeHtml(skills.find((sk) => sk.id === s.skillId)?.name ?? 'Habilidade')}</strong><small>${s.minutes} min</small></div>
         </div>`
               )
               .join('')
@@ -353,7 +354,7 @@ function openDayDetail(c: Challenge, iso: string) {
           ? `
       <div class="form-row" style="padding-left:0;padding-right:0">
         <select class="finp" id="k75-skill-select" style="flex:2">
-          ${skills.map((s) => `<option value="${s.id}">${s.name}</option>`).join('')}
+          ${skills.map((s) => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}
         </select>
         <input class="finp" id="k75-skill-minutes" type="number" min="1" placeholder="minutos" style="flex:1" />
       </div>

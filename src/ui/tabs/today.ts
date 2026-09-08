@@ -19,6 +19,7 @@ import { refreshActive, switchTab } from '../nav';
 import { showToast } from '../components/toast';
 import { isDayComplete } from '../../lib/dayCompletion';
 import { computeDaySchedule } from '../../lib/routineSchedule';
+import { escapeHtml } from '../../lib/sanitize';
 
 let modality: BuiltInModality = 'academia';
 /** The date (YYYY-MM-DD) for which the completion celebration has already
@@ -177,7 +178,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
       if (b.kind === 'unscheduled') {
         return `
         <div class="row" style="cursor:default">
-          <div class="rtxt"><strong>${b.label}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
+          <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
         </div>`;
       }
       const h = (m: number) => `${Math.floor(m / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}`;
@@ -185,7 +186,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
       return `
       <div class="row ${isDone ? 'done' : ''}" data-routine="${b.id}">
         <div class="chk"></div>
-        <div class="rtxt"><strong>${b.label}</strong><small>${h(b.startMin)} – ${h(b.endMin)}</small></div>
+        <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>${h(b.startMin)} – ${h(b.endMin)}</small></div>
       </div>`;
     })
     .join('');

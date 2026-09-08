@@ -53,7 +53,7 @@ export function rawRemove(key: string): void {
  * vp_last_synced_at pulled from another device would corrupt this device's
  * sync cursor) and never included in backups.
  */
-const INTERNAL_KEYS = new Set([`${PFX}_meta`, `${PFX}_last_synced_at`, `${PFX}_migrated_from_scar`]);
+const INTERNAL_KEYS = new Set([`${PFX}_meta`, `${PFX}_last_synced_at`, `${PFX}_migrated_from_scar`, `${PFX}_last_backup_at`]);
 
 /** Every user-data key currently in localStorage, for backup/export/sync. */
 export function allKeys(): string[] {
@@ -270,6 +270,16 @@ export function importBackup(backup: Backup): void {
   for (const [key, value] of Object.entries(backup.data)) {
     if (key.startsWith(PFX + '_') && !INTERNAL_KEYS.has(key)) rawSet(key, value);
   }
+}
+
+/** Last time the user exported a backup, for the periodic reminder in
+ * Ajustes — not part of the exported data itself (see INTERNAL_KEYS). */
+export function getLastBackupAt(): string | null {
+  return rawGet<string | null>(`${PFX}_last_backup_at`, null);
+}
+
+export function recordBackupExported(): void {
+  rawSet(`${PFX}_last_backup_at`, new Date().toISOString());
 }
 
 // ---- Exercise load / strength progression ----

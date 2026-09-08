@@ -16,6 +16,7 @@ import { todayISO } from '../../lib/dates';
 import { drawLineChart } from '../components/chart';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
+import { escapeHtml } from '../../lib/sanitize';
 
 let editingMeasurementIndex: number | null = null;
 
@@ -141,7 +142,7 @@ function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasur
   el.innerHTML = list
     .map((m, i) => {
       const extras = Object.entries(m.extra ?? {})
-        .map(([name, val]) => `${name} ${val}cm`)
+        .map(([name, val]) => `${escapeHtml(name)} ${val}cm`)
         .join(' · ');
       const isEditing = i === editingMeasurementIndex;
       return `
@@ -184,7 +185,7 @@ function renderNotes(root: HTMLElement, list: ReturnType<typeof getNotes>) {
     .map(
       (n, i) => `
     <div class="log-item">
-      <div class="log-txt"><strong>${n.text}</strong><div class="log-date">${n.date}</div></div>
+      <div class="log-txt"><strong>${escapeHtml(n.text)}</strong><div class="log-date">${n.date}</div></div>
       <button class="log-del" data-del-note="${i}"></button>
     </div>`
     )

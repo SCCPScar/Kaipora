@@ -15,6 +15,7 @@ import { computeDaySchedule } from '../../lib/routineSchedule';
 import type { ScheduleBlock } from '../../data/types-routine';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
+import { escapeHtml } from '../../lib/sanitize';
 
 const WEEKDAYS: Weekday[] = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
 const WEEKDAY_LABELS: Record<Weekday, string> = {
@@ -140,7 +141,7 @@ function blockHTML(b: ScheduleBlock): string {
   if (b.kind === 'unscheduled') {
     return `
     <div class="row" style="cursor:default">
-      <div class="rtxt"><strong>${b.label}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
+      <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
       <span class="badge-k">Adiar?</span>
     </div>`;
   }
@@ -148,7 +149,7 @@ function blockHTML(b: ScheduleBlock): string {
   const tag = b.kind === 'fixed' ? 'Fixo' : 'Flexível';
   return `
     <div class="row" style="cursor:default">
-      <div class="rtxt"><strong>${b.label}</strong><small>${time}</small></div>
+      <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>${time}</small></div>
       <span class="pill">${tag}</span>
     </div>`;
 }
@@ -163,7 +164,7 @@ function renderFixedList(root: HTMLElement, fixed: ReturnType<typeof getFixedCom
     .map(
       (f, i) => `
     <div class="log-item">
-      <div class="log-txt"><strong>${f.label}</strong><div class="log-date">${minToHHMM(f.startMin)}–${minToHHMM(f.endMin)} · ${f.days.map((d) => WEEKDAY_LABELS[d].slice(0, 3)).join(', ')}</div></div>
+      <div class="log-txt"><strong>${escapeHtml(f.label)}</strong><div class="log-date">${minToHHMM(f.startMin)}–${minToHHMM(f.endMin)} · ${f.days.map((d) => WEEKDAY_LABELS[d].slice(0, 3)).join(', ')}</div></div>
       <button class="log-del" data-del-fixed="${i}">✕</button>
     </div>`
     )
@@ -180,7 +181,7 @@ function renderFlexibleList(root: HTMLElement, flexible: ReturnType<typeof getFl
     .map(
       (f, i) => `
     <div class="log-item">
-      <div class="log-txt"><strong>${f.label}</strong><div class="log-date">${f.durationMin} min · ${f.days.map((d) => WEEKDAY_LABELS[d].slice(0, 3)).join(', ')}</div></div>
+      <div class="log-txt"><strong>${escapeHtml(f.label)}</strong><div class="log-date">${f.durationMin} min · ${f.days.map((d) => WEEKDAY_LABELS[d].slice(0, 3)).join(', ')}</div></div>
       <button class="log-del" data-del-flexible="${i}">✕</button>
     </div>`
     )

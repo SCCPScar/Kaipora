@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Privacidade · Kaipora</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #1c1712; color: #ecdfd0; font-family: 'Manrope', -apple-system, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 40px 20px 60px; }
+  .mark {
+    font-family: Georgia, serif; font-size: 28px; font-weight: 800; margin-bottom: 6px;
+    background: linear-gradient(135deg, #c9663d 0%, #d9a870 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h1 { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+  .updated { font-size: 12px; color: #8a7a68; margin-bottom: 28px; }
+  h2 { font-size: 15px; font-weight: 700; margin: 28px 0 8px; }
+  p, li { font-size: 13.5px; color: #b3a08c; }
+  strong { color: #ecdfd0; }
+  a { color: #d9a870; }
+  a.back { display: inline-block; margin-top: 34px; color: #b3a08c; font-size: 13px; text-decoration: underline; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="mark">K</div>
+    <h1>Política de Privacidade</h1>
+    <div class="updated">Última atualização: setembro de 2026</div>
+
+    <p>O Kaipora é uma aplicação pessoal de consistência e evolução. Esta página explica, em linguagem simples,
+    que dados a app guarda e o que fazemos (e não fazemos) com eles.</p>
+
+    <h2>O que guardamos</h2>
+    <p>Por padrão, tudo o que registas no Kaipora (água, treino, alimentação, hábitos, diário, desafios,
+    peso e medidas) fica guardado apenas no armazenamento local do teu navegador (<code>localStorage</code>),
+    neste aparelho. Nada sai daqui a menos que ativemos sincronização.</p>
+
+    <h2>Sincronização entre dispositivos (opcional)</h2>
+    <p>Se ativares e configurares a sincronização por conta (via Supabase), guardamos adicionalmente:</p>
+    <ul>
+      <li>O teu <strong>endereço de email</strong>, usado exclusivamente para autenticação por link de acesso
+      (sem palavra-passe).</li>
+      <li>Os mesmos dados de hábitos, corpo e consistência acima, associados à tua conta, para que possam
+      aparecer nos teus outros dispositivos.</li>
+    </ul>
+    <p>Este acesso é protegido por regras ao nível da base de dados que garantem que só tu (autenticada)
+    consegues ler ou escrever os teus próprios dados.</p>
+
+    <h2>O que nunca fazemos</h2>
+    <ul>
+      <li>Não vendemos nem partilhamos os teus dados com terceiros.</li>
+      <li>Não usamos publicidade nem rastreadores de terceiros.</li>
+      <li>Não analisamos os teus dados para fins que não sejam mostrar-tos a ti própria dentro da app.</li>
+    </ul>
+
+    <h2>Os teus dados, o teu controlo</h2>
+    <p>Em Ajustes podes exportar uma cópia completa dos teus dados a qualquer momento (formato <code>.json</code>),
+    importar um backup, ou terminar sessão. Apagar a app ou limpar os dados do navegador remove tudo o que
+    está guardado localmente; se tiveres sincronização ativa, contacta-nos para removermos também a cópia
+    na cloud.</p>
+
+    <h2>Contacto</h2>
+    <p>Para questões sobre os teus dados, contacta a responsável pela app diretamente.</p>
+
+    <a class="back" href="./">‹ Voltar ao Kaipora</a>
+  </div>
+</body>
+</html>

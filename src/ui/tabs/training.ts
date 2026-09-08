@@ -20,6 +20,7 @@ import { todayISO } from '../../lib/dates';
 import { refreshActive } from '../nav';
 import { openTimerModal } from '../components/timer';
 import { openExerciseModal } from '../components/exerciseModal';
+import { escapeHtml } from '../../lib/sanitize';
 import { showToast } from '../components/toast';
 import { infoIcon, timerIcon } from '../components/icons';
 
@@ -190,8 +191,8 @@ function renderCustomExercises(root: HTMLElement) {
           (ex, i) => `
       <div class="log-item">
         <div class="log-txt">
-          <strong>${ex.name}</strong>
-          <div class="log-date">${[ex.muscles.join(', '), ex.desc].filter(Boolean).join(' · ') || 'Sem detalhes adicionais'}</div>
+          <strong>${escapeHtml(ex.name)}</strong>
+          <div class="log-date">${escapeHtml([ex.muscles.join(', '), ex.desc].filter(Boolean).join(' · ')) || 'Sem detalhes adicionais'}</div>
         </div>
         <button class="log-del" data-del-exercise="${i}">✕</button>
       </div>`
@@ -223,11 +224,11 @@ function exerciseOptionsHTML(): string {
   const custom = getCustomExercises();
   return `
     <optgroup label="Biblioteca">
-      ${builtIn.map((ex) => `<option value="${ex.id}">${ex.name}</option>`).join('')}
+      ${builtIn.map((ex) => `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`).join('')}
     </optgroup>
     ${
       custom.length
-        ? `<optgroup label="Meus exercícios">${custom.map((ex) => `<option value="${ex.id}">${ex.name}</option>`).join('')}</optgroup>`
+        ? `<optgroup label="Meus exercícios">${custom.map((ex) => `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`).join('')}</optgroup>`
         : ''
     }
   `;
@@ -243,8 +244,8 @@ function customWorkoutExerciseListHTML(workout: CustomWorkout, date: string): st
       return `
       <div class="ex-row ${isDone ? 'done' : ''}" data-exercise="${we.exerciseId}">
         <div class="ex-main" data-select="${workout.id}:${we.exerciseId}">
-          <strong>${ex.name}</strong>
-          <small>${we.sets}x ${we.reps} · descanso ${we.restSeconds}s${we.note ? ' · ' + we.note : ''}</small>
+          <strong>${escapeHtml(ex.name)}</strong>
+          <small>${we.sets}x ${escapeHtml(we.reps)} · descanso ${we.restSeconds}s${we.note ? ' · ' + escapeHtml(we.note) : ''}</small>
           ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
         </div>
         <div class="ex-actions">
@@ -270,10 +271,10 @@ function renderCustomWorkouts(root: HTMLElement, date: string) {
           return `
       <div class="day-card open">
         <div class="day-head" style="cursor:default">
-          <div class="day-pill" style="background:var(--accent)">${w.category.slice(0, 3).toUpperCase()}</div>
+          <div class="day-pill" style="background:var(--accent)">${escapeHtml(w.category.slice(0, 3).toUpperCase())}</div>
           <div class="day-info">
-            <div class="day-nm">${w.title}</div>
-            <div class="day-focus">${w.focus || w.category}</div>
+            <div class="day-nm">${escapeHtml(w.title)}</div>
+            <div class="day-focus">${escapeHtml(w.focus || w.category)}</div>
           </div>
           <button class="log-del" data-del-workout="${i}">✕</button>
         </div>

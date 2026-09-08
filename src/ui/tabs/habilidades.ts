@@ -16,6 +16,7 @@ import { totalMinutesForSkill, totalMinutesAllSkills, lastPracticedDate, daysPra
 import { todayISO } from '../../lib/dates';
 import { refreshActive, switchTab } from '../nav';
 import { showToast } from '../components/toast';
+import { escapeHtml } from '../../lib/sanitize';
 
 /** skill id currently showing its "log session" mini-form, or null. */
 let loggingToSkill: string | null = null;
@@ -81,7 +82,7 @@ function renderSkills(root: HTMLElement, skills: ReturnType<typeof getSkills>, s
       <div class="day-card open">
         <div class="day-head" style="cursor:default">
           <div class="day-info">
-            <div class="day-nm">${skill.name}</div>
+            <div class="day-nm">${escapeHtml(skill.name)}</div>
             <div class="day-focus">${hoursLabel(total)} · ${days} dia${days === 1 ? '' : 's'} praticados${last ? ` · última vez ${last}` : ''}</div>
           </div>
           <button class="log-del" data-del-skill="${i}">✕</button>
@@ -143,7 +144,7 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
             return `
       <div class="row" style="cursor:default">
         <div class="rtxt">
-          <strong>${r.title}${r.claimed ? ' · conquistada' : ''}</strong>
+          <strong>${escapeHtml(r.title)}${r.claimed ? ' · conquistada' : ''}</strong>
           <small>${hoursLabel(Math.min(total, r.targetMinutes))} / ${hoursLabel(r.targetMinutes)} (${pct}%)</small>
         </div>
         ${

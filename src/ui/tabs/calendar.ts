@@ -94,18 +94,17 @@ function openDayDetail(iso: string) {
     return ids.map((id) => `${workout?.title ?? workoutId}: ${EXERCISES[id]?.name ?? id}`);
   });
 
-  openModal(
+  let close: () => void;
+  close = openModal(
     `
-    <button class="modal-close" data-close></button>
+    <button class="modal-close" data-close aria-label="Fechar"></button>
     <h3>${iso}</h3>
     <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px">Água: ${rec.water} copo(s)${rec.training?.done ? ` · Treino: ${rec.training.modality === 'academia' ? 'Academia' : 'Casa'}` : ''}</div>
     ${mealNames.length ? `<p style="font-size:13px"><strong>Refeições:</strong><br>${mealNames.join('<br>')}</p>` : '<p style="font-size:13px;color:var(--text-faint)">Sem refeições registadas.</p>'}
     ${exerciseNames.length ? `<p style="font-size:13px"><strong>Exercícios:</strong><br>${exerciseNames.join('<br>')}</p>` : ''}
   `,
     (modal) => {
-      modal.querySelector('[data-close]')?.addEventListener('click', () => {
-        modal.closest('.modal-backdrop')?.remove();
-      });
+      modal.querySelector('[data-close]')?.addEventListener('click', () => close());
     }
   );
 }

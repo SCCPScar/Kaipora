@@ -18,6 +18,7 @@ import {
 import { todayISO, toISO, addDays } from '../../lib/dates';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
+import { escapeHtml } from '../../lib/sanitize';
 
 type DietView = 'plano' | 'diario';
 let view: DietView = 'plano';
@@ -94,8 +95,8 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
           <div class="row ${day.meals[o.id] ? 'done' : ''} ${isHidden ? 'muted-row' : ''}" data-option="${o.id}">
             <div class="chk"></div>
             <div class="rtxt">
-              <strong>${o.label}</strong>
-              <small>${o.desc}</small>
+              <strong>${escapeHtml(o.label)}</strong>
+              <small>${escapeHtml(o.desc)}</small>
               <small>P: ${o.protein}g · HC: ${o.carbs}g · G: ${o.fat}g</small>
             </div>
             <span class="kcal">${o.kcal} kcal</span>
@@ -186,7 +187,7 @@ function renderDiario(root: HTMLElement, date: string) {
         .map(
           (entry) => `
       <div class="log-item">
-        <div class="log-txt"><strong>${entry.label}</strong><div class="log-date">${entry.kcal} kcal · P:${entry.protein}g HC:${entry.carbs}g G:${entry.fat}g${entry.grams ? ` · ${entry.grams}g` : ''}</div></div>
+        <div class="log-txt"><strong>${escapeHtml(entry.label)}</strong><div class="log-date">${entry.kcal} kcal · P:${entry.protein}g HC:${entry.carbs}g G:${entry.fat}g${entry.grams ? ` · ${entry.grams}g` : ''}</div></div>
         <button class="log-del" data-del-log="${allLog.indexOf(entry)}">✕</button>
       </div>`
         )
