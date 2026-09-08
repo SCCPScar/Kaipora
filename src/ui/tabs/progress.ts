@@ -127,7 +127,7 @@ function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeight
       return `
       <div class="log-item">
         <div class="log-txt"><strong>${w.kg} kg</strong>${diffHTML}<div class="log-date">${w.date}</div></div>
-        <button class="log-del" data-del-weight="${i}"></button>
+        <button class="log-del" data-del-weight="${i}" aria-label="Remover">✕</button>
       </div>`;
     })
     .join('');
@@ -151,7 +151,7 @@ function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasur
         <strong>${m.date}${isEditing ? ' · a editar' : ''}</strong>
         <div class="log-date">Cintura ${m.waist ?? '-'}cm · Quadril ${m.hip ?? '-'}cm · Coxa ${m.thigh ?? '-'}cm · Braço ${m.arm ?? '-'}cm${extras ? ` · ${extras}` : ''}</div>
       </div>
-      <button class="log-del" data-del-measurement="${i}"></button>
+      <button class="log-del" data-del-measurement="${i}" aria-label="Remover">✕</button>
     </div>`;
     })
     .join('');
@@ -186,7 +186,7 @@ function renderNotes(root: HTMLElement, list: ReturnType<typeof getNotes>) {
       (n, i) => `
     <div class="log-item">
       <div class="log-txt"><strong>${escapeHtml(n.text)}</strong><div class="log-date">${n.date}</div></div>
-      <button class="log-del" data-del-note="${i}"></button>
+      <button class="log-del" data-del-note="${i}" aria-label="Remover">✕</button>
     </div>`
     )
     .join('');

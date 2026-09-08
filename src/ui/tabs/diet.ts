@@ -46,7 +46,7 @@ export const dietTab: Tab = {
       </div>
 
       <div class="stat-row">
-        <div class="stat"><strong style="font-weight:900">${totals.kcal}</strong><small>consumido</small></div>
+        <div class="stat"><strong>${totals.kcal}</strong><small>consumido</small></div>
         <div class="stat"><strong>${settings.calorieGoal}</strong><small>meta kcal</small></div>
         <div class="stat"><strong>${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? 'restante' : 'acima da meta'}</small></div>
       </div>
@@ -100,7 +100,7 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
               <small>P: ${o.protein}g · HC: ${o.carbs}g · G: ${o.fat}g</small>
             </div>
             <span class="kcal">${o.kcal} kcal</span>
-            ${isCustom ? `<button class="log-del" data-del-custom="${allCustom.indexOf(allCustom.find((c) => c.id === o.id)!)}">✕</button>` : `<button class="log-del" data-hide-option="${o.id}" style="font-size:11px">${isHidden ? 'Mostrar' : 'Ocultar'}</button>`}
+            ${isCustom ? `<button class="log-del" data-del-custom="${allCustom.indexOf(allCustom.find((c) => c.id === o.id)!)}" aria-label="Remover">✕</button>` : `<button class="log-del" data-hide-option="${o.id}" style="font-size:11px">${isHidden ? 'Mostrar' : 'Ocultar'}</button>`}
           </div>`;
           })
           .join('')}
@@ -188,7 +188,7 @@ function renderDiario(root: HTMLElement, date: string) {
           (entry) => `
       <div class="log-item">
         <div class="log-txt"><strong>${escapeHtml(entry.label)}</strong><div class="log-date">${entry.kcal} kcal · P:${entry.protein}g HC:${entry.carbs}g G:${entry.fat}g${entry.grams ? ` · ${entry.grams}g` : ''}</div></div>
-        <button class="log-del" data-del-log="${allLog.indexOf(entry)}">✕</button>
+        <button class="log-del" data-del-log="${allLog.indexOf(entry)}" aria-label="Remover">✕</button>
       </div>`
         )
         .join('')

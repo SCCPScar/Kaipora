@@ -87,7 +87,7 @@ function renderSkills(root: HTMLElement, skills: ReturnType<typeof getSkills>, s
             <div class="day-nm">${escapeHtml(skill.name)}</div>
             <div class="day-focus">${hoursLabel(total)} · ${days} dia${days === 1 ? '' : 's'} praticados${last ? ` · última vez ${last}` : ''}</div>
           </div>
-          <button class="log-del" data-del-skill="${i}">✕</button>
+          <button class="log-del" data-del-skill="${i}" aria-label="Remover">✕</button>
         </div>
         <div class="day-body">
           ${
@@ -156,7 +156,7 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
             ? '<span class="pill">Conquistada</span>'
             : `<button class="btn sm ${canClaim ? '' : 'ghost'}" data-claim-reward="${r.id}" ${canClaim ? '' : 'disabled'}>Resgatar</button>`
         }
-        <button class="log-del" data-del-reward="${i}">✕</button>
+        <button class="log-del" data-del-reward="${i}" aria-label="Remover">✕</button>
       </div>`;
           })
           .join('')

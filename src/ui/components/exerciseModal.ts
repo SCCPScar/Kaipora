@@ -88,7 +88,7 @@ function summarize(l: ExerciseLogEntry): string {
       l.weightKg !== undefined ? `${l.weightKg} kg` : null,
       l.reps !== undefined ? `${l.reps} reps` : null,
       l.seconds !== undefined ? `${l.seconds}s` : null,
-      l.note ?? null
+      l.note ? escapeHtml(l.note) : null
     ]
       .filter(Boolean)
       .join(' · ') || '(sem detalhes)'
@@ -146,7 +146,7 @@ function renderLoads(modal: HTMLElement, exerciseId: string): void {
       (l, i) => `
       <div class="log-item">
         <div class="log-txt"><strong>${summarize(l)}</strong><div class="log-date">${l.date}</div></div>
-        <button class="log-del" data-del-load="${i}"></button>
+        <button class="log-del" data-del-load="${i}" aria-label="Remover">✕</button>
       </div>`
     )
     .join('');

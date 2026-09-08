@@ -51,9 +51,9 @@ export const calendarTab: Tab = {
       </div>
       <section>
         <div class="cal-head">
-          <button class="cal-nav" id="cal-prev">‹</button>
+          <button class="cal-nav" id="cal-prev" aria-label="Mês anterior">‹</button>
           <span class="pill">${MONTH_NAMES[viewMonth]} de ${viewYear}</span>
-          <button class="cal-nav" id="cal-next">›</button>
+          <button class="cal-nav" id="cal-next" aria-label="Mês seguinte">›</button>
         </div>
         <div class="cal-grid">
           ${DAY_ABBR.map((a) => `<div class="cal-dow">${a}</div>`).join('')}

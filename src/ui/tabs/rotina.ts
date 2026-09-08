@@ -165,7 +165,7 @@ function renderFixedList(root: HTMLElement, fixed: ReturnType<typeof getFixedCom
       (f, i) => `
     <div class="log-item">
       <div class="log-txt"><strong>${escapeHtml(f.label)}</strong><div class="log-date">${minToHHMM(f.startMin)}–${minToHHMM(f.endMin)} · ${f.days.map((d) => WEEKDAY_LABELS[d].slice(0, 3)).join(', ')}</div></div>
-      <button class="log-del" data-del-fixed="${i}">✕</button>
+      <button class="log-del" data-del-fixed="${i}" aria-label="Remover">✕</button>
     </div>`
     )
     .join('');
@@ -182,7 +182,7 @@ function renderFlexibleList(root: HTMLElement, flexible: ReturnType<typeof getFl
       (f, i) => `
     <div class="log-item">
       <div class="log-txt"><strong>${escapeHtml(f.label)}</strong><div class="log-date">${f.durationMin} min · ${f.days.map((d) => WEEKDAY_LABELS[d].slice(0, 3)).join(', ')}</div></div>
-      <button class="log-del" data-del-flexible="${i}">✕</button>
+      <button class="log-del" data-del-flexible="${i}" aria-label="Remover">✕</button>
     </div>`
     )
     .join('');

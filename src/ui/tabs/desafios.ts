@@ -123,7 +123,7 @@ function renderChallenges(root: HTMLElement) {
             <div class="day-nm">${escapeHtml(c.title)}${stats.finished ? ' · terminado' : ''}</div>
             <div class="day-focus">Dia ${stats.daysElapsed} de ${c.totalDays} · ${stats.daysCompleted} dia(s) cumpridos</div>
           </div>
-          <button class="log-del" data-del-challenge="${i}">✕</button>
+          <button class="log-del" data-del-challenge="${i}" aria-label="Remover">✕</button>
         </div>
         <div class="day-body">
           ${
@@ -326,8 +326,8 @@ function renderCalendarView(root: HTMLElement, c: Challenge & { kind: 'kaipora75
           <div class="k75-cal-year">${calViewYear}</div>
         </div>
         <div class="k75-cal-nav">
-          <button class="cal-nav" id="k75-prev">‹</button>
-          <button class="cal-nav" id="k75-next">›</button>
+          <button class="cal-nav" id="k75-prev" aria-label="Mês anterior">‹</button>
+          <button class="cal-nav" id="k75-next" aria-label="Mês seguinte">›</button>
         </div>
       </div>
       <div class="cal-grid">

@@ -121,7 +121,7 @@ function dayCardHTML(day: TrainingDay, date: string): string {
       <div class="day-head" data-toggle="${day.weekday}">
         <div class="day-pill" style="background:${PILL_COLORS[day.weekday]}">${day.weekday.toUpperCase()}</div>
         <div class="day-info">
-          <div class="day-nm">${day.label}${isTodayDone ? '' : ''}</div>
+          <div class="day-nm">${day.label}</div>
           <div class="day-focus">${workout.focus}</div>
         </div>
         <div class="icon-btn">${isOpen ? '−' : '+'}</div>
@@ -157,8 +157,8 @@ function exerciseListHTML(workout: Workout, date: string): string {
           ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
         </div>
         <div class="ex-actions">
-          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">${infoIcon()}</button>
-          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">${timerIcon()}</button>
+          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar" aria-label="Como executar">${infoIcon()}</button>
+          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador" aria-label="Temporizador">${timerIcon()}</button>
         </div>
       </div>`;
     })
@@ -194,7 +194,7 @@ function renderCustomExercises(root: HTMLElement) {
           <strong>${escapeHtml(ex.name)}</strong>
           <div class="log-date">${escapeHtml([ex.muscles.join(', '), ex.desc].filter(Boolean).join(' · ')) || 'Sem detalhes adicionais'}</div>
         </div>
-        <button class="log-del" data-del-exercise="${i}">✕</button>
+        <button class="log-del" data-del-exercise="${i}" aria-label="Remover">✕</button>
       </div>`
         )
         .join('')
@@ -249,9 +249,9 @@ function customWorkoutExerciseListHTML(workout: CustomWorkout, date: string): st
           ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
         </div>
         <div class="ex-actions">
-          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar">${infoIcon()}</button>
-          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador">${timerIcon()}</button>
-          <button class="log-del" data-remove-exercise="${workout.id}:${idx}">✕</button>
+          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar" aria-label="Como executar">${infoIcon()}</button>
+          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador" aria-label="Temporizador">${timerIcon()}</button>
+          <button class="log-del" data-remove-exercise="${workout.id}:${idx}" aria-label="Remover">✕</button>
         </div>
       </div>`;
     })
@@ -276,7 +276,7 @@ function renderCustomWorkouts(root: HTMLElement, date: string) {
             <div class="day-nm">${escapeHtml(w.title)}</div>
             <div class="day-focus">${escapeHtml(w.focus || w.category)}</div>
           </div>
-          <button class="log-del" data-del-workout="${i}">✕</button>
+          <button class="log-del" data-del-workout="${i}" aria-label="Remover">✕</button>
         </div>
         <div class="day-body">
           ${customWorkoutExerciseListHTML(w, date) || '<div class="empty">Ainda sem exercícios neste treino</div>'}

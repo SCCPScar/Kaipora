@@ -47,7 +47,7 @@ function renderJournal(root: HTMLElement) {
           (entry, i) => `
       <div class="log-item" style="align-items:flex-start">
         <div class="log-txt"><div class="log-date">${entry.date}</div><strong style="font-weight:400;white-space:pre-wrap">${escapeHtml(entry.text)}</strong></div>
-        <button class="log-del" data-del-journal="${i}">✕</button>
+        <button class="log-del" data-del-journal="${i}" aria-label="Remover">✕</button>
       </div>`
         )
         .join('')
