@@ -280,7 +280,15 @@ section, .card {
    circle mask or box around it — drop-shadow follows that outline
    rather than drawing a shadow around its rectangular bounds. */
 .mascot-card { position: relative; margin: 34px 14px 12px; padding: 14px 14px 14px 20px; border-radius: var(--radius); background: var(--tint-primary-low); border: 1px solid var(--border-strong); }
-.mascot-card img { position: absolute; top: -40px; left: 10px; width: 64px; height: auto; filter: drop-shadow(0 3px 5px rgba(0,0,0,.25)); }
+.mascot-card img { position: absolute; top: -40px; left: 10px; width: 64px; height: auto; filter: drop-shadow(0 3px 5px rgba(0,0,0,.25)); z-index: 1; }
+/* A speech-bubble tail pointing up at the floating avatar — two stacked
+   triangles (outline color behind, fill color in front, 1px smaller on
+   each side) so the tail reads as an outlined bubble edge, not a raw
+   flat triangle. */
+.mascot-card::before,
+.mascot-card::after { content: ''; position: absolute; width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; left: 2px; }
+.mascot-card::before { top: -11px; border-bottom: 11px solid var(--border-strong); }
+.mascot-card::after { top: -9px; left: 3px; border-left-width: 8px; border-right-width: 8px; border-bottom: 10px solid var(--tint-primary-low); }
 .mascot-card > div { padding-top: 16px; }
 .mascot-card span { font-size: 12.5px; color: var(--text-dim); line-height: 1.5; }
 .mascot-dismiss { display: block; margin-top: 6px; padding: 0; background: none; border: none; font-size: 11px; font-weight: 600; color: var(--primary); text-decoration: underline; cursor: pointer; }
