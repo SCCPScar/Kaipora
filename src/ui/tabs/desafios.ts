@@ -1,5 +1,6 @@
 import type { Tab } from '../nav';
 import type { Challenge } from '../../data/types-challenges';
+import { CHALLENGE_PRESETS } from '../../data/challengePresets';
 import type { BuiltInModality, Weekday } from '../../lib/types';
 import {
   getChallenges,
@@ -17,17 +18,23 @@ import {
 } from '../../lib/storage';
 import { challengeStats } from '../../lib/challengeStats';
 import { essentialsCompletedFlags } from '../../lib/dayHistory';
-import { kaipora75CompletedFlags, kaipora75DayStatus } from '../../lib/kaipora75';
+import { challengeCompletedFlags, challengeDayStatus } from '../../lib/challengeRules';
 import { getTrainingDay } from '../../data/training';
-import { todayISO, addDays, toISO, fromISO, DAY_ABBR, MONTH_NAMES, WEEKDAY_KEYS } from '../../lib/dates';
+import { todayISO, addDays, toISO, fromISO, DAY_ABBR, DAY_NAMES, MONTH_NAMES, WEEKDAY_KEYS } from '../../lib/dates';
 import { refreshActive, switchTab } from '../nav';
 import { showToast } from '../components/toast';
 import { openModal } from '../components/modal';
 import { escapeHtml } from '../../lib/sanitize';
 
-let addingChallenge = false;
+function isPresetChallenge(c: Challenge): c is Challenge & { kind: 'kaipora75' | 'kaipora45' } {
+  return c.kind === 'kaipora75' || c.kind === 'kaipora45';
+}
 
-/** id of the Kaipora 75 challenge currently showing its 75-day calendar, or null for the list. */
+let addingChallenge = false;
+/** Whether the Kaipora 45 quickstart is showing its rest-weekday picker. */
+let addingKaipora45 = false;
+
+/** id of the preset challenge currently showing its day-by-day calendar, or null for the list. */
 let openChallengeId: string | null = null;
 let calViewYear = new Date().getFullYear();
 let calViewMonth = new Date().getMonth();
@@ -49,7 +56,7 @@ function seedPopHistory(c: Challenge) {
   if (fromISO(c.startDate) > fromISO(end)) return;
   for (let d = fromISO(c.startDate); d <= fromISO(end); d = addDays(d, 1)) {
     const iso = toISO(d);
-    if (kaipora75DayStatus(c.id, iso).allDone) poppedDoneDays.add(`${c.id}_${iso}`);
+    if (challengeDayStatus(c, iso).allDone) poppedDoneDays.add(`${c.id}_${iso}`);
   }
 }
 
@@ -60,7 +67,7 @@ export const desafiosTab: Tab = {
   group: 'Desafios',
   render(root: HTMLElement) {
     const open = openChallengeId ? getChallenges().find((c) => c.id === openChallengeId) : undefined;
-    if (open) {
+    if (open && isPresetChallenge(open)) {
       renderCalendarView(root, open);
     } else {
       openChallengeId = null;
@@ -73,16 +80,16 @@ function renderList(root: HTMLElement) {
   root.innerHTML = `
     <div class="ph">
       <h2>Desafios</h2>
-      <div class="ph-title">Kaipora 75 e outros desafios pessoais</div>
+      <div class="ph-title">Kaipora 75, Kaipora 45 e outros desafios pessoais</div>
       <div class="ph-sub">Um dia falhado nunca reinicia o desafio. A contagem continua</div>
     </div>
 
     <div class="alert">
       <span>
-        <strong>Como funciona o Kaipora 75:</strong> é a nossa versão adaptada do desafio "75 Hard", com 75
-        dias em que cada dia tem quatro regras próprias (vê o calendário do desafio para o detalhe). Se te
-        esqueceres um dia, esse dia simplesmente não conta: o desafio não reinicia nem termina antes do
-        prazo, continua sempre a contar até chegares aos 75 dias.
+        <strong>Kaipora 75 e Kaipora 45</strong> são duas versões do mesmo desafio não-punitivo: a original,
+        e uma mais suave, à tua escolha. Cada uma tem as suas próprias regras (vê o calendário do desafio
+        para o detalhe). Se te esqueceres um dia, esse dia simplesmente não conta: o desafio não reinicia
+        nem termina antes do prazo.
       </span>
     </div>
 
@@ -104,7 +111,7 @@ function renderChallenges(root: HTMLElement) {
   el.innerHTML = challenges.length
     ? challenges
         .map((c, i) => {
-          const flags = c.kind === 'kaipora75' ? kaipora75CompletedFlags(c.id, c.startDate, today) : essentialsCompletedFlags(c.startDate, today);
+          const flags = isPresetChallenge(c) ? challengeCompletedFlags(c, c.startDate, today) : essentialsCompletedFlags(c.startDate, today);
           const stats = challengeStats(flags, c.totalDays);
           const lastDayOfChallenge = toISO(addDays(fromISO(c.startDate), c.totalDays - 1));
           const todayCountsTowardChallenge = !stats.finished && today >= c.startDate && today <= lastDayOfChallenge;
@@ -120,8 +127,8 @@ function renderChallenges(root: HTMLElement) {
         </div>
         <div class="day-body">
           ${
-            c.kind === 'kaipora75'
-              ? `<div class="form-row"><button class="btn sm ghost" data-open-calendar="${c.id}">Ver os 75 dias</button></div>`
+            isPresetChallenge(c)
+              ? `<div class="form-row"><button class="btn sm ghost" data-open-calendar="${c.id}">Ver os ${c.totalDays} dias</button></div>`
               : todayCountsTowardChallenge
                 ? `<div class="row" data-goto-hoje>
                     <div class="rtxt"><strong>Hoje</strong><small>${todayDone ? 'Essenciais já cumpridos: o dia conta' : 'Essenciais ainda por cumprir'}</small></div>
@@ -155,6 +162,22 @@ function renderChallenges(root: HTMLElement) {
     <div class="form-row">
       <button class="btn block" id="ch-quickstart-75">+ Começar o Kaipora 75</button>
     </div>
+    ${
+      addingKaipora45
+        ? `
+    <div class="form-row" style="padding-top:0">
+      <select class="finp" id="k45-rest-weekday" style="flex:1">
+        ${WEEKDAY_KEYS.map((w, idx) => `<option value="${w}" ${w === 'dom' ? 'selected' : ''}>${DAY_NAMES[idx]}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-row" style="padding-top:0">
+      <button class="btn block" id="k45-confirm">Confirmar dia de folga e começar</button>
+    </div>`
+        : `
+    <div class="form-row" style="padding-top:0">
+      <button class="btn block ghost" id="ch-quickstart-45">+ Começar o Kaipora 45</button>
+    </div>`
+    }
     <div class="form-row" style="padding-top:0">
       <button class="btn block ghost" id="ch-toggle">+ Criar outro desafio</button>
     </div>`;
@@ -194,10 +217,29 @@ function wireListEvents(root: HTMLElement) {
   root.querySelector('#challenge-form')?.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
 
-    const quickstart = target.closest<HTMLElement>('#ch-quickstart-75');
-    if (quickstart) {
-      addChallenge({ id: `ch_${Date.now()}`, title: 'Kaipora 75', totalDays: 75, startDate: todayISO(), kind: 'kaipora75' });
+    const quickstart75 = target.closest<HTMLElement>('#ch-quickstart-75');
+    if (quickstart75) {
+      const preset = CHALLENGE_PRESETS.kaipora75;
+      addChallenge({ id: `ch_${Date.now()}`, title: preset.title, totalDays: preset.totalDays, startDate: todayISO(), kind: preset.kind });
       showToast('Kaipora 75 iniciado. Boa sorte!');
+      refreshActive();
+      return;
+    }
+
+    const quickstart45 = target.closest<HTMLElement>('#ch-quickstart-45');
+    if (quickstart45) {
+      addingKaipora45 = true;
+      refreshActive();
+      return;
+    }
+
+    const confirm45 = target.closest<HTMLElement>('#k45-confirm');
+    if (confirm45) {
+      const restWeekday = (root.querySelector('#k45-rest-weekday') as HTMLSelectElement).value as Weekday;
+      const preset = CHALLENGE_PRESETS.kaipora45;
+      addChallenge({ id: `ch_${Date.now()}`, title: preset.title, totalDays: preset.totalDays, startDate: todayISO(), kind: preset.kind, restWeekday });
+      addingKaipora45 = false;
+      showToast('Kaipora 45 iniciado. Boa sorte!');
       refreshActive();
       return;
     }
@@ -226,7 +268,8 @@ function wireListEvents(root: HTMLElement) {
   });
 }
 
-function renderCalendarView(root: HTMLElement, c: Challenge) {
+function renderCalendarView(root: HTMLElement, c: Challenge & { kind: 'kaipora75' | 'kaipora45' }) {
+  const preset = CHALLENGE_PRESETS[c.kind];
   const lastDay = toISO(addDays(fromISO(c.startDate), c.totalDays - 1));
   const first = new Date(calViewYear, calViewMonth, 1);
   const startWeekday = first.getDay();
@@ -243,7 +286,7 @@ function renderCalendarView(root: HTMLElement, c: Challenge) {
       cells.push(`<div class="cal-day empty"><span>${d}</span></div>`);
       continue;
     }
-    const status = kaipora75DayStatus(c.id, iso);
+    const status = challengeDayStatus(c, iso);
     const doneCount = [status.water, status.training, status.skill, status.diet].filter(Boolean).length;
     const pct = Math.round((doneCount / 4) * 100);
     const cls = ['cal-day'];
@@ -273,12 +316,7 @@ function renderCalendarView(root: HTMLElement, c: Challenge) {
     </div>
 
     <div class="alert">
-      <span>
-        <strong>Regras de cada dia:</strong> água até à meta, o treino do dia (ou outra atividade física),
-        uma sessão de qualquer Habilidade, e a dieta sem exceções nem álcool. O anel de cada dia enche à
-        medida que cumpres cada regra, e fica cheio quando as quatro estão feitas. Um dia falhado não
-        reinicia o desafio.
-      </span>
+      <span><strong>Regras de cada dia:</strong> ${preset.rulesExplanation}</span>
     </div>
 
     <section class="k75-cal-card">
@@ -326,12 +364,14 @@ function renderCalendarView(root: HTMLElement, c: Challenge) {
   });
 }
 
-function openDayDetail(c: Challenge, iso: string) {
+function openDayDetail(c: Challenge & { kind: 'kaipora75' | 'kaipora45' }, iso: string) {
+  const preset = CHALLENGE_PRESETS[c.kind];
   const dayNum = Math.round((fromISO(iso).getTime() - fromISO(c.startDate).getTime()) / 86_400_000) + 1;
+  const isPlannedRestDay = c.restWeekday !== undefined && WEEKDAY_KEYS[fromISO(iso).getDay()] === c.restWeekday;
   let close: () => void;
 
   const render = (modal: HTMLElement) => {
-    const status = kaipora75DayStatus(c.id, iso);
+    const status = challengeDayStatus(c, iso);
     const log = getChallengeDayLog(c.id, iso);
     const day = getDay(iso);
     const skills = getSkills();
@@ -355,13 +395,20 @@ function openDayDetail(c: Challenge, iso: string) {
         <div class="rtxt"><strong>Treino do dia</strong><small>${day.training?.done ? 'Marcado como feito' : 'Ainda não marcado'}</small></div>
         <span class="switch"><input type="checkbox" data-day-training ${day.training?.done ? 'checked' : ''}/><span class="slider"></span></span>
       </div>
-      <div class="row" style="cursor:default">
-        <div class="rtxt"><strong>Outra atividade física</strong><small>Se não fizeste o treino do plano, mas fizeste outra coisa</small></div>
-        <span class="switch"><input type="checkbox" data-day-activity ${log.extraActivity ? 'checked' : ''}/><span class="slider"></span></span>
-      </div>
+      ${
+        isPlannedRestDay
+          ? `<div class="row" style="cursor:default">
+              <div class="rtxt"><strong>Dia de folga planeado</strong><small>Conta automaticamente, não precisas de treinar hoje</small></div>
+              <span class="badge-p">Conta</span>
+            </div>`
+          : `<div class="row" style="cursor:default">
+              <div class="rtxt"><strong>Outra atividade física</strong><small>Se não fizeste o treino do plano, mas fizeste outra coisa</small></div>
+              <span class="switch"><input type="checkbox" data-day-activity ${log.extraActivity ? 'checked' : ''}/><span class="slider"></span></span>
+            </div>`
+      }
 
       <div class="row" style="cursor:default">
-        <div class="rtxt"><strong>Dieta</strong><small>Sem exceções, sem álcool</small></div>
+        <div class="rtxt"><strong>Dieta</strong><small>${escapeHtml(preset.dietLabel)}</small></div>
         <span class="switch"><input type="checkbox" data-day-diet ${log.dietOk ? 'checked' : ''}/><span class="slider"></span></span>
       </div>
 
