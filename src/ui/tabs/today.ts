@@ -110,10 +110,10 @@ export const todayTab: Tab = {
       <div class="priority-heading">Opcional</div>
 
       <section id="meals-card">
-        <div class="sec-title"><span>Alimentação</span><span class="badge-k">${foodTotals.kcal} kcal</span></div>
+        <div class="sec-title"><span>Alimentação</span><span class="macro-line">${foodTotals.kcal} kcal</span></div>
         <div class="row" id="meals-open-row">
           <div class="rtxt"><strong>${mealsLogged} de ${MEALS.length} refeições registadas</strong><small>Toca para abrir o plano completo</small></div>
-          <span class="badge-p">${foodTotals.protein}g prot</span>
+          <span class="macro-line">${foodTotals.protein}g prot</span>
         </div>
       </section>
 

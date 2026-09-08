@@ -121,7 +121,7 @@ function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeight
       const diff = prev ? +(w.kg - prev.kg).toFixed(1) : null;
       const diffHTML =
         diff !== null
-          ? `<span style="color:${diff > 0 ? 'var(--burgundy-glow)' : 'var(--green)'};font-weight:800;margin-left:6px">${diff > 0 ? '+' : ''}${diff}kg</span>`
+          ? `<span style="color:${diff > 0 ? 'var(--primary)' : 'var(--green)'};font-weight:600;margin-left:6px">${diff > 0 ? '+' : ''}${diff}kg</span>`
           : '';
       return `
       <div class="log-item">

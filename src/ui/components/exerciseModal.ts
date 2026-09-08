@@ -119,13 +119,13 @@ function renderLoads(modal: HTMLElement, exerciseId: string): void {
     let delta = '';
     if (latest.weightKg !== undefined && previous.weightKg !== undefined) {
       const diff = +(latest.weightKg - previous.weightKg).toFixed(1);
-      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--burgundy-glow)'};font-weight:800">${diff > 0 ? '+' : ''}${diff}kg</span>`;
+      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--primary)'};font-weight:600">${diff > 0 ? '+' : ''}${diff}kg</span>`;
     } else if (latest.reps !== undefined && previous.reps !== undefined) {
       const diff = latest.reps - previous.reps;
-      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--burgundy-glow)'};font-weight:800">${diff > 0 ? '+' : ''}${diff} reps</span>`;
+      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--primary)'};font-weight:600">${diff > 0 ? '+' : ''}${diff} reps</span>`;
     } else if (latest.seconds !== undefined && previous.seconds !== undefined) {
       const diff = latest.seconds - previous.seconds;
-      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--burgundy-glow)'};font-weight:800">${diff > 0 ? '+' : ''}${diff}s</span>`;
+      if (diff !== 0) delta = ` <span style="color:${diff > 0 ? 'var(--green)' : 'var(--primary)'};font-weight:600">${diff > 0 ? '+' : ''}${diff}s</span>`;
     }
     compare.innerHTML = `
       <div class="alert" style="margin:10px 0">

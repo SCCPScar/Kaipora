@@ -45,15 +45,11 @@ export const dietTab: Tab = {
       </div>
 
       <div class="stat-row">
-        <div class="stat"><strong>${totals.kcal}</strong><small>consumido</small></div>
+        <div class="stat"><strong style="font-weight:900">${totals.kcal}</strong><small>consumido</small></div>
         <div class="stat"><strong>${settings.calorieGoal}</strong><small>meta kcal</small></div>
-        <div class="stat"><strong style="color:${remaining < 0 ? 'var(--burgundy-glow)' : 'var(--green)'}">${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? 'restante' : 'acima da meta'}</small></div>
+        <div class="stat"><strong style="color:${remaining < 0 ? 'var(--primary)' : 'var(--green)'}">${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? 'restante' : 'acima da meta'}</small></div>
       </div>
-      <div class="stat-row">
-        <div class="stat"><strong>${totals.protein}g</strong><small>proteína / ${settings.proteinGoal}g</small></div>
-        <div class="stat"><strong>${totals.carbs}g</strong><small>carboidr. / ${settings.carbGoal}g</small></div>
-        <div class="stat"><strong>${totals.fat}g</strong><small>gordura / ${settings.fatGoal}g</small></div>
-      </div>
+      <div class="macro-line" style="padding:0 14px 12px">P ${totals.protein}g / ${settings.proteinGoal}g &middot; HC ${totals.carbs}g / ${settings.carbGoal}g &middot; G ${totals.fat}g / ${settings.fatGoal}g</div>
 
       <div class="modality-switch">
         <button class="modality-btn ${view === 'plano' ? 'active' : ''}" data-view="plano">Meu Plano</button>
@@ -89,7 +85,7 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
       const isAdding = addingCustomToMeal === meal.id;
       return `
       <section>
-        <div class="sec-title"><span>${meal.name} · ${meal.time}</span><span class="badge-k">~${meal.targetKcal} kcal</span></div>
+        <div class="sec-title"><span>${meal.name} · ${meal.time}</span><span class="macro-line">~${meal.targetKcal} kcal</span></div>
         ${options
           .map((o) => {
             const isCustom = allCustom.some((c) => c.id === o.id);
@@ -108,8 +104,7 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
           })
           .join('')}
         <div class="sub-row">
-          <span class="badge-p">${totalP}g prot</span>
-          <span class="badge-k">${totalKcal} kcal</span>
+          <span class="macro-line">${totalKcal} kcal &middot; P ${totalP}g</span>
         </div>
         ${
           isAdding

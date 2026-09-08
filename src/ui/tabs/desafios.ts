@@ -108,8 +108,7 @@ function renderChallenges(root: HTMLElement) {
                 : ''
           }
           <div class="sub-row">
-            <span class="badge-p">${stats.daysCompleted}/${c.totalDays} cumpridos</span>
-            <span class="badge-k">${stats.daysRemaining} dia(s) restantes</span>
+            <span class="macro-line">${stats.daysCompleted}/${c.totalDays} cumpridos &middot; ${stats.daysRemaining} dia(s) restantes</span>
           </div>
         </div>
       </div>`;
