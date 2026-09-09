@@ -6,6 +6,7 @@ import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
 import type { CustomExercise, CustomWorkout } from '../data/types-training';
 import type { Skill, SkillSession, Reward } from '../data/types-skills';
 import type { Challenge, ChallengeDayLog } from '../data/types-challenges';
+import type { Medication } from '../data/types-medications';
 import { lastSyncedAt, setLastSyncedAt, touchedAt, markTouched } from './meta';
 import { mergeDayRecords, mergeEntryLists } from './merge';
 
@@ -190,6 +191,14 @@ function mergeConflicting(key: string, local: unknown, remote: unknown): unknown
     return mergeEntryLists(
       local as ChallengeDayLog[],
       remote as ChallengeDayLog[],
+      (e) => e.id,
+      (e) => String(e.updatedAt ?? 0)
+    );
+  }
+  if (key === 'vp_medications') {
+    return mergeEntryLists(
+      local as Medication[],
+      remote as Medication[],
       (e) => e.id,
       (e) => String(e.updatedAt ?? 0)
     );

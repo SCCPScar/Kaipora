@@ -30,6 +30,7 @@ export const dict: Record<string, string> = {
   'nav.tab.rotina': '日程',
   'nav.tab.treino': '训练',
   'nav.tab.progresso': '进度',
+  'nav.tab.medicamentos': '用药',
   'nav.tab.habilidades': '技能',
   'nav.tab.diario': '日记',
   'nav.tab.desafios': '挑战',
@@ -137,6 +138,8 @@ export const dict: Record<string, string> = {
   'today.meals.proteinAmount': '蛋白质 {{g}}g',
   'today.meals.loggedBlank': '今天的自由饮食记录',
   'today.habits.title': '今天的习惯',
+  'today.medications.title': '今天的用药',
+  'today.medications.empty': '今天没有安排服用的药物',
 
   // ---- src/ui/tabs/rotina.ts ----
   'rotina.title': '日程',
@@ -297,6 +300,21 @@ export const dict: Record<string, string> = {
   'progresso.measurements.toastSaved': '围度已保存',
   'progresso.measurements.toastUpdated': '围度已更新',
   'progresso.measurements.confirmRemove': '要删除这条围度记录吗？',
+
+  // ---- src/ui/tabs/medicamentos.ts ----
+  'medicamentos.title': '用药',
+  'medicamentos.subtitle': '你的药物和补充剂',
+  'medicamentos.description': '记录服药时间、星期几，并每天勾选是否已服用',
+  'medicamentos.list.title': '你的药物',
+  'medicamentos.list.empty': '还没有添加任何药物',
+  'medicamentos.add.title': '添加药物',
+  'medicamentos.add.namePlaceholder': '例如：维生素D',
+  'medicamentos.add.addTime': '+ 添加时间',
+  'medicamentos.add.purposePlaceholder': '用途（可选）',
+  'medicamentos.add.button': '+ 添加药物',
+  'medicamentos.toast.fill': '请填写名称、至少一个时间，并至少选一天',
+  'medicamentos.toast.added': '已添加药物',
+  'medicamentos.confirmRemove': '要删除这个药物吗？',
 
   // ---- src/ui/tabs/habilidades.ts ----
   'habilidades.title': '技能',

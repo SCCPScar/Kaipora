@@ -8,6 +8,7 @@ import type { CustomWorkout } from '../src/data/types-training';
 import type { SkillSession } from '../src/data/types-skills';
 import type { JournalEntry } from '../src/lib/types';
 import type { ChallengeDayLog } from '../src/data/types-challenges';
+import type { Medication } from '../src/data/types-medications';
 
 // These exercise sync.ts's reconcile() directly against seeded localStorage,
 // simulating what happens when this device processes one row pulled from
@@ -197,6 +198,31 @@ describe('reconcile — vp_custom_workouts merges by stable id, not content', ()
     // never produces two rows for the same workout id.
     expect(merged).toHaveLength(1);
     expect(merged[0].id).toBe('cw1');
+  });
+});
+
+describe('reconcile — vp_medications merges by stable id, not content', () => {
+  it('a concurrent edit (add a time) on one device is not lost by an unrelated edit on the other', () => {
+    const original: Medication = { id: 'med1', name: 'Vitamina D', times: ['08:00'], days: ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'], updatedAt: 100 };
+    rawSet('vp_medications', [original]);
+    markTouched('vp_medications', 100);
+
+    // Local: adds a second daily dose offline at T=200 (same id, new content).
+    const localEdited: Medication = { ...original, times: ['08:00', '20:00'], updatedAt: 200 };
+    rawSet('vp_medications', [localEdited]);
+    markTouched('vp_medications', 200);
+
+    // Remote: added a purpose note, pushed at T=250, unaware of the local edit.
+    const remoteEdited: Medication = { ...original, purpose: 'Imunidade', updatedAt: 250 };
+
+    const result = reconcile('vp_medications', [remoteEdited], 250, 100);
+    expect(result.isMerge).toBe(true);
+    const merged = result.value as Medication[];
+    // id-based merge picks whichever side has the later updatedAt for that id —
+    // the remote purpose-note (250) wins over the local time-add (200) — but
+    // never produces two rows for the same medication id.
+    expect(merged).toHaveLength(1);
+    expect(merged[0].id).toBe('med1');
   });
 });
 

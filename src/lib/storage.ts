@@ -2,6 +2,7 @@ import type { DayRecord, MeasurementEntry, NoteEntry, JournalEntry, WeeklyIntent
 import { DEFAULT_SETTINGS } from './types';
 import { visible, withAdded, withSoftDeleted } from './tombstoneList';
 import type { FixedCommitment, FlexibleActivity } from '../data/types-routine';
+import type { Medication } from '../data/types-medications';
 import type { CustomFoodOption, FoodLogEntry } from '../data/types-diet';
 import type { CustomExercise, CustomWorkout, WorkoutExercise } from '../data/types-training';
 import type { Skill, SkillSession, Reward } from '../data/types-skills';
@@ -725,4 +726,50 @@ export function setChallengeDayLog(
   const idx = visible(raw).findIndex((l) => l.id === id);
   const tombstoned = idx >= 0 ? withSoftDeleted(raw, idx, (a, b) => a.id === b.id) : raw;
   rawSet(`${PFX}_challenge_day_logs`, withAdded(tombstoned, { id, challengeId, date, ...current, ...patch }));
+}
+
+// ---- Medicamentos e suplementos ----
+// Same tombstoned-list CRUD pattern as Rotina's fixed commitments (see
+// above), but matched by the medication's own stable id — like
+// Challenge/Skill — rather than a content tuple.
+
+function getMedicationsRaw(): Medication[] {
+  return rawGet<Medication[]>(`${PFX}_medications`, []);
+}
+
+export function getMedications(): Medication[] {
+  return visible(getMedicationsRaw());
+}
+
+export function addMedication(entry: Omit<Medication, 'updatedAt' | 'deleted'>): void {
+  rawSet(`${PFX}_medications`, withAdded(getMedicationsRaw(), entry));
+}
+
+export function deleteMedication(visibleIndex: number): void {
+  rawSet(`${PFX}_medications`, withSoftDeleted(getMedicationsRaw(), visibleIndex, (a, b) => a.id === b.id));
+}
+
+/**
+ * "Taken today" check-off — same low-stakes, non-tombstoned per-date pattern
+ * as isMinDay/toggleMinDay: one boolean per medication per day, regardless of
+ * how many `times` it has (see Medication.times) — not a per-dose log.
+ */
+export function isMedicationTaken(date: string, medicationId: string): boolean {
+  return rawGet<string[]>(`${PFX}_medications_taken`, []).includes(`${date}_${medicationId}`);
+}
+
+export function toggleMedicationTaken(date: string, medicationId: string): boolean {
+  const key = `${date}_${medicationId}`;
+  const taken = rawGet<string[]>(`${PFX}_medications_taken`, []);
+  const idx = taken.indexOf(key);
+  let enabled: boolean;
+  if (idx >= 0) {
+    taken.splice(idx, 1);
+    enabled = false;
+  } else {
+    taken.push(key);
+    enabled = true;
+  }
+  rawSet(`${PFX}_medications_taken`, taken);
+  return enabled;
 }

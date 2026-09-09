@@ -8,6 +8,7 @@ import { applyTheme } from './lib/theme';
 import { initNav, refreshActive } from './ui/nav';
 import { todayTab } from './ui/tabs/today';
 import { rotinaTab } from './ui/tabs/rotina';
+import { medicamentosTab } from './ui/tabs/medicamentos';
 import { habilidadesTab } from './ui/tabs/habilidades';
 import { trainingTab } from './ui/tabs/training';
 import { dietTab } from './ui/tabs/diet';
@@ -60,7 +61,7 @@ try {
 
   initNav(
     app,
-    [todayTab, rotinaTab, trainingTab, dietTab, progressTab, habilidadesTab, diarioTab, desafiosTab, calendarTab, conquistasTab, settingsTab],
+    [todayTab, rotinaTab, trainingTab, dietTab, progressTab, medicamentosTab, habilidadesTab, diarioTab, desafiosTab, calendarTab, conquistasTab, settingsTab],
     'hoje'
   );
 } catch (err) {

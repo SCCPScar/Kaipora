@@ -25,6 +25,7 @@ export const navIcons: Record<string, () => string> = {
   desafios: () => svg('<line x1="6" y1="3" x2="6" y2="21"/><path d="M6 4.5 L18 8 L6 11.5 Z"/>'),
   calendario: () => svg('<rect x="3.5" y="5" width="17" height="15.5" rx="2.2"/><line x1="3.5" y1="9.5" x2="20.5" y2="9.5"/><line x1="8" y1="3" x2="8" y2="6.5"/><line x1="16" y1="3" x2="16" y2="6.5"/><circle cx="8" cy="13.5" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="13.5" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="13.5" r="1" fill="currentColor" stroke="none"/>'),
   conquistas: () => svg('<path d="M12 3.5l2.2 4.6 5 .7-3.6 3.6.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.6 5-.7Z"/>'),
+  medicamentos: () => svg('<rect x="4" y="9.5" width="16" height="7" rx="3.5" transform="rotate(-45 12 13)"/><line x1="12" y1="8.5" x2="12" y2="17.5" transform="rotate(-45 12 13)"/>'),
   ajustes: () => svg('<line x1="3.5" y1="6" x2="20.5" y2="6"/><circle cx="9" cy="6" r="2.1" fill="var(--bg-elevated)"/><line x1="3.5" y1="12" x2="20.5" y2="12"/><circle cx="15" cy="12" r="2.1" fill="var(--bg-elevated)"/><line x1="3.5" y1="18" x2="20.5" y2="18"/><circle cx="11" cy="18" r="2.1" fill="var(--bg-elevated)"/>')
 };
 

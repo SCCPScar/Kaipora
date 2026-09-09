@@ -72,7 +72,12 @@ import {
   setSnoozedReminderDate,
   getWeeklyIntentions,
   getWeeklyIntention,
-  setWeeklyIntention
+  setWeeklyIntention,
+  getMedications,
+  addMedication,
+  deleteMedication,
+  isMedicationTaken,
+  toggleMedicationTaken
 } from '../src/lib/storage';
 import { touchedAt } from '../src/lib/meta';
 
@@ -658,6 +663,54 @@ describe('Kaipora 75: per-day manual check-ins (dieta + atividade extra)', () =>
     expect(getChallengeDayLog('ch1', '2026-01-01')).toEqual({ dietOk: true, extraActivity: false });
     expect(getChallengeDayLog('ch2', '2026-01-01')).toEqual({ dietOk: false, extraActivity: true });
     expect(getChallengeDayLogs('ch1')).toHaveLength(2);
+  });
+});
+
+describe('medicamentos e suplementos', () => {
+  it('creates a medication and lists it back', () => {
+    addMedication({ id: 'med1', name: 'Vitamina D', times: ['08:00'], days: ['seg', 'qua', 'sex'] });
+    expect(getMedications()).toHaveLength(1);
+    expect(getMedications()[0]).toMatchObject({ name: 'Vitamina D', times: ['08:00'], days: ['seg', 'qua', 'sex'] });
+  });
+
+  it('keeps purpose optional', () => {
+    addMedication({ id: 'med1', name: 'Omeprazol', times: ['07:00'], days: ['seg'], purpose: 'Refluxo' });
+    expect(getMedications()[0].purpose).toBe('Refluxo');
+  });
+
+  it('supports more than one time per day', () => {
+    addMedication({ id: 'med1', name: 'Antibiótico', times: ['08:00', '20:00'], days: ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'] });
+    expect(getMedications()[0].times).toEqual(['08:00', '20:00']);
+  });
+
+  it('soft-deletes a medication, matched by id, without touching other medications', () => {
+    addMedication({ id: 'med1', name: 'Vitamina D', times: ['08:00'], days: ['seg'] });
+    addMedication({ id: 'med2', name: 'Ômega 3', times: ['08:00'], days: ['seg'] });
+    deleteMedication(0); // most recent first — this is med2
+    expect(getMedications()).toHaveLength(1);
+    expect(getMedications()[0].id).toBe('med1');
+  });
+});
+
+describe('medicamentos: "tomado hoje"', () => {
+  it('is off by default and toggles on/off per medication per date', () => {
+    expect(isMedicationTaken('2026-01-01', 'med1')).toBe(false);
+    expect(toggleMedicationTaken('2026-01-01', 'med1')).toBe(true);
+    expect(isMedicationTaken('2026-01-01', 'med1')).toBe(true);
+    expect(toggleMedicationTaken('2026-01-01', 'med1')).toBe(false);
+    expect(isMedicationTaken('2026-01-01', 'med1')).toBe(false);
+  });
+
+  it('keeps different medications and different dates independent', () => {
+    toggleMedicationTaken('2026-01-01', 'med1');
+    expect(isMedicationTaken('2026-01-01', 'med2')).toBe(false);
+    expect(isMedicationTaken('2026-01-02', 'med1')).toBe(false);
+  });
+
+  it('is a single checkbox regardless of how many times the medication has per day', () => {
+    addMedication({ id: 'med1', name: 'Antibiótico', times: ['08:00', '20:00'], days: ['seg'] });
+    toggleMedicationTaken('2026-01-01', 'med1');
+    expect(isMedicationTaken('2026-01-01', 'med1')).toBe(true);
   });
 });
 

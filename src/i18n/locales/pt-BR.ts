@@ -32,6 +32,7 @@ export const dict: Record<string, string> = {
   'nav.tab.rotina': 'Rotina',
   'nav.tab.treino': 'Treino',
   'nav.tab.progresso': 'Progresso',
+  'nav.tab.medicamentos': 'Medicamentos',
   'nav.tab.habilidades': 'Habilidades',
   'nav.tab.diario': 'Diário',
   'nav.tab.desafios': 'Desafios',
@@ -140,6 +141,8 @@ export const dict: Record<string, string> = {
   'today.meals.proteinAmount': '{{g}}g prot',
   'today.meals.loggedBlank': 'Diário livre de hoje',
   'today.habits.title': 'Hábitos de hoje',
+  'today.medications.title': 'Medicamentos de hoje',
+  'today.medications.empty': 'Nenhum medicamento programado para hoje',
 
   // ---- src/ui/tabs/rotina.ts ----
   'rotina.title': 'Rotina',
@@ -305,6 +308,21 @@ export const dict: Record<string, string> = {
   'progresso.measurements.toastSaved': 'Medidas salvas',
   'progresso.measurements.toastUpdated': 'Medidas atualizadas',
   'progresso.measurements.confirmRemove': 'Remover este registro de medidas?',
+
+  // ---- src/ui/tabs/medicamentos.ts ----
+  'medicamentos.title': 'Medicamentos',
+  'medicamentos.subtitle': 'Seus remédios e suplementos',
+  'medicamentos.description': 'Registre horários, dias da semana e marque como tomado a cada dia',
+  'medicamentos.list.title': 'Seus medicamentos',
+  'medicamentos.list.empty': 'Ainda sem medicamentos cadastrados',
+  'medicamentos.add.title': 'Adicionar medicamento',
+  'medicamentos.add.namePlaceholder': 'Ex: Vitamina D',
+  'medicamentos.add.addTime': '+ Adicionar horário',
+  'medicamentos.add.purposePlaceholder': 'Para que serve (opcional)',
+  'medicamentos.add.button': '+ Adicionar medicamento',
+  'medicamentos.toast.fill': 'Preencha o nome, pelo menos um horário e pelo menos um dia',
+  'medicamentos.toast.added': 'Medicamento adicionado',
+  'medicamentos.confirmRemove': 'Remover este medicamento?',
 
   // ---- src/ui/tabs/habilidades.ts ----
   'habilidades.title': 'Habilidades',

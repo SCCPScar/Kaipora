@@ -12,6 +12,9 @@ import {
   toggleRoutineItem,
   getFixedCommitments,
   getFlexibleActivities,
+  getMedications,
+  isMedicationTaken,
+  toggleMedicationTaken,
   getSettings,
   getMascotComeBackShownDate,
   setMascotComeBackShownDate,
@@ -193,11 +196,21 @@ export const todayTab: Tab = {
         <div class="sec-title">${t('today.habits.title')}</div>
         <div id="habits-list"></div>
       </section>
+
+      ${
+        getMedications().length > 0
+          ? `<section>
+        <div class="sec-title">${t('today.medications.title')}</div>
+        <div id="medications-list"></div>
+      </section>`
+          : ''
+      }
     `;
 
     renderGlasses(root, day.water, glassGoal);
     renderRoutine(root, date, day, weekdayKey, settings.wakeTime, settings.sleepTime);
     renderHabits(root, date, day);
+    renderMedicationsToday(root, date, weekdayKey);
     wireEvents(root, date, glassGoal, workout, weekKey, weeklyIntention);
   }
 };
@@ -304,6 +317,30 @@ function renderHabits(root: HTMLElement, date: string, day: ReturnType<typeof ge
   ).join('');
 }
 
+/** Only medications scheduled for today's weekday — mirrors renderHabits'
+ * check-row pattern, gated (whole section, see render()) on the user having
+ * at least one medication ever created, so testers who take none never see
+ * an empty section cluttering Hoje. */
+function renderMedicationsToday(root: HTMLElement, date: string, weekday: Weekday) {
+  const el = root.querySelector('#medications-list');
+  if (!el) return;
+  const today = getMedications().filter((m) => m.days.includes(weekday));
+  if (!today.length) {
+    el.innerHTML = `<div class="empty">${t('today.medications.empty')}</div>`;
+    return;
+  }
+  el.innerHTML = today
+    .map((m) => {
+      const taken = isMedicationTaken(date, m.id);
+      return `
+    <div class="row ${taken ? 'done' : ''}" data-medication="${m.id}">
+      <div class="chk"></div>
+      <div class="rtxt"><strong>${escapeHtml(m.name)}</strong><small>${escapeHtml(m.times.join(', '))}</small></div>
+    </div>`;
+    })
+    .join('');
+}
+
 function wireEvents(
   root: HTMLElement,
   date: string,
@@ -390,6 +427,13 @@ function wireEvents(
     const row = (e.target as HTMLElement).closest<HTMLElement>('[data-routine]');
     if (!row) return;
     toggleRoutineItem(date, row.dataset.routine as string);
+    refreshActive();
+  });
+
+  root.querySelector('#medications-list')?.addEventListener('click', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLElement>('[data-medication]');
+    if (!row) return;
+    toggleMedicationTaken(date, row.dataset.medication as string);
     refreshActive();
   });
 }
