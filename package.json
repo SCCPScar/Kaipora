@@ -8,14 +8,19 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "postbuild": "node scripts/stamp-sw.mjs",
+    "build:mobile": "tsc -b && vite build --config vite.config.mobile.ts",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
     "@supabase/supabase-js": "^2.45.4"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.1",
     "jsdom": "^25.0.1",
     "typescript": "^5.6.2",
     "vite": "^5.4.8",

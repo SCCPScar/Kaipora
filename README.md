@@ -62,6 +62,24 @@ O workflow `.github/workflows/deploy.yml` publica automaticamente a cada push pa
 
 Se publicares num domínio próprio (raiz, não subpasta), define `VITE_BASE_PATH=/` como variável de ambiente do build.
 
+## App nativa Android (e futuramente iOS) via Capacitor
+
+O mesmo código web é empacotado como app nativa através do [Capacitor](https://capacitorjs.com). Diferente do build do GitHub Pages (que vive em `/Kaipora/`), o build móvel corre a partir da raiz do próprio pacote da app — por isso usa uma config Vite separada (`vite.config.mobile.ts`) e uma pasta de saída própria (`dist-mobile/`, ignorada pelo git).
+
+Projeto Android já gerado em `android/` (Gradle, ícones adaptativos e splash screen a partir de `resources/icon.png` e `resources/splash.png`). Para abrir e compilar:
+
+1. `npm run build:mobile` — gera `dist-mobile/` com os caminhos corretos para a app nativa.
+2. `npx cap sync android` — copia os assets web mais recentes para dentro do projeto Android.
+3. Abre a pasta `android/` no Android Studio (File → Open) e corre num emulador ou dispositivo.
+
+Repete os passos 1-2 sempre que fizeres alterações ao código e quiseres testá-las na app nativa — o Android Studio não vê o código TypeScript/Vite diretamente, só o HTML/JS/CSS já compilado dentro de `android/app/src/main/assets/public`.
+
+Se mudares o ícone ou a splash screen, substitui `resources/icon.png` (1024×1024), `resources/icon-foreground.png` (camada de primeiro plano do ícone adaptativo) e/ou `resources/splash.png` (2732×2732) e corre `npx capacitor-assets generate --android`.
+
+**iOS**: a mesma base (Capacitor + `dist-mobile/`) serve para gerar um projeto Xcode mais tarde com `npx cap add ios` (requer macOS com Xcode instalado — não é possível gerar/compilar o projeto iOS neste ambiente).
+
+**Notificações/permissões nativas**: por agora a app usa só a API web de notificações (a mesma da versão PWA, ver secção "iPhone / Safari / PWA" abaixo) — ainda não foram adicionados plugins nativos do Capacitor. Isto é um passo futuro se quiseres notificações mais fiáveis em segundo plano no Android.
+
 ## Sincronização cloud (iPhone ↔ PC)
 
 Esta é a forma pretendida de usar o Kaipora em mais do que um dispositivo: Supabase é a fonte de verdade entre o iPhone e o PC, e o `localStorage` de cada dispositivo é a camada offline que garante que a app nunca fica bloqueada à espera de rede. Sem `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` definidos, a app funciona inteiramente local — nada quebra, só não sincroniza entre dispositivos.
