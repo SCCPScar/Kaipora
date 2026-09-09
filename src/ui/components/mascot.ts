@@ -8,8 +8,9 @@ export function mascotCardHTML(text: string, image: string, opts?: { dismissible
   const src = `${import.meta.env.BASE_URL}${image}`;
   return `
     <div class="mascot-card">
-      <img src="${src}" alt="Kaipora" width="46" height="46" />
+      <img src="${src}" alt="Kaipora" />
       <div>
+        <span class="mascot-name">Kaipora</span>
         <span>${text}</span>
         ${opts?.dismissible ? '<button class="mascot-dismiss" type="button" data-mascot-dismiss>Não me lembres hoje</button>' : ''}
       </div>

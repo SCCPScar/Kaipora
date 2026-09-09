@@ -41,5 +41,5 @@ export const MASCOT_LINES = {
   /** Used instead of comeBack once shouldUseAdaptiveTone() is true — two or
    * more difficult days in a row, never a single one. */
   comeBackSoft:
-    'Têm sido uns dias mais difíceis. Não precisas de recuperar tudo de uma vez — só o próximo copo de água ou o próximo treino já conta.'
+    'Têm sido uns dias mais difíceis. Não precisas de recuperar tudo de uma vez, só o próximo copo de água ou o próximo treino já conta.'
 };
