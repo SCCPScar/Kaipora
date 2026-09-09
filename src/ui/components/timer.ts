@@ -123,9 +123,9 @@ export function openTimerModal(initialSeconds = 60): void {
 }
 
 const BREATH_PHASES = [
-  { label: 'Inspira', seconds: 4 },
-  { label: 'Segura', seconds: 4 },
-  { label: 'Expira', seconds: 4 }
+  { label: 'Inspire', seconds: 4 },
+  { label: 'Segure', seconds: 4 },
+  { label: 'Expire', seconds: 4 }
 ];
 
 /**
@@ -152,7 +152,7 @@ export function openBreathingModal(): void {
     <div class="timer-btns">
       <button class="btn" id="breath-toggle">Iniciar</button>
     </div>
-    <p style="text-align:center;color:var(--text-dim);font-size:12.5px;margin-top:10px">Inspira, segura e expira, cada fase com 4 segundos. Repete o tempo que precisares.</p>
+    <p style="text-align:center;color:var(--text-dim);font-size:12.5px;margin-top:10px">Inspire, segure e expire, cada fase com 4 segundos. Repita o tempo que precisar.</p>
   `,
     (modal) => {
       const phaseEl = modal.querySelector('#breath-phase') as HTMLElement;

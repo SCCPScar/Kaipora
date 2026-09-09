@@ -59,7 +59,7 @@ export function startReminderLoop(): void {
 
     if (settings.reminderTimes.meals.includes(hhmm) && !firedToday.has(`meal_${todayKey}`)) {
       firedToday.add(`meal_${todayKey}`);
-      notify('Kaipora', 'Hora de uma refeição, sem pressa. Regista o que comeres.');
+      notify('Kaipora', 'Hora de uma refeição, sem pressa. Registre o que comer.');
     }
     if (settings.reminderTimes.training.includes(hhmm) && !firedToday.has(`train_${todayKey}`)) {
       firedToday.add(`train_${todayKey}`);

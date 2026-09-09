@@ -15,7 +15,7 @@ export const diarioTab: Tab = {
       <div class="ph">
         <h2>Diário</h2>
         <div class="ph-title">Um espaço livre</div>
-        <div class="ph-sub">Escreve sobre o teu dia, sem formulário rígido, sem categorias</div>
+        <div class="ph-sub">Escreva sobre o seu dia, sem formulário rígido, sem categorias</div>
       </div>
 
       <section>
@@ -23,7 +23,7 @@ export const diarioTab: Tab = {
           <textarea class="finp" id="journal-text" rows="4" placeholder="Hoje..." style="flex:1;resize:vertical;font-family:inherit"></textarea>
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn block" id="journal-save">Guardar entrada</button>
+          <button class="btn block" id="journal-save">Salvar entrada</button>
         </div>
       </section>
 
@@ -59,11 +59,11 @@ function wireEvents(root: HTMLElement) {
     const textarea = root.querySelector('#journal-text') as HTMLTextAreaElement;
     const text = textarea.value.trim();
     if (!text) {
-      showToast('Escreve algo antes de guardar');
+      showToast('Escreva algo antes de salvar');
       return;
     }
     addJournalEntry(text, todayISO());
-    showToast('Entrada guardada');
+    showToast('Entrada salva');
     refreshActive();
   });
 

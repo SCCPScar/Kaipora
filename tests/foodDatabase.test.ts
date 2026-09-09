@@ -54,7 +54,7 @@ describe('food database (Contador de Calorias)', () => {
 
   it('searches accent-insensitively, so a phone keyboard without accents still finds matches', () => {
     expect(searchFoodDatabase('feijao').some((f) => f.id === 'fd_feijao_preto')).toBe(true);
-    expect(searchFoodDatabase('ananas').some((f) => f.id === 'fd_ananas')).toBe(true);
+    expect(searchFoodDatabase('melao').some((f) => f.id === 'fd_meloa')).toBe(true);
     expect(searchFoodDatabase('pao').some((f) => f.id === 'fd_pao_forma')).toBe(true);
   });
 

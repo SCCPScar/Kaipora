@@ -87,8 +87,8 @@ function renderList(root: HTMLElement) {
     <div class="alert">
       <span>
         <strong>Kaipora 75 e Kaipora 45</strong> são duas versões do mesmo desafio não-punitivo: a original,
-        e uma mais suave, à tua escolha. Cada uma tem as suas próprias regras (vê o calendário do desafio
-        para o detalhe). Se te esqueceres um dia, esse dia simplesmente não conta: o desafio não reinicia
+        e uma mais suave, à sua escolha. Cada uma tem as suas próprias regras (veja o calendário do desafio
+        para o detalhe). Se esquecer um dia, esse dia simplesmente não conta: o desafio não reinicia
         nem termina antes do prazo.
       </span>
     </div>
@@ -156,7 +156,7 @@ function renderChallenges(root: HTMLElement) {
       <input class="finp" id="ch-start" type="date" value="${today}" style="flex:1" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="ch-save">Guardar desafio</button>
+      <button class="btn block" id="ch-save">Salvar desafio</button>
     </div>`
     : `
     <div class="form-row">
@@ -209,7 +209,7 @@ function wireListEvents(root: HTMLElement) {
 
     const btn = target.closest<HTMLElement>('[data-del-challenge]');
     if (!btn) return;
-    if (!confirm('Remover este desafio? O teu histórico de dias mantém-se guardado.')) return;
+    if (!confirm('Remover este desafio? O seu histórico de dias continua salvo.')) return;
     deleteChallenge(Number(btn.dataset.delChallenge));
     refreshActive();
   });
@@ -257,7 +257,7 @@ function wireListEvents(root: HTMLElement) {
       const totalDays = Number((root.querySelector('#ch-days') as HTMLInputElement).value);
       const startDate = (root.querySelector('#ch-start') as HTMLInputElement).value || todayISO();
       if (!title || !totalDays || totalDays <= 0) {
-        showToast('Preenche o nome e o número de dias');
+        showToast('Preencha o nome e o número de dias');
         return;
       }
       addChallenge({ id: `ch_${Date.now()}`, title, totalDays, startDate });
@@ -312,7 +312,7 @@ function renderCalendarView(root: HTMLElement, c: Challenge & { kind: 'kaipora75
     <div class="ph">
       <button class="btn sm ghost" id="k75-back">‹ Voltar aos desafios</button>
       <div class="ph-title" style="margin-top:10px">${escapeHtml(c.title)}</div>
-      <div class="ph-sub">Toca num dia para veres e registares o que fizeste nesse dia</div>
+      <div class="ph-sub">Toque em um dia para ver e registrar o que fez nesse dia</div>
     </div>
 
     <div class="alert">
@@ -383,7 +383,7 @@ function openDayDetail(c: Challenge & { kind: 'kaipora75' | 'kaipora45' }, iso: 
       <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:12px">${iso}${status.allDone ? ' · dia cumprido' : ''}</div>
 
       <div class="row" style="cursor:default">
-        <div class="rtxt"><strong>Água</strong><small>${day.water} copo(s) registados</small></div>
+        <div class="rtxt"><strong>Água</strong><small>${day.water} copo(s) registrados</small></div>
         <span class="badge-${status.water ? 'p' : 'k'}">${status.water ? 'Meta atingida' : 'Por atingir'}</span>
       </div>
       <div class="wbtns" style="padding:0 0 12px">
@@ -398,11 +398,11 @@ function openDayDetail(c: Challenge & { kind: 'kaipora75' | 'kaipora45' }, iso: 
       ${
         isPlannedRestDay
           ? `<div class="row" style="cursor:default">
-              <div class="rtxt"><strong>Dia de folga planeado</strong><small>Conta automaticamente, não precisas de treinar hoje</small></div>
+              <div class="rtxt"><strong>Dia de folga planejado</strong><small>Conta automaticamente, não precisa treinar hoje</small></div>
               <span class="badge-p">Conta</span>
             </div>`
           : `<div class="row" style="cursor:default">
-              <div class="rtxt"><strong>Outra atividade física</strong><small>Se não fizeste o treino do plano, mas fizeste outra coisa</small></div>
+              <div class="rtxt"><strong>Outra atividade física</strong><small>Se não fez o treino do plano, mas fez outra coisa</small></div>
               <span class="switch"><input type="checkbox" data-day-activity ${log.extraActivity ? 'checked' : ''}/><span class="slider"></span></span>
             </div>`
       }
@@ -423,7 +423,7 @@ function openDayDetail(c: Challenge & { kind: 'kaipora75' | 'kaipora45' }, iso: 
         </div>`
               )
               .join('')
-          : '<div class="empty">Ainda sem sessão registada neste dia</div>'
+          : '<div class="empty">Ainda sem sessão registrada neste dia</div>'
       }
       ${
         skills.length
@@ -435,9 +435,9 @@ function openDayDetail(c: Challenge & { kind: 'kaipora75' | 'kaipora45' }, iso: 
         <input class="finp" id="k75-skill-minutes" type="number" min="1" placeholder="minutos" style="flex:1" />
       </div>
       <div class="form-row" style="padding:0 0 4px">
-        <button class="btn block" data-log-skill>Registar sessão</button>
+        <button class="btn block" data-log-skill>Registrar sessão</button>
       </div>`
-          : `<div style="padding:0 0 4px;font-size:12.5px;color:var(--text-dim)">Ainda sem habilidades criadas. Adiciona uma em <a href="#" data-goto-habilidades style="color:var(--primary);font-weight:700">Habilidades</a>.</div>`
+          : `<div style="padding:0 0 4px;font-size:12.5px;color:var(--text-dim)">Ainda sem habilidades criadas. Adicione uma em <a href="#" data-goto-habilidades style="color:var(--primary);font-weight:700">Habilidades</a>.</div>`
       }
     `;
 
@@ -475,11 +475,11 @@ function openDayDetail(c: Challenge & { kind: 'kaipora75' | 'kaipora45' }, iso: 
       const skillId = (modal.querySelector('#k75-skill-select') as HTMLSelectElement)?.value;
       const minutes = Number((modal.querySelector('#k75-skill-minutes') as HTMLInputElement)?.value);
       if (!skillId || !minutes || minutes <= 0) {
-        showToast('Escolhe a habilidade e indica os minutos');
+        showToast('Escolha a habilidade e indique os minutos');
         return;
       }
       logSkillSession({ skillId, date: iso, minutes });
-      showToast('Sessão registada');
+      showToast('Sessão registrada');
       render(modal);
       refreshActive();
     });

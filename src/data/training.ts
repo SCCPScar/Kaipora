@@ -45,8 +45,8 @@ export const TRAINING_WEEK: TrainingDay[] = [
       ex('rosca_martelo', 3, '12', 45)
     ]),
     casa: workout('ter-casa', 'Pull em Casa · Costas e Bíceps', 'Costas · Bíceps · Core', 'casa', [
-      ex('australian_row', 4, '12', 60, 'Usa uma mesa firme ou barra baixa.'),
-      ex('pull_up', 4, 'máx. reps (ou negativas)', 90, 'Sem barra em casa? troca por remada invertida extra.'),
+      ex('australian_row', 4, '12', 60, 'Use uma mesa firme ou barra baixa.'),
+      ex('pull_up', 4, 'máx. reps (ou negativas)', 90, 'Sem barra em casa? Troque por remada invertida extra.'),
       ex('hanging_knee', 3, '12', 45),
       ex('superman', 3, '15', 45),
       ex('dead_bug', 3, '12 cada lado', 30)
@@ -94,7 +94,7 @@ export const TRAINING_WEEK: TrainingDay[] = [
       'Glúteo máximo · Glúteo médio',
       'academia',
       [
-        ex('hip_thrust', 4, '12', 75, 'Exercício principal do dia. Aperta bem no topo.'),
+        ex('hip_thrust', 4, '12', 75, 'Exercício principal do dia. Aperte bem no topo.'),
         ex('gluteo_cabo', 3, '15 cada perna', 45),
         ex('abducao_quadril', 3, '15', 45),
         ex('stiff_halteres', 3, '12', 75),
@@ -108,7 +108,7 @@ export const TRAINING_WEEK: TrainingDay[] = [
       'Glúteo máximo · Glúteo médio',
       'casa',
       [
-        ex('elevacao_quadril_elastico', 4, '15', 60, 'Exercício principal do dia. Aperta bem no topo.'),
+        ex('elevacao_quadril_elastico', 4, '15', 60, 'Exercício principal do dia. Aperte bem no topo.'),
         ex('ponte_gluteo_unilateral', 3, '10 cada perna', 45),
         ex('caminhada_lateral_elastico', 3, '15 passos cada lado', 30),
         ex('donkey_kick', 3, '15 cada perna', 30),

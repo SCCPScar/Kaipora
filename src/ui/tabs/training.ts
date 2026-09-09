@@ -63,15 +63,15 @@ export const trainingTab: Tab = {
         <div class="ph">
           <h2>Treino</h2>
           <div class="ph-title">Academia + Casa</div>
-          <div class="ph-sub">Toca no dia para abrir · relógio = descanso · info = como fazer</div>
+          <div class="ph-sub">Toque no dia para abrir · relógio = descanso · info = como fazer</div>
         </div>
-        <div class="alert"><span>Cada dia tem sempre as duas versões: escolhe Academia ou Casa consoante o que fizeres.</span></div>
+        <div class="alert"><span>Cada dia tem sempre as duas versões: escolha Academia ou Casa consoante o que fizer.</span></div>
         <div id="week-days"></div>
 
         <section>
           <div class="sec-title"><span>Os Meus Exercícios</span></div>
           <div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-            Exercícios que a biblioteca não tem, como algo que o teu personal trainer te ensinou. Ficam disponíveis para qualquer treino teu.
+            Exercícios que a biblioteca não tem, como algo que seu personal trainer ensinou. Ficam disponíveis para qualquer treino seu.
           </div>
           <div id="custom-exercise-list"></div>
           <div id="custom-exercise-form"></div>
@@ -80,7 +80,7 @@ export const trainingTab: Tab = {
         <section>
           <div class="sec-title"><span>Os Meus Treinos</span></div>
           <div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-            Cria os teus próprios treinos (academia, casa, calistenia, personal trainer ou o que fizer sentido) sem mexer no plano acima.
+            Crie os seus próprios treinos (academia, casa, calistenia, personal trainer ou o que fizer sentido) sem mexer no plano acima.
           </div>
           <div id="custom-workout-list"></div>
           <div id="custom-workout-form"></div>
@@ -187,7 +187,7 @@ function renderCustomExercises(root: HTMLElement) {
       <input class="finp" id="cex-tip" type="text" placeholder="Dica (opcional)" style="flex:1" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="cex-save">Guardar exercício</button>
+      <button class="btn block" id="cex-save">Salvar exercício</button>
     </div>`
     : `<div class="form-row" style="padding-top:0"><button class="btn block" id="cex-toggle">+ Novo exercício</button></div>`;
 }
@@ -297,7 +297,7 @@ function renderCustomWorkouts(root: HTMLElement, date: string) {
       <input class="finp" id="cw-focus" type="text" placeholder="Foco (ex: Peito e Costas)" style="flex:1" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="cw-save">Guardar treino</button>
+      <button class="btn block" id="cw-save">Salvar treino</button>
     </div>`
     : `<div class="form-row" style="padding-top:0"><button class="btn block" id="cw-toggle">+ Criar treino</button></div>`;
 }
@@ -351,7 +351,7 @@ function wireEvents(root: HTMLElement, date: string) {
       const marker = getDay(date).training;
       const alreadyDone = marker?.workoutId === workoutId && marker.done;
       setTrainingDone(date, modality, workoutId, !alreadyDone);
-      if (!alreadyDone) showToast('Treino de hoje registado!');
+      if (!alreadyDone) showToast('Treino de hoje registrado!');
       refreshActive();
       return;
     }
@@ -363,7 +363,7 @@ function wireEvents(root: HTMLElement, date: string) {
       const marker = getDay(date).training;
       const alreadyDone = marker?.workoutId === workoutId && marker.done;
       setTrainingDone(date, category, workoutId, !alreadyDone);
-      if (!alreadyDone) showToast('Treino de hoje registado!');
+      if (!alreadyDone) showToast('Treino de hoje registrado!');
       refreshActive();
       return;
     }
@@ -390,7 +390,7 @@ function wireEvents(root: HTMLElement, date: string) {
       const desc = (root.querySelector('#cex-desc') as HTMLInputElement).value.trim();
       const tip = (root.querySelector('#cex-tip') as HTMLInputElement).value.trim();
       if (!name) {
-        showToast('Preenche pelo menos o nome');
+        showToast('Preencha pelo menos o nome');
         return;
       }
       const muscles = musclesRaw
@@ -424,12 +424,12 @@ function wireEvents(root: HTMLElement, date: string) {
       const category = (root.querySelector('#cw-category') as HTMLInputElement).value.trim();
       const focus = (root.querySelector('#cw-focus') as HTMLInputElement).value.trim();
       if (!title || !category) {
-        showToast('Preenche pelo menos o nome e a categoria');
+        showToast('Preencha pelo menos o nome e a categoria');
         return;
       }
       addCustomWorkout({ id: `cw_${Date.now()}`, title, category, focus, exercises: [] });
       addingCustomWorkout = false;
-      showToast('Treino criado. Adiciona exercícios abaixo');
+      showToast('Treino criado. Adicione exercícios abaixo');
       refreshActive();
       return;
     }
@@ -454,7 +454,7 @@ function wireEvents(root: HTMLElement, date: string) {
       const reps = repsInput.value.trim() || '12';
       const restSeconds = Number(restInput.value) || 0;
       if (!exerciseId) {
-        showToast('Escolhe um exercício');
+        showToast('Escolha um exercício');
         return;
       }
       const entry: WorkoutExercise = { exerciseId, sets, reps, restSeconds };

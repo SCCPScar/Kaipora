@@ -10,15 +10,15 @@ import { getHiddenMealOptionIds, getCustomFoodOptions, getFoodLog } from '../lib
 export const MEALS: Meal[] = [
   {
     id: "pa",
-    name: "Pequeno-Almoço",
+    name: "Café da Manhã",
     time: "07h",
     targetKcal: 270,
     targetProtein: 22,
     options: [
       {
         id: "pa1",
-        label: "Omelete de espinafres",
-        desc: "1 ovo + 2 claras + espinafres (40g) + queijo light (25g) + pão integral (30g)",
+        label: "Omelete de espinafre",
+        desc: "1 ovo + 2 claras + espinafre (40g) + queijo light (25g) + pão integral (30g)",
         kcal: 243,
         protein: 24,
         carbs: 18,
@@ -63,7 +63,7 @@ export const MEALS: Meal[] = [
       {
         id: "pa6",
         label: "Torrada com queijo fresco e peru",
-        desc: "Pão de mistura (40g) + queijo fresco magro (40g) + peru fumado (30g) + tomate",
+        desc: "Pão de mistura (40g) + queijo fresco magro (40g) + peru defumado (30g) + tomate",
         kcal: 260,
         protein: 20,
         carbs: 28,
@@ -116,8 +116,8 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lm5",
-        label: "Papaia com ovo cozido",
-        desc: "Papaia (120g) + 1 ovo cozido",
+        label: "Mamão com ovo cozido",
+        desc: "Mamão (120g) + 1 ovo cozido",
         kcal: 155,
         protein: 7,
         carbs: 15,
@@ -144,7 +144,7 @@ export const MEALS: Meal[] = [
       {
         id: "al1",
         label: "Pescada grelhada com batata-doce",
-        desc: "Pescada ou dourada grelhada (150g) + batata-doce assada (150g) + brócolos (100g) + azeite (5ml)",
+        desc: "Pescada ou dourada grelhada (150g) + batata-doce assada (150g) + brócolis (100g) + azeite (5ml)",
         kcal: 345,
         protein: 33,
         carbs: 37,
@@ -153,7 +153,7 @@ export const MEALS: Meal[] = [
       {
         id: "al2",
         label: "Frango grelhado com arroz integral",
-        desc: "Peito de frango grelhado (130g) + arroz integral (100g) + feijão verde (100g) + azeite (5ml)",
+        desc: "Peito de frango grelhado (130g) + arroz integral (100g) + vagem (100g) + azeite (5ml)",
         kcal: 495,
         protein: 40,
         carbs: 38,
@@ -171,7 +171,7 @@ export const MEALS: Meal[] = [
       {
         id: "al4",
         label: "Massa integral com frango e legumes",
-        desc: "Massa integral cozida (100g) + peito de frango (100g) + courgette e cenoura salteadas (100g) + azeite (5ml)",
+        desc: "Massa integral cozida (100g) + peito de frango (100g) + abobrinha e cenoura salteadas (100g) + azeite (5ml)",
         kcal: 500,
         protein: 33,
         carbs: 44,
@@ -180,7 +180,7 @@ export const MEALS: Meal[] = [
       {
         id: "al5",
         label: "Salmão com legumes e quinoa",
-        desc: "Salmão grelhado (100g) + quinoa cozida (100g) + brócolos e cenoura (100g)",
+        desc: "Salmão grelhado (100g) + quinoa cozida (100g) + brócolis e cenoura (100g)",
         kcal: 470,
         protein: 28,
         carbs: 35,
@@ -207,7 +207,7 @@ export const MEALS: Meal[] = [
       {
         id: "lt1",
         label: "Queijo fresco com fruta",
-        desc: "Queijo fresco magro (50g) + uvas ou meloa (100g)",
+        desc: "Queijo fresco magro (50g) + uvas ou melão (100g)",
         kcal: 190,
         protein: 11,
         carbs: 20,
@@ -215,8 +215,8 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lt2",
-        label: "Sandes de peru",
-        desc: "Pão integral (30g) + peru fumado (40g) + queijo light (15g) + alface e tomate",
+        label: "Sanduíche de peru",
+        desc: "Pão integral (30g) + peru defumado (40g) + queijo light (15g) + alface e tomate",
         kcal: 175,
         protein: 17,
         carbs: 18,
@@ -242,8 +242,8 @@ export const MEALS: Meal[] = [
       },
       {
         id: "lt5",
-        label: "Bolachas de arroz com hummus",
-        desc: "Bolachas de arroz (2 un.) + hummus (40g) + cenoura em palitos (60g)",
+        label: "Biscoitos de arroz com hummus",
+        desc: "Biscoitos de arroz (2 un.) + hummus (40g) + cenoura em palitos (60g)",
         kcal: 195,
         protein: 7,
         carbs: 26,
@@ -279,7 +279,7 @@ export const MEALS: Meal[] = [
       {
         id: "ja2",
         label: "Frango com puré de batata-doce",
-        desc: "Peito de frango grelhado (120g) + puré de batata-doce (120g) + espinafres salteados (80g)",
+        desc: "Peito de frango grelhado (120g) + purê de batata-doce (120g) + espinafre salteado (80g)",
         kcal: 345,
         protein: 32,
         carbs: 28,
@@ -288,7 +288,7 @@ export const MEALS: Meal[] = [
       {
         id: "ja3",
         label: "Sopa de legumes com ovo",
-        desc: "Sopa de legumes variados (350ml) + 1 ovo cozido ou escalfado + pão integral (20g)",
+        desc: "Sopa de legumes variados (350ml) + 1 ovo cozido ou pochê + pão integral (20g)",
         kcal: 330,
         protein: 17,
         carbs: 32,
@@ -297,7 +297,7 @@ export const MEALS: Meal[] = [
       {
         id: "ja4",
         label: "Omelete de legumes",
-        desc: "2 ovos + 1 clara + courgette, cogumelos e cebola (120g) + salada verde",
+        desc: "2 ovos + 1 clara + abobrinha, cogumelos e cebola (120g) + salada verde",
         kcal: 300,
         protein: 20,
         carbs: 10,
@@ -314,8 +314,8 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ja6",
-        label: "Grão-de-bico estufado com legumes",
-        desc: "Grão de bico estufado (150g) + tomate, courgette e pimento (150g)",
+        label: "Grão-de-bico guisado com legumes",
+        desc: "Grão de bico guisado (150g) + tomate, abobrinha e pimentão (150g)",
         kcal: 340,
         protein: 15,
         carbs: 45,
@@ -333,7 +333,7 @@ export const MEALS: Meal[] = [
       {
         id: "ce1",
         label: "Leite morno com canela",
-        desc: "Leite meio-gordo ou s/lactose (200ml) + canela",
+        desc: "Leite semidesnatado ou s/lactose (200ml) + canela",
         kcal: 150,
         protein: 7,
         carbs: 10,
@@ -359,8 +359,8 @@ export const MEALS: Meal[] = [
       },
       {
         id: "ce4",
-        label: "Chá de camomila com bolacha de arroz",
-        desc: "Chá de ervas + bolacha de arroz (1 un.) + queijo fresco (20g)",
+        label: "Chá de camomila com biscoito de arroz",
+        desc: "Chá de ervas + biscoito de arroz (1 un.) + queijo fresco (20g)",
         kcal: 120,
         protein: 6,
         carbs: 13,

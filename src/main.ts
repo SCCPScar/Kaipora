@@ -27,10 +27,10 @@ function renderBootError(): void {
   app.innerHTML = `
     <div style="max-width:420px;margin:15vh auto 0;padding:0 20px;text-align:center;font-family:'Manrope',-apple-system,sans-serif">
       <img class="boot-mark" src="${import.meta.env.BASE_URL}icons/icon-192.png?v=2" alt="Kaipora" style="width:64px;height:64px;margin-bottom:18px" />
-      <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Algo correu mal a abrir a app</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Algo deu errado ao abrir o app</div>
       <div style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:20px">
-        Os teus dados continuam guardados neste aparelho. Tenta recarregar a página; se continuar
-        a acontecer, exporta um backup em Ajustes assim que conseguires voltar a entrar.
+        Seus dados continuam salvos neste aparelho. Tente recarregar a página; se continuar
+        acontecendo, exporte um backup em Ajustes assim que conseguir voltar a entrar.
       </div>
       <button class="btn" id="boot-reload">Recarregar</button>
     </div>
@@ -90,7 +90,7 @@ onAuthChange((signedIn) => {
   if (justSignedIn) {
     void fullSync().then((result) => {
       refreshActive();
-      showToast(result.ok ? 'Sessão iniciada e sincronizada' : 'Sessão iniciada. Sincronização falhou, a tentar novamente em breve.');
+      showToast(result.ok ? 'Sessão iniciada e sincronizada' : 'Sessão iniciada. Sincronização falhou, tentando novamente em breve.');
     });
   } else if (justSignedOut) {
     showToast('Sessão terminada.');

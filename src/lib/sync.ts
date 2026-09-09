@@ -212,7 +212,7 @@ export async function fullSync(): Promise<SyncResult> {
   if (!supabase) return { ok: false, reason: 'Sincronização cloud não configurada.' };
   const session = await getSession();
   if (!session) return { ok: false, reason: 'Sessão não iniciada.' };
-  if (!navigator.onLine) return { ok: false, reason: 'Sem ligação à internet.' };
+  if (!navigator.onLine) return { ok: false, reason: 'Sem conexão com a internet.' };
 
   const userId = session.user.id;
   const since = lastSyncedAt();

@@ -33,8 +33,8 @@ export function openExerciseModal(ex: ExerciseLike): void {
     <div class="sec-title" style="margin:18px -20px 0;border-radius:0">Carga e progressão</div>
     <div id="load-compare"></div>
     <canvas id="load-chart" style="width:100%;display:none;margin-top:10px"></canvas>
-    <div id="load-empty" class="empty" style="display:none">Regista pelo menos 2 vezes com carga para veres o gráfico de evolução</div>
-    <div style="padding:12px 0 0;font-size:10.5px;color:var(--text-faint)">Preenche só o que fizer sentido: carga para exercícios de academia, repetições/duração/variação para calistenia.</div>
+    <div id="load-empty" class="empty" style="display:none">Registre pelo menos 2 vezes com carga para ver o gráfico de evolução</div>
+    <div style="padding:12px 0 0;font-size:10.5px;color:var(--text-faint)">Preencha só o que fizer sentido: carga para exercícios de academia, repetições/duração/variação para calistenia.</div>
     <div class="form-row" style="padding:8px 0 0">
       <input class="finp" id="load-kg" type="number" step="0.5" min="0" placeholder="Carga (kg)" />
       <input class="finp" id="load-reps" type="number" step="1" min="0" placeholder="Reps" style="max-width:80px" />
@@ -44,7 +44,7 @@ export function openExerciseModal(ex: ExerciseLike): void {
       <input class="finp" id="load-note" type="text" placeholder="Variação (ex: joelhos, elástico vermelho)" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="load-save">+ Registar esta sessão</button>
+      <button class="btn block" id="load-save">+ Registrar esta sessão</button>
     </div>
     <div id="load-log"></div>
   `,
@@ -68,7 +68,7 @@ export function openExerciseModal(ex: ExerciseLike): void {
         repsInput.value = '';
         secondsInput.value = '';
         noteInput.value = '';
-        showToast('Sessão registada');
+        showToast('Sessão registrada');
         renderLoads(modal, ex.id);
       });
 

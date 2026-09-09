@@ -53,7 +53,7 @@ export const dietTab: Tab = {
       <div class="ph">
         <h2>Alimentação</h2>
         <div class="ph-title">Plano, diário livre e contador de calorias</div>
-        <div class="ph-sub">Sem carne vermelha · Alimentos de supermercado em Portugal · Variedade</div>
+        <div class="ph-sub">Sem carne vermelha · Alimentos de supermercado no Brasil · Variedade</div>
       </div>
 
       <div class="stat-row">
@@ -89,7 +89,7 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
   const allCustom = getCustomFoodOptions();
 
   el.innerHTML =
-    `<div class="alert"><span>Não bebas durante as refeições (30 min antes e depois). As opções de cada refeição são substituições equivalentes. Oculta as que não usas e adiciona as tuas próprias.</span></div>` +
+    `<div class="alert"><span>Não beba durante as refeições (30 min antes e depois). As opções de cada refeição são substituições equivalentes. Oculte as que não usa e adicione as suas próprias.</span></div>` +
     MEALS.map((meal) => {
       const options = allMealOptions(meal.id);
       const totalKcal = options.reduce((s, o) => (day.meals[o.id] ? s + o.kcal : s), 0);
@@ -132,7 +132,7 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
           <input class="finp custom-fat" type="number" min="0" placeholder="gord g" style="flex:1;min-width:70px" />
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn block" data-save-custom="${meal.id}">Guardar alimento</button>
+          <button class="btn block" data-save-custom="${meal.id}">Salvar alimento</button>
         </div>`
             : `<div class="form-row" style="padding-top:0"><button class="btn block" data-toggle-add-custom="${meal.id}">+ Adicionar alimento a ${meal.name}</button></div>`
         }
@@ -158,7 +158,7 @@ function renderDiario(root: HTMLElement, date: string) {
   const todays = allLog.filter((e) => e.date === date);
 
   el.innerHTML = `
-    <div class="alert"><span>Regista aqui o que comeste fora do plano: pesquisa um alimento (valores por 100g) ou adiciona manualmente. A pesquisa cruza a base de dados local com o Open Food Facts quando há ligação.</span></div>
+    <div class="alert"><span>Registre aqui o que comeu fora do plano: pesquise um alimento (valores por 100g) ou adicione manualmente. A pesquisa cruza a base de dados local com o Open Food Facts quando há conexão.</span></div>
 
     <section>
       <div class="sec-title">Contador de Calorias</div>
@@ -248,7 +248,7 @@ async function renderOpenFoodFactsResults(root: HTMLElement, query: string): Pro
   }
 
   const token = ++offSearchToken;
-  el.innerHTML = '<div class="sec-title" style="margin-top:6px">Open Food Facts (online)</div><div class="empty">A pesquisar…</div>';
+  el.innerHTML = '<div class="sec-title" style="margin-top:6px">Open Food Facts (online)</div><div class="empty">Pesquisando…</div>';
   const results = await searchOpenFoodFacts(query);
   if (token !== offSearchToken) return; // a newer search already superseded this one
 
@@ -266,7 +266,7 @@ async function renderOpenFoodFactsResults(root: HTMLElement, query: string): Pro
       </div>`
           )
           .join('')
-      : '<div class="empty">Sem resultados online (ou sem ligação)</div>');
+      : '<div class="empty">Sem resultados online (ou sem conexão)</div>');
 }
 
 function renderHistory(root: HTMLElement, date: string) {
@@ -281,7 +281,7 @@ function renderHistory(root: HTMLElement, date: string) {
     const anyMarked = MEALS.some((m) => m.options.some((o) => rec.meals[o.id])) || getFoodLog(iso).length > 0;
     rows.push(`
       <div class="log-item">
-        <div class="log-txt"><strong>${iso}</strong><div class="log-date">${anyMarked ? `${kcal} kcal registadas` : 'Sem registo'}</div></div>
+        <div class="log-txt"><strong>${iso}</strong><div class="log-date">${anyMarked ? `${kcal} kcal registradas` : 'Sem registro'}</div></div>
       </div>`);
   }
   el.innerHTML = rows.join('');
@@ -332,7 +332,7 @@ function wireEvents(root: HTMLElement, date: string) {
       const carbs = Number((section.querySelector('.custom-carbs') as HTMLInputElement).value) || 0;
       const fat = Number((section.querySelector('.custom-fat') as HTMLInputElement).value) || 0;
       if (!label || !kcal) {
-        showToast('Preenche pelo menos o nome e as kcal');
+        showToast('Preencha pelo menos o nome e as kcal');
         return;
       }
       addCustomFoodOption({ id: `cf_${Date.now()}`, mealId, label, desc, kcal, protein, carbs, fat });

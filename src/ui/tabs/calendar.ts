@@ -100,7 +100,7 @@ function openDayDetail(iso: string) {
     <button class="modal-close" data-close aria-label="Fechar"></button>
     <h3>${iso}</h3>
     <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px">Água: ${rec.water} copo(s)${rec.training?.done ? ` · Treino: ${rec.training.modality === 'academia' ? 'Academia' : 'Casa'}` : ''}</div>
-    ${mealNames.length ? `<p style="font-size:13px"><strong>Refeições:</strong><br>${mealNames.join('<br>')}</p>` : '<p style="font-size:13px;color:var(--text-faint)">Sem refeições registadas.</p>'}
+    ${mealNames.length ? `<p style="font-size:13px"><strong>Refeições:</strong><br>${mealNames.join('<br>')}</p>` : '<p style="font-size:13px;color:var(--text-faint)">Sem refeições registradas.</p>'}
     ${exerciseNames.length ? `<p style="font-size:13px"><strong>Exercícios:</strong><br>${exerciseNames.join('<br>')}</p>` : ''}
   `,
     (modal) => {

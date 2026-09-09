@@ -46,7 +46,7 @@ export const habilidadesTab: Tab = {
       <div class="ph">
         <h2>Habilidades</h2>
         <div class="ph-title">Tempo investido e frequência</div>
-        <div class="ph-sub">Qualquer habilidade que estejas a desenvolver, sem categorias fixas</div>
+        <div class="ph-sub">Qualquer habilidade que esteja desenvolvendo, sem categorias fixas</div>
       </div>
 
       <section>
@@ -71,7 +71,7 @@ export const habilidadesTab: Tab = {
 function renderSkills(root: HTMLElement, skills: ReturnType<typeof getSkills>, sessions: ReturnType<typeof getSkillSessions>) {
   const el = root.querySelector('#skill-list') as HTMLElement;
   if (!skills.length) {
-    el.innerHTML = '<div class="empty">Ainda sem habilidades. Adiciona a primeira abaixo</div>';
+    el.innerHTML = '<div class="empty">Ainda sem habilidades. Adicione a primeira abaixo</div>';
     return;
   }
   el.innerHTML = skills
@@ -101,9 +101,9 @@ function renderSkills(root: HTMLElement, skills: ReturnType<typeof getSkills>, s
             <input class="finp" id="sess-note-${skill.id}" type="text" placeholder="Nota (opcional)" style="flex:1" />
           </div>
           <div class="form-row" style="padding-top:0">
-            <button class="btn block" data-save-session="${skill.id}">Guardar sessão</button>
+            <button class="btn block" data-save-session="${skill.id}">Salvar sessão</button>
           </div>`
-              : `<div class="form-row" style="padding-top:0"><button class="btn block" data-toggle-log="${skill.id}">+ Registar sessão</button></div>`
+              : `<div class="form-row" style="padding-top:0"><button class="btn block" data-toggle-log="${skill.id}">+ Registrar sessão</button></div>`
           }
         </div>
       </div>`;
@@ -119,7 +119,7 @@ function renderSkillAddForm(root: HTMLElement) {
       <input class="finp" id="skill-name" type="text" placeholder="Nome da habilidade (ex: Piano, Mandarim)" style="flex:1" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="skill-save">Guardar habilidade</button>
+      <button class="btn block" id="skill-save">Salvar habilidade</button>
     </div>`
     : `<div class="form-row" style="padding-top:0"><button class="btn block" id="skill-toggle">+ Nova habilidade</button></div>`;
 }
@@ -129,7 +129,7 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
   if (!enabled) {
     el.innerHTML = `
       <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-        Sistema de recompensas desativado. Ativa em <a href="#" data-goto-settings style="color:var(--primary);font-weight:700">Ajustes</a> se quiseres definir marcos para o teu tempo de prática.
+        Sistema de recompensas desativado. Ative em <a href="#" data-goto-settings style="color:var(--primary);font-weight:700">Ajustes</a> se quiser definir marcos para o seu tempo de prática.
       </div>`;
     return;
   }
@@ -168,7 +168,7 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
         <input class="finp" id="reward-minutes" type="number" min="1" placeholder="minutos alvo" style="flex:1;min-width:110px" />
       </div>
       <div class="form-row" style="padding-top:0">
-        <button class="btn block" id="reward-save">Guardar recompensa</button>
+        <button class="btn block" id="reward-save">Salvar recompensa</button>
       </div>`
       : `<div class="form-row" style="padding-top:0"><button class="btn block" id="reward-toggle">+ Nova recompensa</button></div>`);
 
@@ -192,7 +192,7 @@ function wireEvents(root: HTMLElement) {
 
     const delBtn = target.closest<HTMLElement>('[data-del-skill]');
     if (delBtn) {
-      if (!confirm('Remover esta habilidade? O tempo já registado mantém-se guardado.')) return;
+      if (!confirm('Remover esta habilidade? O tempo já registrado continua salvo.')) return;
       deleteSkill(Number(delBtn.dataset.delSkill));
       refreshActive();
       return;
@@ -213,12 +213,12 @@ function wireEvents(root: HTMLElement) {
       const minutes = Number((root.querySelector(`#sess-minutes-${skillId}`) as HTMLInputElement).value);
       const note = (root.querySelector(`#sess-note-${skillId}`) as HTMLInputElement).value.trim();
       if (!minutes || minutes <= 0) {
-        showToast('Indica quantos minutos praticaste');
+        showToast('Indique quantos minutos praticou');
         return;
       }
       logSkillSession({ skillId, date, minutes, note: note || undefined });
       loggingToSkill = null;
-      showToast('Sessão registada');
+      showToast('Sessão registrada');
       refreshActive();
     }
   });
@@ -231,7 +231,7 @@ function wireEvents(root: HTMLElement) {
   root.querySelector('#skill-save')?.addEventListener('click', () => {
     const name = (root.querySelector('#skill-name') as HTMLInputElement).value.trim();
     if (!name) {
-      showToast('Dá um nome à habilidade');
+      showToast('Dê um nome à habilidade');
       return;
     }
     addSkill({ id: `sk_${Date.now()}`, name });
@@ -280,7 +280,7 @@ function wireEvents(root: HTMLElement) {
       const title = (root.querySelector('#reward-title') as HTMLInputElement).value.trim();
       const targetMinutes = Number((root.querySelector('#reward-minutes') as HTMLInputElement).value);
       if (!title || !targetMinutes || targetMinutes <= 0) {
-        showToast('Preenche o nome e os minutos alvo');
+        showToast('Preencha o nome e os minutos alvo');
         return;
       }
       addReward({ id: `rw_${Date.now()}`, title, targetMinutes });

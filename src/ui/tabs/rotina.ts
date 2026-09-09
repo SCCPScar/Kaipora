@@ -63,8 +63,8 @@ export const rotinaTab: Tab = {
     root.innerHTML = `
       <div class="ph">
         <h2>Rotina</h2>
-        <div class="ph-title">A tua semana</div>
-        <div class="ph-sub">Compromissos fixos e atividades flexíveis, organizados por ti</div>
+        <div class="ph-title">Sua semana</div>
+        <div class="ph-sub">Compromissos fixos e atividades flexíveis, organizados por você</div>
       </div>
 
       <section>
@@ -228,7 +228,7 @@ function wireEvents(root: HTMLElement) {
       const start = (root.querySelector('#cm-start') as HTMLInputElement).value;
       const end = (root.querySelector('#cm-end') as HTMLInputElement).value;
       if (!label || !start || !end || !days.length) {
-        showToast('Preenche o nome, horário e pelo menos um dia');
+        showToast('Preencha o nome, horário e pelo menos um dia');
         return;
       }
       addFixedCommitment({ id: `fx_${Date.now()}`, label, days, startMin: timeToMin(start), endMin: timeToMin(end) });
@@ -236,7 +236,7 @@ function wireEvents(root: HTMLElement) {
     } else {
       const duration = Number((root.querySelector('#cm-duration') as HTMLInputElement).value);
       if (!label || !duration || !days.length) {
-        showToast('Preenche o nome, duração e pelo menos um dia');
+        showToast('Preencha o nome, duração e pelo menos um dia');
         return;
       }
       addFlexibleActivity({ id: `fl_${Date.now()}`, label, days, durationMin: duration });

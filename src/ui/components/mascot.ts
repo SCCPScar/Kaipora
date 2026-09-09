@@ -12,7 +12,7 @@ export function mascotCardHTML(text: string, image: string, opts?: { dismissible
       <div>
         <span class="mascot-name">Kaipora</span>
         <span>${text}</span>
-        ${opts?.dismissible ? '<button class="mascot-dismiss" type="button" data-mascot-dismiss>Não me lembres hoje</button>' : ''}
+        ${opts?.dismissible ? '<button class="mascot-dismiss" type="button" data-mascot-dismiss>Não me lembre hoje</button>' : ''}
       </div>
     </div>`;
 }

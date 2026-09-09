@@ -22,8 +22,8 @@ export const CHALLENGE_PRESETS: Record<'kaipora75' | 'kaipora45', ChallengePrese
     totalDays: 75,
     dietLabel: 'Sem exceções, sem álcool',
     rulesExplanation:
-      'Água até à meta, o treino do dia (ou outra atividade física), uma sessão de qualquer Habilidade, ' +
-      'e a dieta sem exceções nem álcool. O anel de cada dia enche à medida que cumpres cada regra, e fica ' +
+      'Água até a meta, o treino do dia (ou outra atividade física), uma sessão de qualquer Habilidade, ' +
+      'e a dieta sem exceções nem álcool. O anel de cada dia enche à medida que cumpre cada regra, e fica ' +
       'cheio quando as quatro estão feitas. Um dia falhado não reinicia o desafio.',
     hasWeeklyRestDay: false
   },
@@ -33,9 +33,9 @@ export const CHALLENGE_PRESETS: Record<'kaipora75' | 'kaipora45', ChallengePrese
     totalDays: 45,
     dietLabel: 'Com atenção',
     rulesExplanation:
-      'A versão mais suave do Kaipora 75: água até à meta, o treino do dia ou qualquer atividade física ' +
+      'A versão mais suave do Kaipora 75: água até a meta, o treino do dia ou qualquer atividade física ' +
       '(caminhada e yoga contam), uma sessão de qualquer Habilidade (ler também conta), e a dieta com ' +
-      'atenção. Tens um dia de folga planeado por semana que conta sempre, não é falha nem exceção. Um dia ' +
+      'atenção. Tem um dia de folga planejado por semana que conta sempre, não é falha nem exceção. Um dia ' +
       'falhado não reinicia o desafio.',
     hasWeeklyRestDay: true
   }

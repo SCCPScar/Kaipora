@@ -118,7 +118,7 @@ export const todayTab: Tab = {
       <div class="priority-heading">Essencial</div>
 
       <div class="row" style="cursor:default">
-        <div class="rtxt"><strong>Dia mínimo</strong><small>Em dias difíceis, só precisas de um Essencial, não os dois</small></div>
+        <div class="rtxt"><strong>Dia mínimo</strong><small>Em dias difíceis, só precisa de um Essencial, não os dois</small></div>
         <span class="switch"><input type="checkbox" id="min-day-toggle" ${minDay ? 'checked' : ''}/><span class="slider"></span></span>
       </div>
 
@@ -161,7 +161,7 @@ export const todayTab: Tab = {
       <section>
         <div class="sec-title">Intenção da semana</div>
         <div class="row" id="intention-open-row">
-          <div class="rtxt"><strong>${weeklyIntention ? escapeHtml(weeklyIntention) : 'Ainda não definida'}</strong><small>Toca para ${weeklyIntention ? 'editar' : 'definir'}</small></div>
+          <div class="rtxt"><strong>${weeklyIntention ? escapeHtml(weeklyIntention) : 'Ainda não definida'}</strong><small>Toque para ${weeklyIntention ? 'editar' : 'definir'}</small></div>
           <span class="badge-k">${weeklyIntention ? 'Editar' : 'Definir'}</span>
         </div>
       </section>
@@ -176,7 +176,7 @@ export const todayTab: Tab = {
       <section id="meals-card">
         <div class="sec-title"><span>Alimentação</span><span class="macro-line">${foodTotals.kcal} kcal</span></div>
         <div class="row" id="meals-open-row">
-          <div class="rtxt"><strong>${mealsLogged} de ${MEALS.length} refeições registadas</strong><small>Toca para abrir o plano completo</small></div>
+          <div class="rtxt"><strong>${mealsLogged} de ${MEALS.length} refeições registradas</strong><small>Toque para abrir o plano completo</small></div>
           <span class="macro-line">${foodTotals.protein}g prot</span>
         </div>
       </section>
@@ -213,7 +213,7 @@ function completionBannerHTML(animate: boolean): string {
       <img src="${mascotSrc}" alt="Kaipora" width="40" style="height:auto;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))" />
       <div>
         <strong>Essenciais de hoje concluídos.</strong>
-        <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">O resto do dia é bónus. Consistência é mais importante que perfeição.</div>
+        <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">O resto do dia é bônus. Consistência é mais importante que perfeição.</div>
       </div>
     </div>`;
 }
@@ -234,7 +234,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
   const blocks = computeDaySchedule(fixed, flexible, wake, sleep);
 
   if (!blocks.length) {
-    el.innerHTML = '<div class="empty">Sem rotina configurada para hoje. Define-a na aba Rotina</div>';
+    el.innerHTML = '<div class="empty">Sem rotina configurada para hoje. Defina-a na aba Rotina</div>';
     return;
   }
 
@@ -327,7 +327,7 @@ function wireEvents(
   root.querySelector('#training-done')?.addEventListener('change', (e) => {
     const checked = (e.target as HTMLInputElement).checked;
     setTrainingDone(date, modality, workout.id, checked);
-    if (checked) showToast('Treino de hoje registado!');
+    if (checked) showToast('Treino de hoje registrado!');
     refreshActive();
   });
 
@@ -352,10 +352,10 @@ function openIntentionModal(current: string, onSave: (text: string) => void): vo
     <button class="modal-close" data-close aria-label="Fechar"></button>
     <h3>Intenção da semana</h3>
     <div class="form-row">
-      <textarea class="finp" id="intention-text" rows="3" placeholder="O que queres priorizar esta semana?" style="flex:1;resize:vertical;font-family:inherit">${escapeHtml(current)}</textarea>
+      <textarea class="finp" id="intention-text" rows="3" placeholder="O que quer priorizar esta semana?" style="flex:1;resize:vertical;font-family:inherit">${escapeHtml(current)}</textarea>
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="intention-save">Guardar</button>
+      <button class="btn block" id="intention-save">Salvar</button>
     </div>
   `,
     (modal) => {

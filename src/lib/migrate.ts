@@ -120,7 +120,7 @@ export function migrateFromLegacyApp(): { migrated: boolean; warnings: string[] 
 
   if (dateKeys.size > 0) {
     warnings.push(
-      `${dateKeys.size} dia(s) de dados antigos foram migrados. O tipo de treino (Academia/Casa) desses dias antigos foi assumido como "Academia" porque a app original não guardava essa informação.`
+      `${dateKeys.size} dia(s) de dados antigos foram migrados. O tipo de treino (Academia/Casa) desses dias antigos foi assumido como "Academia" porque o app original não guardava essa informação.`
     );
   }
 
@@ -160,7 +160,7 @@ export function migrateFromLegacyApp(): { migrated: boolean; warnings: string[] 
   }
 
   if (habitDaysMigrated > 0) {
-    warnings.push(`${habitDaysMigrated} registo(s) de hábitos antigos foram migrados para os dias correspondentes.`);
+    warnings.push(`${habitDaysMigrated} registro(s) de hábitos antigos foram migrados para os dias correspondentes.`);
   }
 
   rawSet(MIGRATION_FLAG, true);

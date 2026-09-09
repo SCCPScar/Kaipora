@@ -30,7 +30,7 @@ export const progressTab: Tab = {
     root.innerHTML = `
       <div class="ph">
         <h2>Progresso</h2>
-        <div class="ph-title">O teu historial${settings.userName ? `, ${escapeHtml(settings.userName)}` : ''}</div>
+        <div class="ph-title">Seu histórico${settings.userName ? `, ${escapeHtml(settings.userName)}` : ''}</div>
         <div class="ph-sub">Recomposição corporal, mais do que a balança</div>
       </div>
 
@@ -39,14 +39,14 @@ export const progressTab: Tab = {
       <div class="chart-sec">
         <h4>Evolução do peso</h4>
         <canvas id="wchart" style="width:100%"></canvas>
-        <div id="chart-empty" class="empty" style="display:none">Regista pelo menos 2 pesagens para veres o gráfico</div>
+        <div id="chart-empty" class="empty" style="display:none">Registre pelo menos 2 pesagens para ver o gráfico</div>
       </div>
       <div class="form-row">
         <input class="finp" id="wi" type="number" step="0.1" min="30" max="250" placeholder="Peso em kg (ex: 74.8)" />
-        <button class="fsave" id="wsave">+ Guardar</button>
+        <button class="fsave" id="wsave">+ Salvar</button>
       </div>
       <section>
-        <div class="sec-title">Registos de peso</div>
+        <div class="sec-title">Registros de peso</div>
         <div id="wlog"></div>
       </section>
 
@@ -66,10 +66,10 @@ export const progressTab: Tab = {
           <input class="finp" id="mextra-val" type="number" placeholder="cm" style="max-width:90px" />
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn block" id="msave">${editingMeasurementIndex !== null ? 'Guardar alterações' : '+ Guardar medidas'}</button>
+          <button class="btn block" id="msave">${editingMeasurementIndex !== null ? 'Salvar alterações' : '+ Salvar medidas'}</button>
           ${editingMeasurementIndex !== null ? '<button class="btn ghost" id="mcancel">Cancelar</button>' : ''}
         </div>
-        <div style="padding:0 16px 4px;font-size:11px;color:var(--text-faint)">Toca num registo abaixo para o editar.</div>
+        <div style="padding:0 16px 4px;font-size:11px;color:var(--text-faint)">Toque em um registro abaixo para editá-lo.</div>
         <div id="mlog"></div>
       </section>
     `;
@@ -99,7 +99,7 @@ function renderChart(root: HTMLElement, weights: ReturnType<typeof getWeights>, 
 function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeights>) {
   const el = root.querySelector('#wlog') as HTMLElement;
   if (!weights.length) {
-    el.innerHTML = '<div class="empty">Ainda sem registos de peso</div>';
+    el.innerHTML = '<div class="empty">Ainda sem registros de peso</div>';
     return;
   }
   el.innerHTML = weights
@@ -122,7 +122,7 @@ function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeight
 function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasurements>) {
   const el = root.querySelector('#mlog') as HTMLElement;
   if (!list.length) {
-    el.innerHTML = '<div class="empty">Regista as medidas mensalmente</div>';
+    el.innerHTML = '<div class="empty">Registre as medidas mensalmente</div>';
     return;
   }
   el.innerHTML = list
@@ -134,7 +134,7 @@ function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasur
       return `
     <div class="log-item" data-edit-measurement="${i}" style="cursor:pointer;${isEditing ? 'background:rgba(139,92,246,.12)' : ''}">
       <div class="log-txt">
-        <strong>${m.date}${isEditing ? ' · a editar' : ''}</strong>
+        <strong>${m.date}${isEditing ? ' · editando' : ''}</strong>
         <div class="log-date">Cintura ${m.waist ?? '-'}cm · Quadril ${m.hip ?? '-'}cm · Coxa ${m.thigh ?? '-'}cm · Braço ${m.arm ?? '-'}cm${extras ? ` · ${extras}` : ''}</div>
       </div>
       <button class="log-del" data-del-measurement="${i}" aria-label="Remover">✕</button>
@@ -167,7 +167,7 @@ function wireEvents(root: HTMLElement) {
     const v = parseFloat(input.value);
     if (!v || Number.isNaN(v)) return;
     addWeight(v, todayISO());
-    showToast('Peso guardado');
+    showToast('Peso salvo');
     refreshActive();
   });
 
@@ -195,7 +195,7 @@ function wireEvents(root: HTMLElement) {
       showToast('Medidas atualizadas');
     } else {
       addMeasurement(values);
-      showToast('Medidas guardadas');
+      showToast('Medidas salvas');
     }
     refreshActive();
   });
@@ -208,7 +208,7 @@ function wireEvents(root: HTMLElement) {
   root.querySelector('#wlog')?.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-del-weight]');
     if (!btn) return;
-    if (!confirm('Remover este registo de peso?')) return;
+    if (!confirm('Remover este registro de peso?')) return;
     deleteWeight(Number(btn.dataset.delWeight));
     refreshActive();
   });
@@ -217,7 +217,7 @@ function wireEvents(root: HTMLElement) {
     const target = e.target as HTMLElement;
     const delBtn = target.closest<HTMLElement>('[data-del-measurement]');
     if (delBtn) {
-      if (!confirm('Remover este registo de medidas?')) return;
+      if (!confirm('Remover este registro de medidas?')) return;
       deleteMeasurement(Number(delBtn.dataset.delMeasurement));
       if (editingMeasurementIndex === Number(delBtn.dataset.delMeasurement)) editingMeasurementIndex = null;
       refreshActive();
