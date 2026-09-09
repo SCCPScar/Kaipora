@@ -14,7 +14,8 @@ import {
   addCustomWorkout,
   deleteCustomWorkout,
   addExerciseToCustomWorkout,
-  removeExerciseFromCustomWorkout
+  removeExerciseFromCustomWorkout,
+  getSettings
 } from '../../lib/storage';
 import { todayISO } from '../../lib/dates';
 import { refreshActive } from '../nav';
@@ -53,6 +54,7 @@ export const trainingTab: Tab = {
   group: 'Corpo',
   render(root: HTMLElement) {
     const date = todayISO();
+    const useDefaultPlan = getSettings().useDefaultPlan;
     // Wrapped in a freshly-created child (rather than delegating straight on
     // `root`) because `root` itself is a persistent container reused across
     // renders — only its children are replaced each time. A listener
@@ -66,8 +68,12 @@ export const trainingTab: Tab = {
           <div class="ph-title">${t('treino.subtitle')}</div>
           <div class="ph-sub">${t('treino.description')}</div>
         </div>
-        <div class="alert"><span>${t('treino.alert')}</span></div>
-        <div id="week-days"></div>
+        ${
+          useDefaultPlan
+            ? `<div class="alert"><span>${t('treino.alert')}</span></div>
+        <div id="week-days"></div>`
+            : `<div class="alert"><span>${t('treino.blankAlert')}</span></div>`
+        }
 
         <section>
           <div class="sec-title"><span>${t('treino.myExercises.title')}</span></div>
@@ -89,7 +95,7 @@ export const trainingTab: Tab = {
       </div>
     `;
 
-    renderWeek(root, date);
+    if (useDefaultPlan) renderWeek(root, date);
     renderCustomExercises(root);
     renderCustomWorkouts(root, date);
     wireEvents(root.querySelector('#treino-content') as HTMLElement, date);

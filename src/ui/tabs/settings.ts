@@ -121,6 +121,14 @@ export const settingsTab: Tab = {
       </section>
 
       <section>
+        <div class="sec-title">${t('settings.defaultPlan.title')}</div>
+        <div class="row" style="cursor:default">
+          <div class="rtxt"><strong>${t('settings.defaultPlan.enable')}</strong><small>${t('settings.defaultPlan.enableDesc')}</small></div>
+          <label class="switch"><input type="checkbox" id="s-default-plan" ${settings.useDefaultPlan ? 'checked' : ''}/><span class="slider"></span></label>
+        </div>
+      </section>
+
+      <section>
         <div class="sec-title">${t('settings.accessibility.title')}</div>
         <div class="row" style="cursor:default">
           <div class="rtxt"><strong>${t('settings.accessibility.reduceMotion')}</strong><small>${t('settings.accessibility.reduceMotionDesc')}</small></div>
@@ -248,6 +256,10 @@ function wireEvents(root: HTMLElement) {
 
   root.querySelector('#s-rewards')?.addEventListener('change', (e) => {
     saveSettings({ rewardsEnabled: (e.target as HTMLInputElement).checked });
+  });
+
+  root.querySelector('#s-default-plan')?.addEventListener('change', (e) => {
+    saveSettings({ useDefaultPlan: (e.target as HTMLInputElement).checked });
   });
 
   root.querySelector('#s-export')?.addEventListener('click', () => {

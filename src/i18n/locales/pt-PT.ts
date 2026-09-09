@@ -119,6 +119,8 @@ export const dict: Record<string, string> = {
   'today.training.open': 'Abrir',
   'today.training.markDone': 'Marcar treino de hoje como concluído',
   'today.training.toast': 'Treino de hoje registado!',
+  'today.training.blankEmpty': 'Ainda não criaste nenhum treino. Cria o primeiro na aba Treino.',
+  'today.training.blankCta': 'Criar treino',
   'today.priority.important': 'Importante',
   'today.intention.title': 'Intenção da semana',
   'today.intention.notSet': 'Ainda não definida',
@@ -135,6 +137,7 @@ export const dict: Record<string, string> = {
   'today.meals.logged': '{{done}} de {{total}} refeições registadas',
   'today.meals.tapOpen': 'Toca para abrir o plano completo',
   'today.meals.proteinAmount': '{{g}}g prot',
+  'today.meals.loggedBlank': 'Diário livre de hoje',
   'today.habits.title': 'Hábitos de hoje',
 
   // ---- src/ui/tabs/rotina.ts ----
@@ -176,6 +179,7 @@ export const dict: Record<string, string> = {
   'treino.subtitle': 'Ginásio + Casa',
   'treino.description': 'Toca no dia para abrir · relógio = descanso · info = como fazer',
   'treino.alert': 'Cada dia tem sempre as duas versões: escolhe Ginásio ou Casa consoante o que fizeres.',
+  'treino.blankAlert': 'Ainda não tens um plano de treino fixo. Cria os teus próprios treinos abaixo, escolhendo exercícios da biblioteca.',
   'treino.myExercises.title': 'Os Meus Exercícios',
   'treino.myExercises.desc':
     'Exercícios que a biblioteca não tem, como algo que o teu personal trainer ensinou. Ficam disponíveis para qualquer treino teu.',
@@ -486,6 +490,9 @@ export const dict: Record<string, string> = {
   'settings.rewards.title': 'Recompensas',
   'settings.rewards.enable': 'Ativar sistema de recompensas',
   'settings.rewards.enableDesc': 'Define marcos de tempo praticado em Competências e resgata-os quando os atingires',
+  'settings.defaultPlan.title': 'Plano de exemplo',
+  'settings.defaultPlan.enable': 'Usar plano de exemplo',
+  'settings.defaultPlan.enableDesc': 'Mostra o treino e a dieta de exemplo da Scarllett. Desativa para começares do zero e construíres o teu próprio plano.',
   'settings.accessibility.title': 'Acessibilidade',
   'settings.accessibility.reduceMotion': 'Reduzir animações',
   'settings.accessibility.reduceMotionDesc': 'Respeita o prefers-reduced-motion do sistema por predefinição',

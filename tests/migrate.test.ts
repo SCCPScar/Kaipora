@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { migrateFromLegacyApp } from '../src/lib/migrate';
-import { getWeights, getMeasurements, getNotes, getDay } from '../src/lib/storage';
+import { migrateFromLegacyApp, migrateDefaultPlanFlag } from '../src/lib/migrate';
+import { getWeights, getMeasurements, getNotes, getDay, getSettings, saveSettings } from '../src/lib/storage';
 
 beforeEach(() => {
   localStorage.clear();
@@ -96,5 +96,55 @@ describe('legacy migration', () => {
     const record = getDay('2026-01-01');
     expect(record.meals).toEqual({ pa1: true });
     expect(record.habits.suplementos).toBe(true);
+  });
+});
+
+describe('default plan flag migration', () => {
+  it('leaves useDefaultPlan false on a genuinely fresh install (no prior data)', () => {
+    migrateDefaultPlanFlag();
+    expect(getSettings().useDefaultPlan).toBe(false);
+  });
+
+  it('turns useDefaultPlan on for a device with existing day records', () => {
+    localStorage.setItem('vp_day_2026-01-01', JSON.stringify({ meals: {}, water: 3, exercisesDone: {}, training: null, habits: {}, routineDone: [] }));
+    migrateDefaultPlanFlag();
+    expect(getSettings().useDefaultPlan).toBe(true);
+  });
+
+  it('turns useDefaultPlan on for a device with logged weights or notes', () => {
+    localStorage.setItem('vp_weights', JSON.stringify([{ kg: 70, date: '2026-01-01' }]));
+    migrateDefaultPlanFlag();
+    expect(getSettings().useDefaultPlan).toBe(true);
+  });
+
+  it('turns useDefaultPlan on for a device that already went through the legacy migration in a past session', () => {
+    // Simulates an existing device on its SECOND-EVER load of this app
+    // version: the legacy check already ran (and found real data) in an
+    // earlier session, so its flag is already true before this load starts.
+    seedLegacyApp();
+    migrateFromLegacyApp();
+    localStorage.removeItem('vp_migrated_default_plan_flag'); // pretend this check hasn't run yet
+    migrateDefaultPlanFlag();
+    expect(getSettings().useDefaultPlan).toBe(true);
+  });
+
+  it('regression: a brand-new device with no legacy data stays false even though migrateFromLegacyApp() always stamps its own flag true — order matters (see main.ts)', () => {
+    // migrateFromLegacyApp() sets MIGRATION_FLAG=true on every very first
+    // load regardless of whether it found anything, so migrateDefaultPlanFlag()
+    // must run BEFORE it (as main.ts does) or every fresh install would
+    // incorrectly look like an "existing user" from that flag alone.
+    migrateDefaultPlanFlag();
+    migrateFromLegacyApp();
+    expect(getSettings().useDefaultPlan).toBe(false);
+  });
+
+  it('is idempotent and never re-applies after a deliberate opt-out', () => {
+    localStorage.setItem('vp_weights', JSON.stringify([{ kg: 70, date: '2026-01-01' }]));
+    migrateDefaultPlanFlag();
+    expect(getSettings().useDefaultPlan).toBe(true);
+
+    saveSettings({ useDefaultPlan: false });
+    migrateDefaultPlanFlag();
+    expect(getSettings().useDefaultPlan).toBe(false);
   });
 });

@@ -118,6 +118,8 @@ export const dict: Record<string, string> = {
   'today.training.open': 'Abrir',
   'today.training.markDone': 'Marcar el entreno de hoy como completado',
   'today.training.toast': '¡Entreno de hoy registrado!',
+  'today.training.blankEmpty': 'Todavía no has creado ningún entrenamiento. Crea el primero en la pestaña Entrenamiento.',
+  'today.training.blankCta': 'Crear entrenamiento',
   'today.priority.important': 'Importante',
   'today.intention.title': 'Intención de la semana',
   'today.intention.notSet': 'Todavía no definida',
@@ -134,6 +136,7 @@ export const dict: Record<string, string> = {
   'today.meals.logged': '{{done}} de {{total}} comidas registradas',
   'today.meals.tapOpen': 'Toca para abrir el plan completo',
   'today.meals.proteinAmount': '{{g}}g prot',
+  'today.meals.loggedBlank': 'Diario libre de hoy',
   'today.habits.title': 'Hábitos de hoy',
 
   // ---- src/ui/tabs/rotina.ts ----
@@ -175,6 +178,7 @@ export const dict: Record<string, string> = {
   'treino.subtitle': 'Gimnasio + Casa',
   'treino.description': 'Toca el día para abrirlo · reloj = descanso · info = cómo hacerlo',
   'treino.alert': 'Cada día tiene siempre las dos versiones: elige Gimnasio o Casa según lo que vayas a hacer.',
+  'treino.blankAlert': 'Todavía no tienes un plan de entrenamiento fijo. Crea tus propios entrenamientos abajo, eligiendo ejercicios de la biblioteca.',
   'treino.myExercises.title': 'Mis Ejercicios',
   'treino.myExercises.desc':
     'Ejercicios que la biblioteca no tiene, como algo que te enseñó tu entrenador personal. Quedan disponibles para cualquier entreno tuyo.',
@@ -485,6 +489,9 @@ export const dict: Record<string, string> = {
   'settings.rewards.title': 'Recompensas',
   'settings.rewards.enable': 'Activar sistema de recompensas',
   'settings.rewards.enableDesc': 'Define metas de tiempo practicado en Habilidades y reclámalas cuando las alcances',
+  'settings.defaultPlan.title': 'Plan de ejemplo',
+  'settings.defaultPlan.enable': 'Usar plan de ejemplo',
+  'settings.defaultPlan.enableDesc': 'Muestra el entrenamiento y la dieta de ejemplo de Scarllett. Desactívalo para empezar de cero y crear tu propio plan.',
   'settings.accessibility.title': 'Accesibilidad',
   'settings.accessibility.reduceMotion': 'Reducir animaciones',
   'settings.accessibility.reduceMotionDesc': 'Respeta el prefers-reduced-motion del sistema por defecto',

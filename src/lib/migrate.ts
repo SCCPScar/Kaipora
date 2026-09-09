@@ -1,5 +1,5 @@
 import { rawGet, rawSet, PFX } from './storage';
-import type { DayRecord } from './types';
+import type { DayRecord, Settings } from './types';
 import { HABIT_IDS } from '../data/habits';
 import { toISO, addDays, fromISO } from './dates';
 
@@ -165,4 +165,42 @@ export function migrateFromLegacyApp(): { migrated: boolean; warnings: string[] 
 
   rawSet(MIGRATION_FLAG, true);
   return { migrated: touchedAnything, warnings };
+}
+
+const DEFAULT_PLAN_FLAG_MIGRATED = `${PFX}_migrated_default_plan_flag`;
+
+function hasAnyDayRecords(): boolean {
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && /^vp_day_\d{4}-\d{2}-\d{2}$/.test(key)) return true;
+  }
+  return false;
+}
+
+/**
+ * One-time, idempotent check: a device that already had Kaipora data before
+ * `Settings.useDefaultPlan` existed (real logged days, weights or notes, or
+ * a prior legacy-app migration) gets it switched on, so the built-in example
+ * training week and diet plan keep showing exactly as they always have — no
+ * visible change for an existing user. A genuinely first-ever install has no
+ * such evidence and keeps the new default (false): the built-in plan starts
+ * hidden, so a new tester isn't shown Scarllett's personal plan as if it
+ * were generic starter content (see Settings.useDefaultPlan in types.ts).
+ * Runs once (guarded by its own flag) so a later, deliberate opt-out via the
+ * Ajustes toggle is never overwritten back to true on a subsequent load.
+ */
+export function migrateDefaultPlanFlag(): void {
+  if (rawGet<boolean>(DEFAULT_PLAN_FLAG_MIGRATED, false)) return;
+  rawSet(DEFAULT_PLAN_FLAG_MIGRATED, true);
+
+  const hasExistingData =
+    rawGet<boolean>(MIGRATION_FLAG, false) ||
+    hasAnyDayRecords() ||
+    rawGet<unknown[]>(`${PFX}_weights`, []).length > 0 ||
+    rawGet<unknown[]>(`${PFX}_notes`, []).length > 0;
+
+  if (!hasExistingData) return;
+
+  const current = rawGet<Partial<Settings>>(`${PFX}_settings`, {});
+  rawSet(`${PFX}_settings`, { ...current, useDefaultPlan: true });
 }

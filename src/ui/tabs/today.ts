@@ -20,7 +20,8 @@ import {
   getSnoozedReminderDate,
   setSnoozedReminderDate,
   getWeeklyIntention,
-  setWeeklyIntention
+  setWeeklyIntention,
+  getCustomWorkouts
 } from '../../lib/storage';
 import type { BuiltInModality, Weekday } from '../../lib/types';
 import { refreshActive, switchTab } from '../nav';
@@ -100,6 +101,7 @@ export const todayTab: Tab = {
     const exercisesDone = (day.exercisesDone[workout.id] ?? []).length;
     const mealsLogged = MEALS.filter((m) => allMealOptions(m.id).some((o) => day.meals[o.id])).length;
     const foodTotals = combinedDayTotals(date, day.meals);
+    const customWorkouts = settings.useDefaultPlan ? [] : getCustomWorkouts();
 
     root.innerHTML = `
       <div class="ph">
@@ -137,6 +139,9 @@ export const todayTab: Tab = {
       </div>
 
       <section id="training-card">
+        ${
+          settings.useDefaultPlan
+            ? `
         <div class="sec-title">
           <span>${t('today.training.title')}</span>
           <span class="pill">${workout.focus}</span>
@@ -154,7 +159,9 @@ export const todayTab: Tab = {
             <span class="switch"><input type="checkbox" id="training-done" ${day.training?.done ? 'checked' : ''}/><span class="slider"></span></span>
             ${t('today.training.markDone')}
           </label>
-        </div>
+        </div>`
+            : blankTrainingCardHTML(day, customWorkouts)
+        }
       </section>
 
       <div class="priority-heading">${t('today.priority.important')}</div>
@@ -177,7 +184,7 @@ export const todayTab: Tab = {
       <section id="meals-card">
         <div class="sec-title"><span>${t('common.nutrition')}</span><span class="macro-line">${foodTotals.kcal} kcal</span></div>
         <div class="row" id="meals-open-row">
-          <div class="rtxt"><strong>${t('today.meals.logged', { done: mealsLogged, total: MEALS.length })}</strong><small>${t('today.meals.tapOpen')}</small></div>
+          <div class="rtxt"><strong>${settings.useDefaultPlan ? t('today.meals.logged', { done: mealsLogged, total: MEALS.length }) : t('today.meals.loggedBlank')}</strong><small>${t('today.meals.tapOpen')}</small></div>
           <span class="macro-line">${t('today.meals.proteinAmount', { g: foodTotals.protein })}</span>
         </div>
       </section>
@@ -217,6 +224,34 @@ function completionBannerHTML(animate: boolean): string {
         <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">${t('today.completion.subtitle')}</div>
       </div>
     </div>`;
+}
+
+/** Training card content when Settings.useDefaultPlan is false — instead of
+ * the fixed weekly plan, lists the user's own custom workouts (see
+ * src/ui/tabs/training.ts) as pickable "did this today" rows, same
+ * check-row pattern as habits/routine. Empty state points to the Training
+ * tab to create the first one. */
+function blankTrainingCardHTML(day: ReturnType<typeof getDay>, customWorkouts: ReturnType<typeof getCustomWorkouts>): string {
+  if (!customWorkouts.length) {
+    return `
+      <div class="sec-title"><span>${t('today.training.title')}</span></div>
+      <div class="empty">${t('today.training.blankEmpty')}</div>
+      <div class="form-row" style="padding-top:0">
+        <button class="btn ghost" id="training-blank-cta" type="button">${t('today.training.blankCta')}</button>
+      </div>`;
+  }
+  return `
+    <div class="sec-title"><span>${t('today.training.title')}</span></div>
+    ${customWorkouts
+      .map((cw) => {
+        const isDone = day.training?.workoutId === cw.id && day.training?.done;
+        return `
+      <div class="row ${isDone ? 'done' : ''}" data-custom-workout="${cw.id}" data-custom-category="${escapeHtml(cw.category)}">
+        <div class="chk"></div>
+        <div class="rtxt"><strong>${escapeHtml(cw.title)}</strong><small>${escapeHtml(cw.focus)}</small></div>
+      </div>`;
+      })
+      .join('')}`;
 }
 
 function renderGlasses(root: HTMLElement, water: number, goal: number) {
@@ -323,12 +358,24 @@ function wireEvents(
   });
 
   root.querySelector('#training-open-row')?.addEventListener('click', () => switchTab('treino'));
+  root.querySelector('#training-blank-cta')?.addEventListener('click', () => switchTab('treino'));
   root.querySelector('#meals-open-row')?.addEventListener('click', () => switchTab('dieta'));
 
   root.querySelector('#training-done')?.addEventListener('change', (e) => {
     const checked = (e.target as HTMLInputElement).checked;
     setTrainingDone(date, modality, workout.id, checked);
     if (checked) showToast(t('today.training.toast'));
+    refreshActive();
+  });
+
+  root.querySelector('#training-card')?.addEventListener('click', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLElement>('[data-custom-workout]');
+    if (!row) return;
+    const workoutId = row.dataset.customWorkout as string;
+    const category = row.dataset.customCategory as string;
+    const alreadyDone = row.classList.contains('done');
+    setTrainingDone(date, category, workoutId, !alreadyDone);
+    if (!alreadyDone) showToast(t('today.training.toast'));
     refreshActive();
   });
 

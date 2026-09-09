@@ -97,6 +97,16 @@ export interface Settings {
   /** UI language — see src/i18n. Defaults to pt-BR (also the fallback used
    * for any key missing from another locale). */
   language: Locale;
+  /** When true, Treino/Alimentação show the built-in example training week
+   * (TRAINING_WEEK) and diet plan (MEALS) alongside the user's own custom
+   * workouts/food log, exactly as the app has always behaved. When false
+   * (the default for brand-new installs), the built-in plan is hidden
+   * entirely and those tabs start blank — just the user's own custom
+   * workouts and the free-form food diary — so a new tester isn't shown
+   * Scarllett's personal, medically-specific plan as if it were generic
+   * starter content. See src/lib/migrate.ts for how existing installs are
+   * switched to `true` so nothing changes for them. */
+  useDefaultPlan: boolean;
 }
 
 // carbGoal/fatGoal derived from the average carbs/fat across all options of
@@ -117,5 +127,6 @@ export const DEFAULT_SETTINGS: Settings = {
   wakeTime: '07:00',
   sleepTime: '23:00',
   rewardsEnabled: false,
-  language: 'pt-BR'
+  language: 'pt-BR',
+  useDefaultPlan: false
 };

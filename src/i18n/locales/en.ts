@@ -118,6 +118,8 @@ export const dict: Record<string, string> = {
   'today.training.open': 'Open',
   'today.training.markDone': "Mark today's workout as done",
   'today.training.toast': "Today's workout logged!",
+  'today.training.blankEmpty': 'You haven\'t created a workout yet. Create your first one in the Training tab.',
+  'today.training.blankCta': 'Create workout',
   'today.priority.important': 'Important',
   'today.intention.title': "This week's intention",
   'today.intention.notSet': 'Not set yet',
@@ -134,6 +136,7 @@ export const dict: Record<string, string> = {
   'today.meals.logged': '{{done}} of {{total}} meals logged',
   'today.meals.tapOpen': 'Tap to open the full plan',
   'today.meals.proteinAmount': '{{g}}g prot',
+  'today.meals.loggedBlank': 'Today\'s free diary',
   'today.habits.title': "Today's habits",
 
   // ---- src/ui/tabs/rotina.ts ----
@@ -175,6 +178,7 @@ export const dict: Record<string, string> = {
   'treino.subtitle': 'Gym + Home',
   'treino.description': 'Tap a day to open it · clock = rest · info = how to do it',
   'treino.alert': 'Every day always has both versions: pick Gym or Home depending on what you do.',
+  'treino.blankAlert': 'You don\'t have a fixed training plan yet. Create your own workouts below by picking exercises from the library.',
   'treino.myExercises.title': 'My Exercises',
   'treino.myExercises.desc':
     "Exercises the library doesn't have, like something your personal trainer taught you. Available for any of your workouts.",
@@ -484,6 +488,9 @@ export const dict: Record<string, string> = {
   'settings.rewards.title': 'Rewards',
   'settings.rewards.enable': 'Enable rewards system',
   'settings.rewards.enableDesc': 'Set time milestones in Skills and claim them once you reach them',
+  'settings.defaultPlan.title': 'Example plan',
+  'settings.defaultPlan.enable': 'Use example plan',
+  'settings.defaultPlan.enableDesc': 'Shows Scarllett\'s example training program and diet plan. Turn off to start from scratch and build your own plan.',
   'settings.accessibility.title': 'Accessibility',
   'settings.accessibility.reduceMotion': 'Reduce animations',
   'settings.accessibility.reduceMotionDesc': "Respects the system's prefers-reduced-motion by default",

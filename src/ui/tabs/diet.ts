@@ -49,6 +49,8 @@ export const dietTab: Tab = {
 
     const totals = combinedDayTotals(date, day.meals);
     const remaining = settings.calorieGoal - totals.kcal;
+    const useDefaultPlan = settings.useDefaultPlan;
+    if (!useDefaultPlan) view = 'diario';
 
     root.innerHTML = `
       <div class="ph">
@@ -64,10 +66,14 @@ export const dietTab: Tab = {
       </div>
       <div class="macro-line" style="padding:0 14px 12px">${t('common.abbr.protein')} ${totals.protein}g / ${settings.proteinGoal}g &middot; ${t('common.abbr.carbs')} ${totals.carbs}g / ${settings.carbGoal}g &middot; ${t('common.abbr.fat')} ${totals.fat}g / ${settings.fatGoal}g</div>
 
-      <div class="modality-switch">
+      ${
+        useDefaultPlan
+          ? `<div class="modality-switch">
         <button class="modality-btn ${view === 'plano' ? 'active' : ''}" data-view="plano">${t('dieta.view.plan')}</button>
         <button class="modality-btn ${view === 'diario' ? 'active' : ''}" data-view="diario">${t('dieta.view.diary')}</button>
-      </div>
+      </div>`
+          : ''
+      }
 
       <div id="diet-content"></div>
 

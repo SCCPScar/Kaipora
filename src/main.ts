@@ -1,5 +1,5 @@
 import './style.css';
-import { migrateFromLegacyApp } from './lib/migrate';
+import { migrateFromLegacyApp, migrateDefaultPlanFlag } from './lib/migrate';
 import { registerServiceWorker } from './lib/registerSW';
 import { startBackgroundSync, onAuthChange, fullSync } from './lib/sync';
 import { startReminderLoop } from './lib/notifications';
@@ -41,6 +41,13 @@ function renderBootError(): void {
 let migrated = false;
 try {
   applyTheme(getSettings().theme);
+
+  // Must run before migrateFromLegacyApp(): that function stamps its own
+  // "already checked" flag true on every very first load (legacy data or
+  // not), so checking it here first still reads a device's *true* prior
+  // history (set by an earlier session) rather than the flag this same call
+  // is about to write — see migrateDefaultPlanFlag's own comment.
+  migrateDefaultPlanFlag();
 
   const migration = migrateFromLegacyApp();
   migrated = migration.migrated;
