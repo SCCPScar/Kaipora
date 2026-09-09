@@ -20,11 +20,12 @@ import { challengeStats } from '../../lib/challengeStats';
 import { essentialsCompletedFlags } from '../../lib/dayHistory';
 import { challengeCompletedFlags, challengeDayStatus } from '../../lib/challengeRules';
 import { getTrainingDay } from '../../data/training';
-import { todayISO, addDays, toISO, fromISO, DAY_ABBR, DAY_NAMES, MONTH_NAMES, WEEKDAY_KEYS } from '../../lib/dates';
+import { todayISO, addDays, toISO, fromISO, dayAbbr, dayNames, monthNames, WEEKDAY_KEYS } from '../../lib/dates';
 import { refreshActive, switchTab } from '../nav';
 import { showToast } from '../components/toast';
 import { openModal } from '../components/modal';
 import { escapeHtml } from '../../lib/sanitize';
+import { t } from '../../i18n';
 
 function isPresetChallenge(c: Challenge): c is Challenge & { kind: 'kaipora75' | 'kaipora45' } {
   return c.kind === 'kaipora75' || c.kind === 'kaipora45';
@@ -62,7 +63,7 @@ function seedPopHistory(c: Challenge) {
 
 export const desafiosTab: Tab = {
   id: 'desafios',
-  label: 'Desafios',
+  label: 'nav.tab.desafios',
   icon: '',
   group: 'Desafios',
   render(root: HTMLElement) {
@@ -79,18 +80,13 @@ export const desafiosTab: Tab = {
 function renderList(root: HTMLElement) {
   root.innerHTML = `
     <div class="ph">
-      <h2>Desafios</h2>
-      <div class="ph-title">Kaipora 75, Kaipora 45 e outros desafios pessoais</div>
-      <div class="ph-sub">Um dia falhado nunca reinicia o desafio. A contagem continua</div>
+      <h2>${t('desafios.title')}</h2>
+      <div class="ph-title">${t('desafios.subtitle')}</div>
+      <div class="ph-sub">${t('desafios.description')}</div>
     </div>
 
     <div class="alert">
-      <span>
-        <strong>Kaipora 75 e Kaipora 45</strong> são duas versões do mesmo desafio não-punitivo: a original,
-        e uma mais suave, à sua escolha. Cada uma tem as suas próprias regras (veja o calendário do desafio
-        para o detalhe). Se esquecer um dia, esse dia simplesmente não conta: o desafio não reinicia
-        nem termina antes do prazo.
-      </span>
+      <span>${t('desafios.alert')}</span>
     </div>
 
     <section>
@@ -120,66 +116,66 @@ function renderChallenges(root: HTMLElement) {
       <div class="day-card open">
         <div class="day-head" style="cursor:default">
           <div class="day-info">
-            <div class="day-nm">${escapeHtml(c.title)}${stats.finished ? ' · terminado' : ''}</div>
-            <div class="day-focus">Dia ${stats.daysElapsed} de ${c.totalDays} · ${stats.daysCompleted} dia(s) cumpridos</div>
+            <div class="day-nm">${escapeHtml(c.title)}${stats.finished ? ` ${t('desafios.finishedSuffix')}` : ''}</div>
+            <div class="day-focus">${t('desafios.dayProgress', { elapsed: stats.daysElapsed, total: c.totalDays, completed: stats.daysCompleted })}</div>
           </div>
-          <button class="log-del" data-del-challenge="${i}" aria-label="Remover">✕</button>
+          <button class="log-del" data-del-challenge="${i}" aria-label="${t('common.remove')}">✕</button>
         </div>
         <div class="day-body">
           ${
             isPresetChallenge(c)
-              ? `<div class="form-row"><button class="btn sm ghost" data-open-calendar="${c.id}">Ver os ${c.totalDays} dias</button></div>`
+              ? `<div class="form-row"><button class="btn sm ghost" data-open-calendar="${c.id}">${t('desafios.viewDays', { total: c.totalDays })}</button></div>`
               : todayCountsTowardChallenge
                 ? `<div class="row" data-goto-hoje>
-                    <div class="rtxt"><strong>Hoje</strong><small>${todayDone ? 'Essenciais já cumpridos: o dia conta' : 'Essenciais ainda por cumprir'}</small></div>
-                    <span class="badge-${todayDone ? 'p' : 'k'}">${todayDone ? 'Cumprido' : 'Ir para Hoje'}</span>
+                    <div class="rtxt"><strong>${t('desafios.today')}</strong><small>${todayDone ? t('desafios.essentialsDoneToday') : t('desafios.essentialsPendingToday')}</small></div>
+                    <span class="badge-${todayDone ? 'p' : 'k'}">${todayDone ? t('desafios.dayFulfilled') : t('desafios.goToToday')}</span>
                   </div>`
                 : ''
           }
           <div class="sub-row">
-            <span class="macro-line">${stats.daysCompleted}/${c.totalDays} cumpridos &middot; ${stats.daysRemaining} dia(s) restantes</span>
+            <span class="macro-line">${t('desafios.completedRemaining', { completed: stats.daysCompleted, total: c.totalDays, remaining: stats.daysRemaining })}</span>
           </div>
         </div>
       </div>`;
         })
         .join('')
-    : '<div class="empty">Ainda sem desafios ativos</div>';
+    : `<div class="empty">${t('desafios.empty')}</div>`;
 
   const formEl = root.querySelector('#challenge-form') as HTMLElement;
   formEl.innerHTML = addingChallenge
     ? `
     <div class="form-row">
-      <input class="finp" id="ch-title" type="text" placeholder="Nome do desafio" style="flex:2" />
-      <input class="finp" id="ch-days" type="number" min="1" placeholder="dias" value="75" style="flex:1;min-width:80px" />
+      <input class="finp" id="ch-title" type="text" placeholder="${t('desafios.form.namePlaceholder')}" style="flex:2" />
+      <input class="finp" id="ch-days" type="number" min="1" placeholder="${t('desafios.form.daysPlaceholder')}" value="75" style="flex:1;min-width:80px" />
     </div>
     <div class="form-row" style="padding-top:0">
       <input class="finp" id="ch-start" type="date" value="${today}" style="flex:1" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="ch-save">Salvar desafio</button>
+      <button class="btn block" id="ch-save">${t('desafios.form.save')}</button>
     </div>`
     : `
     <div class="form-row">
-      <button class="btn block" id="ch-quickstart-75">+ Começar o Kaipora 75</button>
+      <button class="btn block" id="ch-quickstart-75">${t('desafios.quickstart75')}</button>
     </div>
     ${
       addingKaipora45
         ? `
     <div class="form-row" style="padding-top:0">
       <select class="finp" id="k45-rest-weekday" style="flex:1">
-        ${WEEKDAY_KEYS.map((w, idx) => `<option value="${w}" ${w === 'dom' ? 'selected' : ''}>${DAY_NAMES[idx]}</option>`).join('')}
+        ${WEEKDAY_KEYS.map((w, idx) => `<option value="${w}" ${w === 'dom' ? 'selected' : ''}>${dayNames()[idx]}</option>`).join('')}
       </select>
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="k45-confirm">Confirmar dia de folga e começar</button>
+      <button class="btn block" id="k45-confirm">${t('desafios.confirm45')}</button>
     </div>`
         : `
     <div class="form-row" style="padding-top:0">
-      <button class="btn block ghost" id="ch-quickstart-45">+ Começar o Kaipora 45</button>
+      <button class="btn block ghost" id="ch-quickstart-45">${t('desafios.quickstart45')}</button>
     </div>`
     }
     <div class="form-row" style="padding-top:0">
-      <button class="btn block ghost" id="ch-toggle">+ Criar outro desafio</button>
+      <button class="btn block ghost" id="ch-toggle">${t('desafios.createAnother')}</button>
     </div>`;
 }
 
@@ -209,7 +205,7 @@ function wireListEvents(root: HTMLElement) {
 
     const btn = target.closest<HTMLElement>('[data-del-challenge]');
     if (!btn) return;
-    if (!confirm('Remover este desafio? O seu histórico de dias continua salvo.')) return;
+    if (!confirm(t('desafios.confirmRemove'))) return;
     deleteChallenge(Number(btn.dataset.delChallenge));
     refreshActive();
   });
@@ -221,7 +217,7 @@ function wireListEvents(root: HTMLElement) {
     if (quickstart75) {
       const preset = CHALLENGE_PRESETS.kaipora75;
       addChallenge({ id: `ch_${Date.now()}`, title: preset.title, totalDays: preset.totalDays, startDate: todayISO(), kind: preset.kind });
-      showToast('Kaipora 75 iniciado. Boa sorte!');
+      showToast(t('desafios.toastKaipora75Started'));
       refreshActive();
       return;
     }
@@ -239,7 +235,7 @@ function wireListEvents(root: HTMLElement) {
       const preset = CHALLENGE_PRESETS.kaipora45;
       addChallenge({ id: `ch_${Date.now()}`, title: preset.title, totalDays: preset.totalDays, startDate: todayISO(), kind: preset.kind, restWeekday });
       addingKaipora45 = false;
-      showToast('Kaipora 45 iniciado. Boa sorte!');
+      showToast(t('desafios.toastKaipora45Started'));
       refreshActive();
       return;
     }
@@ -257,12 +253,12 @@ function wireListEvents(root: HTMLElement) {
       const totalDays = Number((root.querySelector('#ch-days') as HTMLInputElement).value);
       const startDate = (root.querySelector('#ch-start') as HTMLInputElement).value || todayISO();
       if (!title || !totalDays || totalDays <= 0) {
-        showToast('Preencha o nome e o número de dias');
+        showToast(t('desafios.toastFillNameDays'));
         return;
       }
       addChallenge({ id: `ch_${Date.now()}`, title, totalDays, startDate });
       addingChallenge = false;
-      showToast('Desafio criado');
+      showToast(t('desafios.toastCreated'));
       refreshActive();
     }
   });
@@ -310,28 +306,28 @@ function renderCalendarView(root: HTMLElement, c: Challenge & { kind: 'kaipora75
 
   root.innerHTML = `
     <div class="ph">
-      <button class="btn sm ghost" id="k75-back">‹ Voltar aos desafios</button>
+      <button class="btn sm ghost" id="k75-back">${t('desafios.back')}</button>
       <div class="ph-title" style="margin-top:10px">${escapeHtml(c.title)}</div>
-      <div class="ph-sub">Toque em um dia para ver e registrar o que fez nesse dia</div>
+      <div class="ph-sub">${t('desafios.calendarSubtitle')}</div>
     </div>
 
     <div class="alert">
-      <span><strong>Regras de cada dia:</strong> ${preset.rulesExplanation}</span>
+      <span><strong>${t('desafios.rulesTitle')}</strong> ${preset.rulesExplanation}</span>
     </div>
 
     <section class="k75-cal-card">
       <div class="k75-cal-header">
         <div>
-          <div class="k75-cal-month">${MONTH_NAMES[calViewMonth]}</div>
+          <div class="k75-cal-month">${monthNames()[calViewMonth]}</div>
           <div class="k75-cal-year">${calViewYear}</div>
         </div>
         <div class="k75-cal-nav">
-          <button class="cal-nav" id="k75-prev" aria-label="Mês anterior">‹</button>
-          <button class="cal-nav" id="k75-next" aria-label="Mês seguinte">›</button>
+          <button class="cal-nav" id="k75-prev" aria-label="${t('common.prevMonth')}">‹</button>
+          <button class="cal-nav" id="k75-next" aria-label="${t('common.nextMonth')}">›</button>
         </div>
       </div>
       <div class="cal-grid">
-        ${DAY_ABBR.map((a) => `<div class="cal-dow">${a}</div>`).join('')}
+        ${dayAbbr().map((a) => `<div class="cal-dow">${a}</div>`).join('')}
         ${cells.join('')}
       </div>
     </section>
@@ -378,52 +374,52 @@ function openDayDetail(c: Challenge & { kind: 'kaipora75' | 'kaipora45' }, iso: 
     const sessionsToday = getSkillSessions().filter((s) => s.date === iso);
 
     modal.innerHTML = `
-      <button class="modal-close" data-close aria-label="Fechar"></button>
-      <h3>Dia ${dayNum} de ${c.totalDays}</h3>
-      <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:12px">${iso}${status.allDone ? ' · dia cumprido' : ''}</div>
+      <button class="modal-close" data-close aria-label="${t('common.close')}"></button>
+      <h3>${t('desafios.dayModal.title', { day: dayNum, total: c.totalDays })}</h3>
+      <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:12px">${iso}${status.allDone ? ` ${t('desafios.dayModal.fulfilledSuffix')}` : ''}</div>
 
       <div class="row" style="cursor:default">
-        <div class="rtxt"><strong>Água</strong><small>${day.water} copo(s) registrados</small></div>
-        <span class="badge-${status.water ? 'p' : 'k'}">${status.water ? 'Meta atingida' : 'Por atingir'}</span>
+        <div class="rtxt"><strong>${t('desafios.dayModal.water')}</strong><small>${t('desafios.dayModal.waterGlasses', { count: day.water })}</small></div>
+        <span class="badge-${status.water ? 'p' : 'k'}">${status.water ? t('desafios.dayModal.goalReached') : t('desafios.dayModal.goalPending')}</span>
       </div>
       <div class="wbtns" style="padding:0 0 12px">
-        <button class="wbtn" data-day-water-minus>− Copo</button>
-        <button class="wbtn" data-day-water-plus>+ Copo</button>
+        <button class="wbtn" data-day-water-minus>${t('today.water.minus')}</button>
+        <button class="wbtn" data-day-water-plus>${t('today.water.plus')}</button>
       </div>
 
       <div class="row" style="cursor:default">
-        <div class="rtxt"><strong>Treino do dia</strong><small>${day.training?.done ? 'Marcado como feito' : 'Ainda não marcado'}</small></div>
+        <div class="rtxt"><strong>${t('desafios.dayModal.trainingToday')}</strong><small>${day.training?.done ? t('desafios.dayModal.markedDone') : t('desafios.dayModal.notMarked')}</small></div>
         <span class="switch"><input type="checkbox" data-day-training ${day.training?.done ? 'checked' : ''}/><span class="slider"></span></span>
       </div>
       ${
         isPlannedRestDay
           ? `<div class="row" style="cursor:default">
-              <div class="rtxt"><strong>Dia de folga planejado</strong><small>Conta automaticamente, não precisa treinar hoje</small></div>
-              <span class="badge-p">Conta</span>
+              <div class="rtxt"><strong>${t('desafios.dayModal.restDayTitle')}</strong><small>${t('desafios.dayModal.restDayDesc')}</small></div>
+              <span class="badge-p">${t('desafios.dayModal.counts')}</span>
             </div>`
           : `<div class="row" style="cursor:default">
-              <div class="rtxt"><strong>Outra atividade física</strong><small>Se não fez o treino do plano, mas fez outra coisa</small></div>
+              <div class="rtxt"><strong>${t('desafios.dayModal.otherActivityTitle')}</strong><small>${t('desafios.dayModal.otherActivityDesc')}</small></div>
               <span class="switch"><input type="checkbox" data-day-activity ${log.extraActivity ? 'checked' : ''}/><span class="slider"></span></span>
             </div>`
       }
 
       <div class="row" style="cursor:default">
-        <div class="rtxt"><strong>Dieta</strong><small>${escapeHtml(preset.dietLabel)}</small></div>
+        <div class="rtxt"><strong>${t('desafios.dayModal.diet')}</strong><small>${escapeHtml(preset.dietLabel)}</small></div>
         <span class="switch"><input type="checkbox" data-day-diet ${log.dietOk ? 'checked' : ''}/><span class="slider"></span></span>
       </div>
 
-      <div class="sec-title" style="padding-top:14px;padding-left:0">Habilidades neste dia</div>
+      <div class="sec-title" style="padding-top:14px;padding-left:0">${t('desafios.dayModal.skillsTitle')}</div>
       ${
         sessionsToday.length
           ? sessionsToday
               .map(
                 (s) => `
         <div class="row" style="cursor:default">
-          <div class="rtxt"><strong>${escapeHtml(skills.find((sk) => sk.id === s.skillId)?.name ?? 'Habilidade')}</strong><small>${s.minutes} min</small></div>
+          <div class="rtxt"><strong>${escapeHtml(skills.find((sk) => sk.id === s.skillId)?.name ?? t('desafios.dayModal.skillFallbackName'))}</strong><small>${s.minutes} min</small></div>
         </div>`
               )
               .join('')
-          : '<div class="empty">Ainda sem sessão registrada neste dia</div>'
+          : `<div class="empty">${t('desafios.dayModal.noSessions')}</div>`
       }
       ${
         skills.length
@@ -432,12 +428,12 @@ function openDayDetail(c: Challenge & { kind: 'kaipora75' | 'kaipora45' }, iso: 
         <select class="finp" id="k75-skill-select" style="flex:2">
           ${skills.map((s) => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}
         </select>
-        <input class="finp" id="k75-skill-minutes" type="number" min="1" placeholder="minutos" style="flex:1" />
+        <input class="finp" id="k75-skill-minutes" type="number" min="1" placeholder="${t('desafios.dayModal.minutesPlaceholder')}" style="flex:1" />
       </div>
       <div class="form-row" style="padding:0 0 4px">
-        <button class="btn block" data-log-skill>Registrar sessão</button>
+        <button class="btn block" data-log-skill>${t('desafios.dayModal.logSession')}</button>
       </div>`
-          : `<div style="padding:0 0 4px;font-size:12.5px;color:var(--text-dim)">Ainda sem habilidades criadas. Adicione uma em <a href="#" data-goto-habilidades style="color:var(--primary);font-weight:700">Habilidades</a>.</div>`
+          : `<div style="padding:0 0 4px;font-size:12.5px;color:var(--text-dim)">${t('desafios.dayModal.noSkillsYet', { link: `<a href="#" data-goto-habilidades style="color:var(--primary);font-weight:700">${t('nav.tab.habilidades')}</a>` })}</div>`
       }
     `;
 
@@ -475,11 +471,11 @@ function openDayDetail(c: Challenge & { kind: 'kaipora75' | 'kaipora45' }, iso: 
       const skillId = (modal.querySelector('#k75-skill-select') as HTMLSelectElement)?.value;
       const minutes = Number((modal.querySelector('#k75-skill-minutes') as HTMLInputElement)?.value);
       if (!skillId || !minutes || minutes <= 0) {
-        showToast('Escolha a habilidade e indique os minutos');
+        showToast(t('desafios.dayModal.toastChooseSkillMinutes'));
         return;
       }
       logSkillSession({ skillId, date: iso, minutes });
-      showToast('Sessão registrada');
+      showToast(t('desafios.dayModal.toastSessionSaved'));
       render(modal);
       refreshActive();
     });

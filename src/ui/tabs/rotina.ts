@@ -1,5 +1,5 @@
 import type { Tab } from '../nav';
-import { WEEKDAY_KEYS } from '../../lib/dates';
+import { WEEKDAY_KEYS, weekdayName } from '../../lib/dates';
 import {
   getFixedCommitments,
   addFixedCommitment,
@@ -16,17 +16,15 @@ import type { ScheduleBlock } from '../../data/types-routine';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
 import { escapeHtml } from '../../lib/sanitize';
+import { t } from '../../i18n';
 
 const WEEKDAYS: Weekday[] = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
-const WEEKDAY_LABELS: Record<Weekday, string> = {
-  seg: 'Segunda',
-  ter: 'Terça',
-  qua: 'Quarta',
-  qui: 'Quinta',
-  sex: 'Sexta',
-  sab: 'Sábado',
-  dom: 'Domingo'
-};
+
+/** Short (3-letter) weekday label — derived from the localized full name,
+ * same convention the app used before i18n (see weekdayName in dates.ts). */
+function weekdayShort(w: Weekday): string {
+  return weekdayName(w).slice(0, 3);
+}
 
 function todayWeekday(): Weekday {
   const key = WEEKDAY_KEYS[new Date().getDay()];
@@ -52,7 +50,7 @@ function timeToMin(hhmm: string): number {
 
 export const rotinaTab: Tab = {
   id: 'rotina',
-  label: 'Rotina',
+  label: 'nav.tab.rotina',
   icon: '',
   group: 'Início',
   render(root: HTMLElement) {
@@ -62,66 +60,66 @@ export const rotinaTab: Tab = {
 
     root.innerHTML = `
       <div class="ph">
-        <h2>Rotina</h2>
-        <div class="ph-title">Sua semana</div>
-        <div class="ph-sub">Compromissos fixos e atividades flexíveis, organizados por você</div>
+        <h2>${t('rotina.title')}</h2>
+        <div class="ph-title">${t('rotina.subtitle')}</div>
+        <div class="ph-sub">${t('rotina.description')}</div>
       </div>
 
       <section>
-        <div class="sec-title">Janela do dia</div>
+        <div class="sec-title">${t('rotina.dayWindow.title')}</div>
         <div class="meds-grid time-grid">
-          <div><label>Acordar</label><input class="finp" id="wake-time" type="time" value="${settings.wakeTime}" /></div>
-          <div><label>Dormir</label><input class="finp" id="sleep-time" type="time" value="${settings.sleepTime}" /></div>
+          <div><label>${t('rotina.dayWindow.wake')}</label><input class="finp" id="wake-time" type="time" value="${settings.wakeTime}" /></div>
+          <div><label>${t('rotina.dayWindow.sleep')}</label><input class="finp" id="sleep-time" type="time" value="${settings.sleepTime}" /></div>
         </div>
       </section>
 
       <div class="modality-switch" id="day-picker" style="flex-wrap:wrap;gap:6px">
-        ${WEEKDAYS.map((d) => `<button class="modality-btn ${d === selectedDay ? 'active' : ''}" data-day="${d}" style="flex:0 0 auto;padding:8px 12px">${WEEKDAY_LABELS[d].slice(0, 3)}</button>`).join('')}
+        ${WEEKDAYS.map((d) => `<button class="modality-btn ${d === selectedDay ? 'active' : ''}" data-day="${d}" style="flex:0 0 auto;padding:8px 12px">${weekdayShort(d)}</button>`).join('')}
       </div>
 
       <section>
-        <div class="sec-title">Agenda de ${WEEKDAY_LABELS[selectedDay]}</div>
+        <div class="sec-title">${t('rotina.agenda.title', { day: weekdayName(selectedDay) })}</div>
         <div id="agenda-list"></div>
       </section>
 
       <section>
-        <div class="sec-title">Compromissos fixos</div>
+        <div class="sec-title">${t('rotina.fixed.title')}</div>
         <div id="fixed-list"></div>
       </section>
 
       <section>
-        <div class="sec-title">Atividades flexíveis</div>
+        <div class="sec-title">${t('rotina.flexible.title')}</div>
         <div id="flexible-list"></div>
       </section>
 
       <section>
-        <div class="sec-title">Adicionar à rotina</div>
+        <div class="sec-title">${t('rotina.add.title')}</div>
         <div class="modality-switch">
-          <button class="modality-btn ${commitmentType === 'fixed' ? 'active' : ''}" data-commitment-type="fixed">Fixo</button>
-          <button class="modality-btn ${commitmentType === 'flexible' ? 'active' : ''}" data-commitment-type="flexible">Flexível</button>
+          <button class="modality-btn ${commitmentType === 'fixed' ? 'active' : ''}" data-commitment-type="fixed">${t('rotina.agenda.fixed')}</button>
+          <button class="modality-btn ${commitmentType === 'flexible' ? 'active' : ''}" data-commitment-type="flexible">${t('rotina.agenda.flexible')}</button>
         </div>
         <div class="form-row">
-          <input class="finp" id="cm-label" type="text" placeholder="${commitmentType === 'fixed' ? 'Ex: Trabalho' : 'Ex: Programação'}" style="flex:1" />
+          <input class="finp" id="cm-label" type="text" placeholder="${commitmentType === 'fixed' ? t('rotina.add.labelPlaceholderFixed') : t('rotina.add.labelPlaceholderFlexible')}" style="flex:1" />
         </div>
         ${
           commitmentType === 'fixed'
             ? `<div class="meds-grid time-grid" style="padding-top:0">
-                <div><label>Início</label><input class="finp" id="cm-start" type="time" /></div>
-                <div><label>Fim</label><input class="finp" id="cm-end" type="time" /></div>
+                <div><label>${t('rotina.add.start')}</label><input class="finp" id="cm-start" type="time" /></div>
+                <div><label>${t('rotina.add.end')}</label><input class="finp" id="cm-end" type="time" /></div>
               </div>`
             : `<div class="form-row" style="padding-top:0">
-                <input class="finp" id="cm-duration" type="number" min="5" step="5" placeholder="Duração em minutos" style="flex:1" />
+                <input class="finp" id="cm-duration" type="number" min="5" step="5" placeholder="${t('rotina.add.duration')}" style="flex:1" />
               </div>`
         }
         <div class="form-row" style="padding-top:0;flex-wrap:wrap">
-          ${WEEKDAYS.map((d) => `<label class="pill" style="cursor:pointer"><input type="checkbox" class="cm-day" value="${d}" style="margin-right:4px" />${WEEKDAY_LABELS[d].slice(0, 3)}</label>`).join('')}
+          ${WEEKDAYS.map((d) => `<label class="pill" style="cursor:pointer"><input type="checkbox" class="cm-day" value="${d}" style="margin-right:4px" />${weekdayShort(d)}</label>`).join('')}
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn block" id="cm-add">+ Adicionar ${commitmentType === 'fixed' ? 'compromisso' : 'atividade'}</button>
+          <button class="btn block" id="cm-add">${commitmentType === 'fixed' ? t('rotina.add.buttonFixed') : t('rotina.add.buttonFlexible')}</button>
         </div>
       </section>
 
-      <div class="alert"><span>Se não houver espaço para tudo, uma atividade flexível fica "sem espaço hoje" em vez de sobrepor um compromisso fixo, considera adiá-la.</span></div>
+      <div class="alert"><span>${t('rotina.footerAlert')}</span></div>
     `;
 
     renderAgenda(root, fixed, flexible, settings.wakeTime, settings.sleepTime);
@@ -138,7 +136,7 @@ function renderAgenda(root: HTMLElement, fixed: ReturnType<typeof getFixedCommit
   const blocks = computeDaySchedule(dayFixed, dayFlexible, wake, sleep);
 
   if (!blocks.length) {
-    el.innerHTML = '<div class="empty">Sem compromissos nem atividades para este dia</div>';
+    el.innerHTML = `<div class="empty">${t('rotina.agenda.empty')}</div>`;
     return;
   }
 
@@ -149,12 +147,12 @@ function blockHTML(b: ScheduleBlock): string {
   if (b.kind === 'unscheduled') {
     return `
     <div class="row" style="cursor:default">
-      <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
-      <span class="badge-k">Adiar?</span>
+      <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>${t('rotina.agenda.noSpace', { min: b.durationMin })}</small></div>
+      <span class="badge-k">${t('rotina.agenda.postpone')}</span>
     </div>`;
   }
   const time = `${minToHHMM(b.startMin)} – ${minToHHMM(b.endMin)}`;
-  const tag = b.kind === 'fixed' ? 'Fixo' : 'Flexível';
+  const tag = b.kind === 'fixed' ? t('rotina.agenda.fixed') : t('rotina.agenda.flexible');
   return `
     <div class="row" style="cursor:default">
       <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>${time}</small></div>
@@ -165,15 +163,15 @@ function blockHTML(b: ScheduleBlock): string {
 function renderFixedList(root: HTMLElement, fixed: ReturnType<typeof getFixedCommitments>) {
   const el = root.querySelector('#fixed-list') as HTMLElement;
   if (!fixed.length) {
-    el.innerHTML = '<div class="empty">Ainda sem compromissos fixos</div>';
+    el.innerHTML = `<div class="empty">${t('rotina.fixed.empty')}</div>`;
     return;
   }
   el.innerHTML = fixed
     .map(
       (f, i) => `
     <div class="log-item">
-      <div class="log-txt"><strong>${escapeHtml(f.label)}</strong><div class="log-date">${minToHHMM(f.startMin)}–${minToHHMM(f.endMin)} · ${f.days.map((d) => WEEKDAY_LABELS[d].slice(0, 3)).join(', ')}</div></div>
-      <button class="log-del" data-del-fixed="${i}" aria-label="Remover">✕</button>
+      <div class="log-txt"><strong>${escapeHtml(f.label)}</strong><div class="log-date">${minToHHMM(f.startMin)}–${minToHHMM(f.endMin)} · ${f.days.map((d) => weekdayShort(d)).join(', ')}</div></div>
+      <button class="log-del" data-del-fixed="${i}" aria-label="${t('common.remove')}">✕</button>
     </div>`
     )
     .join('');
@@ -182,15 +180,15 @@ function renderFixedList(root: HTMLElement, fixed: ReturnType<typeof getFixedCom
 function renderFlexibleList(root: HTMLElement, flexible: ReturnType<typeof getFlexibleActivities>) {
   const el = root.querySelector('#flexible-list') as HTMLElement;
   if (!flexible.length) {
-    el.innerHTML = '<div class="empty">Ainda sem atividades flexíveis</div>';
+    el.innerHTML = `<div class="empty">${t('rotina.flexible.empty')}</div>`;
     return;
   }
   el.innerHTML = flexible
     .map(
       (f, i) => `
     <div class="log-item">
-      <div class="log-txt"><strong>${escapeHtml(f.label)}</strong><div class="log-date">${f.durationMin} min · ${f.days.map((d) => WEEKDAY_LABELS[d].slice(0, 3)).join(', ')}</div></div>
-      <button class="log-del" data-del-flexible="${i}" aria-label="Remover">✕</button>
+      <div class="log-txt"><strong>${escapeHtml(f.label)}</strong><div class="log-date">${f.durationMin} min · ${f.days.map((d) => weekdayShort(d)).join(', ')}</div></div>
+      <button class="log-del" data-del-flexible="${i}" aria-label="${t('common.remove')}">✕</button>
     </div>`
     )
     .join('');
@@ -228,19 +226,19 @@ function wireEvents(root: HTMLElement) {
       const start = (root.querySelector('#cm-start') as HTMLInputElement).value;
       const end = (root.querySelector('#cm-end') as HTMLInputElement).value;
       if (!label || !start || !end || !days.length) {
-        showToast('Preencha o nome, horário e pelo menos um dia');
+        showToast(t('rotina.toast.fillFixed'));
         return;
       }
       addFixedCommitment({ id: `fx_${Date.now()}`, label, days, startMin: timeToMin(start), endMin: timeToMin(end) });
-      showToast('Compromisso adicionado');
+      showToast(t('rotina.toast.addedFixed'));
     } else {
       const duration = Number((root.querySelector('#cm-duration') as HTMLInputElement).value);
       if (!label || !duration || !days.length) {
-        showToast('Preencha o nome, duração e pelo menos um dia');
+        showToast(t('rotina.toast.fillFlexible'));
         return;
       }
       addFlexibleActivity({ id: `fl_${Date.now()}`, label, days, durationMin: duration });
-      showToast('Atividade adicionada');
+      showToast(t('rotina.toast.addedFlexible'));
     }
     refreshActive();
   });
@@ -248,7 +246,7 @@ function wireEvents(root: HTMLElement) {
   root.querySelector('#fixed-list')?.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-del-fixed]');
     if (!btn) return;
-    if (!confirm('Remover este compromisso?')) return;
+    if (!confirm(t('rotina.confirmRemoveFixed'))) return;
     deleteFixedCommitment(Number(btn.dataset.delFixed));
     refreshActive();
   });
@@ -256,7 +254,7 @@ function wireEvents(root: HTMLElement) {
   root.querySelector('#flexible-list')?.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-del-flexible]');
     if (!btn) return;
-    if (!confirm('Remover esta atividade?')) return;
+    if (!confirm(t('rotina.confirmRemoveFlexible'))) return;
     deleteFlexibleActivity(Number(btn.dataset.delFlexible));
     refreshActive();
   });

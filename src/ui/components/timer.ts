@@ -1,5 +1,6 @@
 import { openModal } from './modal';
 import { MASCOT_IMAGES } from '../../data/mascot';
+import { t } from '../../i18n';
 
 const PRESETS = [30, 45, 60, 90, 120];
 
@@ -59,15 +60,15 @@ export function openTimerModal(initialSeconds = 60): void {
 
   const close = openModal(
     `
-    <button class="modal-close" data-close aria-label="Fechar"></button>
-    <h3>Temporizador de descanso</h3>
+    <button class="modal-close" data-close aria-label="${t('common.close')}"></button>
+    <h3>${t('timer.restTitle')}</h3>
     <div class="timer-display" id="tmr-display">${fmt(remaining)}</div>
     <div class="timer-presets" id="tmr-presets">
       ${PRESETS.map((p) => `<button class="timer-preset${p === total ? ' active' : ''}" data-preset="${p}">${p}s</button>`).join('')}
     </div>
     <div class="timer-btns">
-      <button class="btn ghost" id="tmr-reset">Reiniciar</button>
-      <button class="btn" id="tmr-toggle">Iniciar</button>
+      <button class="btn ghost" id="tmr-reset">${t('timer.reset')}</button>
+      <button class="btn" id="tmr-toggle">${t('timer.start')}</button>
     </div>
   `,
     (modal) => {
@@ -88,12 +89,12 @@ export function openTimerModal(initialSeconds = 60): void {
       function start() {
         if (!audioCtx) audioCtx = unlockAudioContext(); // must happen inside this click handler, not later
         running = true;
-        toggleBtn.textContent = 'Pausar';
+        toggleBtn.textContent = t('timer.pause');
         interval = setInterval(tick, 1000);
       }
       function stop() {
         running = false;
-        toggleBtn.textContent = 'Iniciar';
+        toggleBtn.textContent = t('timer.start');
         if (interval) clearInterval(interval);
       }
 
@@ -122,10 +123,12 @@ export function openTimerModal(initialSeconds = 60): void {
   );
 }
 
+/** labelKey resolved at render/tick time (not baked in), so a language
+ * change mid-exercise still shows the right phase name — see src/i18n. */
 const BREATH_PHASES = [
-  { label: 'Inspire', seconds: 4 },
-  { label: 'Segure', seconds: 4 },
-  { label: 'Expire', seconds: 4 }
+  { labelKey: 'timer.breathe.inhale', seconds: 4 },
+  { labelKey: 'timer.breathe.hold', seconds: 4 },
+  { labelKey: 'timer.breathe.exhale', seconds: 4 }
 ];
 
 /**
@@ -144,15 +147,15 @@ export function openBreathingModal(): void {
   const mascotSrc = `${import.meta.env.BASE_URL}${MASCOT_IMAGES.breathe}`;
   const close = openModal(
     `
-    <button class="modal-close" data-close aria-label="Fechar"></button>
-    <h3>Respirar</h3>
-    <img src="${mascotSrc}" alt="Kaipora" width="152" style="display:block;height:auto;margin:0 auto 14px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))" />
-    <div class="timer-display" id="breath-phase" style="font-size:20px">${BREATH_PHASES[0].label}</div>
+    <button class="modal-close" data-close aria-label="${t('common.close')}"></button>
+    <h3>${t('timer.breatheTitle')}</h3>
+    <img src="${mascotSrc}" alt="${t('mascot.name')}" width="152" style="display:block;height:auto;margin:0 auto 14px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))" />
+    <div class="timer-display" id="breath-phase" style="font-size:20px">${t(BREATH_PHASES[0].labelKey)}</div>
     <div class="timer-display" id="breath-display">${fmt(remaining)}</div>
     <div class="timer-btns">
-      <button class="btn" id="breath-toggle">Iniciar</button>
+      <button class="btn" id="breath-toggle">${t('timer.start')}</button>
     </div>
-    <p style="text-align:center;color:var(--text-dim);font-size:12.5px;margin-top:10px">Inspire, segure e expire, cada fase com 4 segundos. Repita o tempo que precisar.</p>
+    <p style="text-align:center;color:var(--text-dim);font-size:12.5px;margin-top:10px">${t('timer.breatheInstructions')}</p>
   `,
     (modal) => {
       const phaseEl = modal.querySelector('#breath-phase') as HTMLElement;
@@ -164,7 +167,7 @@ export function openBreathingModal(): void {
         if (remaining <= 0) {
           phaseIndex = (phaseIndex + 1) % BREATH_PHASES.length;
           remaining = BREATH_PHASES[phaseIndex].seconds;
-          phaseEl.textContent = BREATH_PHASES[phaseIndex].label;
+          phaseEl.textContent = t(BREATH_PHASES[phaseIndex].labelKey);
           beep(audioCtx);
         }
         display.textContent = fmt(remaining);
@@ -172,12 +175,12 @@ export function openBreathingModal(): void {
       function start() {
         if (!audioCtx) audioCtx = unlockAudioContext(); // must happen inside this click handler, not later
         running = true;
-        toggleBtn.textContent = 'Pausar';
+        toggleBtn.textContent = t('timer.pause');
         interval = setInterval(tick, 1000);
       }
       function stop() {
         running = false;
-        toggleBtn.textContent = 'Iniciar';
+        toggleBtn.textContent = t('timer.start');
         if (interval) clearInterval(interval);
       }
 

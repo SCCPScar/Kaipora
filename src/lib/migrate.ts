@@ -1,6 +1,6 @@
 import { rawGet, rawSet, PFX } from './storage';
 import type { DayRecord } from './types';
-import { HABITS } from '../data/habits';
+import { HABIT_IDS } from '../data/habits';
 import { toISO, addDays, fromISO } from './dates';
 
 const OLD_PFX = 'scar';
@@ -143,15 +143,15 @@ export function migrateFromLegacyApp(): { migrated: boolean; warnings: string[] 
       const [hStr, diStr] = entryKey.split('_');
       const habitIndex = Number(hStr);
       const dayOfWeek = Number(diStr);
-      const habit = HABITS[habitIndex];
-      if (!habit || Number.isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) continue;
+      const habitId = HABIT_IDS[habitIndex];
+      if (!habitId || Number.isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) continue;
 
       const date = toISO(addDays(weekStart, dayOfWeek));
       const dayKey = `${PFX}_day_${date}`;
       const existing = rawGet<DayRecord | null>(dayKey, null);
       const merged: DayRecord = existing ?? { meals: {}, water: 0, exercisesDone: {}, training: null, habits: {}, routineDone: [] };
-      if (!merged.habits[habit.id]) {
-        merged.habits[habit.id] = true;
+      if (!merged.habits[habitId]) {
+        merged.habits[habitId] = true;
         rawSet(dayKey, merged);
         habitDaysMigrated++;
         touchedAnything = true;

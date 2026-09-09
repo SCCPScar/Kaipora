@@ -2,7 +2,7 @@ import type { Tab } from '../nav';
 import { todayISO, formatLong, greeting, WEEKDAY_KEYS, addDays, fromISO, toISO } from '../../lib/dates';
 import { getTrainingDay } from '../../data/training';
 import { MEALS, allMealOptions, combinedDayTotals } from '../../data/diet';
-import { HABITS } from '../../data/habits';
+import { getHabits } from '../../data/habits';
 import {
   getDay,
   getWater,
@@ -35,6 +35,7 @@ import { mascotCardHTML } from '../components/mascot';
 import { openModal } from '../components/modal';
 import { openBreathingModal } from '../components/timer';
 import { startOfWeek } from '../../lib/dates';
+import { t } from '../../i18n';
 
 let modality: BuiltInModality = 'academia';
 /** The date (YYYY-MM-DD) for which the completion celebration has already
@@ -44,7 +45,7 @@ let celebratedDate: string | null = null;
 
 export const todayTab: Tab = {
   id: 'hoje',
-  label: 'Hoje',
+  label: 'nav.tab.hoje',
   icon: '',
   group: 'Início',
   render(root: HTMLElement) {
@@ -86,7 +87,7 @@ export const todayTab: Tab = {
     if (!essentialsDone && !snoozedToday) {
       const hour = now.getHours();
       if (shouldShowReminder(hour, trainingDone)) {
-        reminderText = MASCOT_LINES.reminderTraining;
+        reminderText = MASCOT_LINES.reminderTraining();
       } else if (shouldShowReminder(hour, waterDone)) {
         const remainingMl = Math.max(0, settings.waterGoalMl - day.water * mlEach);
         reminderText = MASCOT_LINES.reminderWater(remainingMl);
@@ -103,86 +104,86 @@ export const todayTab: Tab = {
     root.innerHTML = `
       <div class="ph">
         <h2>${greeting(now)}${settings.userName ? `, ${escapeHtml(settings.userName)}` : ''}</h2>
-        <div class="ph-title">Hoje</div>
+        <div class="ph-title">${t('today.title')}</div>
         <div class="ph-sub">${formatLong(now)}</div>
       </div>
 
       <div class="form-row" style="padding-top:0">
-        <button class="btn ghost" id="breathe-open" type="button">Respirar</button>
+        <button class="btn ghost" id="breathe-open" type="button">${t('today.breatheButton')}</button>
       </div>
 
-      ${showComeBack ? mascotCardHTML(useAdaptiveTone ? MASCOT_LINES.comeBackSoft : MASCOT_LINES.comeBack, MASCOT_IMAGES.comeBack) : ''}
+      ${showComeBack ? mascotCardHTML(useAdaptiveTone ? MASCOT_LINES.comeBackSoft() : MASCOT_LINES.comeBack(), MASCOT_IMAGES.comeBack) : ''}
       ${reminderText ? mascotCardHTML(reminderText, MASCOT_IMAGES.reminder, { dismissible: true }) : ''}
       ${essentialsDone ? completionBannerHTML(justCelebrated) : ''}
 
-      <div class="priority-heading">Essencial</div>
+      <div class="priority-heading">${t('today.priority.essential')}</div>
 
       <div class="row" style="cursor:default">
-        <div class="rtxt"><strong>Dia mínimo</strong><small>Em dias difíceis, só precisa de um Essencial, não os dois</small></div>
+        <div class="rtxt"><strong>${t('today.minDay.title')}</strong><small>${t('today.minDay.desc')}</small></div>
         <span class="switch"><input type="checkbox" id="min-day-toggle" ${minDay ? 'checked' : ''}/><span class="slider"></span></span>
       </div>
 
       <div class="wcard">
         <div class="wcard-top">
-          <div class="wcard-lbl">Água de hoje</div>
-          <div class="wcard-ml" id="wml">${day.water * mlEach} / ${settings.waterGoalMl} ml</div>
+          <div class="wcard-lbl">${t('today.water.title')}</div>
+          <div class="wcard-ml" id="wml">${t('today.water.progress', { current: day.water * mlEach, goal: settings.waterGoalMl })}</div>
         </div>
         <div class="glasses" id="glasses"></div>
         <div class="wbar"><div class="wbar-fill" style="width:${Math.min(100, (day.water / glassGoal) * 100)}%"></div></div>
         <div class="wbtns">
-          <button class="wbtn" id="water-minus">− Copo</button>
-          <button class="wbtn" id="water-plus">+ Copo</button>
+          <button class="wbtn" id="water-minus">${t('today.water.minus')}</button>
+          <button class="wbtn" id="water-plus">${t('today.water.plus')}</button>
         </div>
       </div>
 
       <section id="training-card">
         <div class="sec-title">
-          <span>Treino de hoje</span>
+          <span>${t('today.training.title')}</span>
           <span class="pill">${workout.focus}</span>
         </div>
         <div class="modality-switch">
-          <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-modality="academia">Academia</button>
-          <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-modality="casa">Casa</button>
+          <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-modality="academia">${t('common.academia')}</button>
+          <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-modality="casa">${t('common.casa')}</button>
         </div>
         <div class="row" id="training-open-row">
-          <div class="rtxt"><strong>${workout.title}</strong><small>${exercisesDone} de ${workout.exercises.length} exercícios feitos</small></div>
-          <span class="badge-k">Abrir</span>
+          <div class="rtxt"><strong>${workout.title}</strong><small>${t('today.training.exercisesDone', { done: exercisesDone, total: workout.exercises.length })}</small></div>
+          <span class="badge-k">${t('today.training.open')}</span>
         </div>
         <div class="sub-row" style="justify-content:space-between">
           <label style="display:flex;align-items:center;gap:8px;margin:0;text-transform:none;font-size:12.5px;color:var(--text-dim)">
             <span class="switch"><input type="checkbox" id="training-done" ${day.training?.done ? 'checked' : ''}/><span class="slider"></span></span>
-            Marcar treino de hoje como concluído
+            ${t('today.training.markDone')}
           </label>
         </div>
       </section>
 
-      <div class="priority-heading">Importante</div>
+      <div class="priority-heading">${t('today.priority.important')}</div>
 
       <section>
-        <div class="sec-title">Intenção da semana</div>
+        <div class="sec-title">${t('today.intention.title')}</div>
         <div class="row" id="intention-open-row">
-          <div class="rtxt"><strong>${weeklyIntention ? escapeHtml(weeklyIntention) : 'Ainda não definida'}</strong><small>Toque para ${weeklyIntention ? 'editar' : 'definir'}</small></div>
-          <span class="badge-k">${weeklyIntention ? 'Editar' : 'Definir'}</span>
+          <div class="rtxt"><strong>${weeklyIntention ? escapeHtml(weeklyIntention) : t('today.intention.notSet')}</strong><small>${weeklyIntention ? t('today.intention.tapToEdit') : t('today.intention.tapToSet')}</small></div>
+          <span class="badge-k">${weeklyIntention ? t('today.intention.editBadge') : t('today.intention.setBadge')}</span>
         </div>
       </section>
 
       <section>
-        <div class="sec-title">Rotina de hoje</div>
+        <div class="sec-title">${t('today.routine.title')}</div>
         <div id="routine-list"></div>
       </section>
 
-      <div class="priority-heading">Opcional</div>
+      <div class="priority-heading">${t('today.priority.optional')}</div>
 
       <section id="meals-card">
-        <div class="sec-title"><span>Alimentação</span><span class="macro-line">${foodTotals.kcal} kcal</span></div>
+        <div class="sec-title"><span>${t('common.nutrition')}</span><span class="macro-line">${foodTotals.kcal} kcal</span></div>
         <div class="row" id="meals-open-row">
-          <div class="rtxt"><strong>${mealsLogged} de ${MEALS.length} refeições registradas</strong><small>Toque para abrir o plano completo</small></div>
-          <span class="macro-line">${foodTotals.protein}g prot</span>
+          <div class="rtxt"><strong>${t('today.meals.logged', { done: mealsLogged, total: MEALS.length })}</strong><small>${t('today.meals.tapOpen')}</small></div>
+          <span class="macro-line">${t('today.meals.proteinAmount', { g: foodTotals.protein })}</span>
         </div>
       </section>
 
       <section>
-        <div class="sec-title">Hábitos de hoje</div>
+        <div class="sec-title">${t('today.habits.title')}</div>
         <div id="habits-list"></div>
       </section>
     `;
@@ -210,10 +211,10 @@ function completionBannerHTML(animate: boolean): string {
   return `
     <div class="day-complete-banner ${animate ? 'animate' : ''}">
       ${sparks}
-      <img src="${mascotSrc}" alt="Kaipora" width="40" style="height:auto;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))" />
+      <img src="${mascotSrc}" alt="${t('mascot.name')}" width="40" style="height:auto;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))" />
       <div>
-        <strong>Essenciais de hoje concluídos.</strong>
-        <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">O resto do dia é bônus. Consistência é mais importante que perfeição.</div>
+        <strong>${t('today.completion.title')}</strong>
+        <div style="font-weight:600;font-size:12px;opacity:.9;margin-top:2px">${t('today.completion.subtitle')}</div>
       </div>
     </div>`;
 }
@@ -234,7 +235,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
   const blocks = computeDaySchedule(fixed, flexible, wake, sleep);
 
   if (!blocks.length) {
-    el.innerHTML = '<div class="empty">Sem rotina configurada para hoje. Defina-a na aba Rotina</div>';
+    el.innerHTML = `<div class="empty">${t('today.routine.empty')}</div>`;
     return;
   }
 
@@ -243,7 +244,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
       if (b.kind === 'unscheduled') {
         return `
         <div class="row" style="cursor:default">
-          <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>Sem espaço hoje (${b.durationMin} min), considera adiar</small></div>
+          <div class="rtxt"><strong>${escapeHtml(b.label)}</strong><small>${t('today.routine.noSpace', { min: b.durationMin })}</small></div>
         </div>`;
       }
       const h = (m: number) => `${Math.floor(m / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}`;
@@ -259,7 +260,7 @@ function renderRoutine(root: HTMLElement, date: string, day: ReturnType<typeof g
 
 function renderHabits(root: HTMLElement, date: string, day: ReturnType<typeof getDay>) {
   const el = root.querySelector('#habits-list') as HTMLElement;
-  el.innerHTML = HABITS.map(
+  el.innerHTML = getHabits().map(
     (h) => `
     <div class="row ${day.habits[h.id] ? 'done' : ''}" data-habit="${h.id}">
       <div class="chk"></div>
@@ -327,7 +328,7 @@ function wireEvents(
   root.querySelector('#training-done')?.addEventListener('change', (e) => {
     const checked = (e.target as HTMLInputElement).checked;
     setTrainingDone(date, modality, workout.id, checked);
-    if (checked) showToast('Treino de hoje registrado!');
+    if (checked) showToast(t('today.training.toast'));
     refreshActive();
   });
 
@@ -349,13 +350,13 @@ function wireEvents(
 function openIntentionModal(current: string, onSave: (text: string) => void): void {
   const close = openModal(
     `
-    <button class="modal-close" data-close aria-label="Fechar"></button>
-    <h3>Intenção da semana</h3>
+    <button class="modal-close" data-close aria-label="${t('common.close')}"></button>
+    <h3>${t('today.intention.title')}</h3>
     <div class="form-row">
-      <textarea class="finp" id="intention-text" rows="3" placeholder="O que quer priorizar esta semana?" style="flex:1;resize:vertical;font-family:inherit">${escapeHtml(current)}</textarea>
+      <textarea class="finp" id="intention-text" rows="3" placeholder="${t('today.intention.placeholder')}" style="flex:1;resize:vertical;font-family:inherit">${escapeHtml(current)}</textarea>
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="intention-save">Salvar</button>
+      <button class="btn block" id="intention-save">${t('today.intention.save')}</button>
     </div>
   `,
     (modal) => {

@@ -1,3 +1,5 @@
+import { t } from '../../i18n';
+
 export interface ChartPoint {
   date: string;
   value: number;
@@ -60,7 +62,7 @@ export function drawLineChart(canvas: HTMLCanvasElement, points: ChartPoint[], g
     ctx.fillStyle = goalColor;
     ctx.font = '9px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(`Meta ${goal}`, pad.l + 2, gy - 3);
+    ctx.fillText(t('chart.goalLabel', { goal }), pad.l + 2, gy - 3);
   }
 
   const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);

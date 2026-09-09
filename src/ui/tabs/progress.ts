@@ -14,12 +14,13 @@ import { drawLineChart } from '../components/chart';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
 import { escapeHtml } from '../../lib/sanitize';
+import { t } from '../../i18n';
 
 let editingMeasurementIndex: number | null = null;
 
 export const progressTab: Tab = {
   id: 'progresso',
-  label: 'Progresso',
+  label: 'nav.tab.progresso',
   icon: '',
   group: 'Corpo',
   render(root: HTMLElement) {
@@ -29,47 +30,47 @@ export const progressTab: Tab = {
 
     root.innerHTML = `
       <div class="ph">
-        <h2>Progresso</h2>
-        <div class="ph-title">Seu histórico${settings.userName ? `, ${escapeHtml(settings.userName)}` : ''}</div>
-        <div class="ph-sub">Recomposição corporal, mais do que a balança</div>
+        <h2>${t('progresso.title')}</h2>
+        <div class="ph-title">${t('progresso.subtitle')}${settings.userName ? `, ${escapeHtml(settings.userName)}` : ''}</div>
+        <div class="ph-sub">${t('progresso.description')}</div>
       </div>
 
-      <div class="alert"><span>O sucesso combina peso, medidas, treino e consistência, nunca só o número na balança.</span></div>
+      <div class="alert"><span>${t('progresso.alert')}</span></div>
 
       <div class="chart-sec">
-        <h4>Evolução do peso</h4>
+        <h4>${t('progresso.chart.title')}</h4>
         <canvas id="wchart" style="width:100%"></canvas>
-        <div id="chart-empty" class="empty" style="display:none">Registre pelo menos 2 pesagens para ver o gráfico</div>
+        <div id="chart-empty" class="empty" style="display:none">${t('progresso.chart.empty')}</div>
       </div>
       <div class="form-row">
-        <input class="finp" id="wi" type="number" step="0.1" min="30" max="250" placeholder="Peso em kg (ex: 74.8)" />
-        <button class="fsave" id="wsave">+ Salvar</button>
+        <input class="finp" id="wi" type="number" step="0.1" min="30" max="250" placeholder="${t('progresso.weight.placeholder')}" />
+        <button class="fsave" id="wsave">${t('progresso.weight.save')}</button>
       </div>
       <section>
-        <div class="sec-title">Registros de peso</div>
+        <div class="sec-title">${t('progresso.weight.logTitle')}</div>
         <div id="wlog"></div>
       </section>
 
       <section>
         <div class="sec-title">
-          <span>Medidas (cm)</span>
-          ${editingMeasurementIndex !== null ? '<span class="pill">A editar</span>' : ''}
+          <span>${t('progresso.measurements.title')}</span>
+          ${editingMeasurementIndex !== null ? `<span class="pill">${t('progresso.measurements.editingPill')}</span>` : ''}
         </div>
         <div class="meds-grid">
-          <div><label>Cintura</label><input class="finp" id="mc" type="number" placeholder="Ex: 82" /></div>
-          <div><label>Quadril / Glúteos</label><input class="finp" id="mq" type="number" placeholder="Ex: 104" /></div>
-          <div><label>Coxa</label><input class="finp" id="mco" type="number" placeholder="Ex: 56" /></div>
-          <div><label>Braço</label><input class="finp" id="mb" type="number" placeholder="Ex: 28" /></div>
+          <div><label>${t('progresso.measurements.waist')}</label><input class="finp" id="mc" type="number" placeholder="${t('progresso.measurements.waistPlaceholder')}" /></div>
+          <div><label>${t('progresso.measurements.hip')}</label><input class="finp" id="mq" type="number" placeholder="${t('progresso.measurements.hipPlaceholder')}" /></div>
+          <div><label>${t('progresso.measurements.thigh')}</label><input class="finp" id="mco" type="number" placeholder="${t('progresso.measurements.thighPlaceholder')}" /></div>
+          <div><label>${t('progresso.measurements.arm')}</label><input class="finp" id="mb" type="number" placeholder="${t('progresso.measurements.armPlaceholder')}" /></div>
         </div>
         <div class="form-row">
-          <input class="finp" id="mextra-name" type="text" placeholder="Outra medida (ex: peito)" style="max-width:160px" />
-          <input class="finp" id="mextra-val" type="number" placeholder="cm" style="max-width:90px" />
+          <input class="finp" id="mextra-name" type="text" placeholder="${t('progresso.measurements.extraNamePlaceholder')}" style="max-width:160px" />
+          <input class="finp" id="mextra-val" type="number" placeholder="${t('progresso.measurements.extraValPlaceholder')}" style="max-width:90px" />
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn block" id="msave">${editingMeasurementIndex !== null ? 'Salvar alterações' : '+ Salvar medidas'}</button>
-          ${editingMeasurementIndex !== null ? '<button class="btn ghost" id="mcancel">Cancelar</button>' : ''}
+          <button class="btn block" id="msave">${editingMeasurementIndex !== null ? t('progresso.measurements.saveChanges') : t('progresso.measurements.save')}</button>
+          ${editingMeasurementIndex !== null ? `<button class="btn ghost" id="mcancel">${t('progresso.measurements.cancel')}</button>` : ''}
         </div>
-        <div style="padding:0 16px 4px;font-size:11px;color:var(--text-faint)">Toque em um registro abaixo para editá-lo.</div>
+        <div style="padding:0 16px 4px;font-size:11px;color:var(--text-faint)">${t('progresso.measurements.tapToEdit')}</div>
         <div id="mlog"></div>
       </section>
     `;
@@ -99,7 +100,7 @@ function renderChart(root: HTMLElement, weights: ReturnType<typeof getWeights>, 
 function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeights>) {
   const el = root.querySelector('#wlog') as HTMLElement;
   if (!weights.length) {
-    el.innerHTML = '<div class="empty">Ainda sem registros de peso</div>';
+    el.innerHTML = `<div class="empty">${t('progresso.weight.empty')}</div>`;
     return;
   }
   el.innerHTML = weights
@@ -113,7 +114,7 @@ function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeight
       return `
       <div class="log-item">
         <div class="log-txt"><strong>${w.kg} kg</strong>${diffHTML}<div class="log-date">${w.date}</div></div>
-        <button class="log-del" data-del-weight="${i}" aria-label="Remover">✕</button>
+        <button class="log-del" data-del-weight="${i}" aria-label="${t('common.remove')}">✕</button>
       </div>`;
     })
     .join('');
@@ -122,7 +123,7 @@ function renderWeightLog(root: HTMLElement, weights: ReturnType<typeof getWeight
 function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasurements>) {
   const el = root.querySelector('#mlog') as HTMLElement;
   if (!list.length) {
-    el.innerHTML = '<div class="empty">Registre as medidas mensalmente</div>';
+    el.innerHTML = `<div class="empty">${t('progresso.measurements.empty')}</div>`;
     return;
   }
   el.innerHTML = list
@@ -134,10 +135,10 @@ function renderMeasurements(root: HTMLElement, list: ReturnType<typeof getMeasur
       return `
     <div class="log-item" data-edit-measurement="${i}" style="cursor:pointer;${isEditing ? 'background:rgba(139,92,246,.12)' : ''}">
       <div class="log-txt">
-        <strong>${m.date}${isEditing ? ' · editando' : ''}</strong>
-        <div class="log-date">Cintura ${m.waist ?? '-'}cm · Quadril ${m.hip ?? '-'}cm · Coxa ${m.thigh ?? '-'}cm · Braço ${m.arm ?? '-'}cm${extras ? ` · ${extras}` : ''}</div>
+        <strong>${m.date}${isEditing ? ` · ${t('progresso.measurements.editingSuffix')}` : ''}</strong>
+        <div class="log-date">${t('progresso.measurements.waist')} ${m.waist ?? '-'}cm · ${t('progresso.measurements.hip')} ${m.hip ?? '-'}cm · ${t('progresso.measurements.thigh')} ${m.thigh ?? '-'}cm · ${t('progresso.measurements.arm')} ${m.arm ?? '-'}cm${extras ? ` · ${extras}` : ''}</div>
       </div>
-      <button class="log-del" data-del-measurement="${i}" aria-label="Remover">✕</button>
+      <button class="log-del" data-del-measurement="${i}" aria-label="${t('common.remove')}">✕</button>
     </div>`;
     })
     .join('');
@@ -167,7 +168,7 @@ function wireEvents(root: HTMLElement) {
     const v = parseFloat(input.value);
     if (!v || Number.isNaN(v)) return;
     addWeight(v, todayISO());
-    showToast('Peso salvo');
+    showToast(t('progresso.weight.toastSaved'));
     refreshActive();
   });
 
@@ -192,10 +193,10 @@ function wireEvents(root: HTMLElement) {
     if (editingMeasurementIndex !== null) {
       updateMeasurement(editingMeasurementIndex, values);
       editingMeasurementIndex = null;
-      showToast('Medidas atualizadas');
+      showToast(t('progresso.measurements.toastUpdated'));
     } else {
       addMeasurement(values);
-      showToast('Medidas salvas');
+      showToast(t('progresso.measurements.toastSaved'));
     }
     refreshActive();
   });
@@ -208,7 +209,7 @@ function wireEvents(root: HTMLElement) {
   root.querySelector('#wlog')?.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-del-weight]');
     if (!btn) return;
-    if (!confirm('Remover este registro de peso?')) return;
+    if (!confirm(t('progresso.weight.confirmRemove'))) return;
     deleteWeight(Number(btn.dataset.delWeight));
     refreshActive();
   });
@@ -217,7 +218,7 @@ function wireEvents(root: HTMLElement) {
     const target = e.target as HTMLElement;
     const delBtn = target.closest<HTMLElement>('[data-del-measurement]');
     if (delBtn) {
-      if (!confirm('Remover este registro de medidas?')) return;
+      if (!confirm(t('progresso.measurements.confirmRemove'))) return;
       deleteMeasurement(Number(delBtn.dataset.delMeasurement));
       if (editingMeasurementIndex === Number(delBtn.dataset.delMeasurement)) editingMeasurementIndex = null;
       refreshActive();

@@ -3,6 +3,7 @@ import { essentialsCompletedFlags } from '../../lib/dayHistory';
 import { currentStreakFromToday, longestStreak } from '../../lib/streaks';
 import { evaluateMilestones } from '../../lib/milestones';
 import { todayISO, toISO, addDays } from '../../lib/dates';
+import { t } from '../../i18n';
 
 const WINDOW_DAYS = 365;
 
@@ -12,7 +13,7 @@ let lastSeenStreak: number | null = null;
 
 export const conquistasTab: Tab = {
   id: 'conquistas',
-  label: 'Conquistas',
+  label: 'nav.tab.conquistas',
   icon: '',
   group: 'Acompanhamento',
   render(root: HTMLElement) {
@@ -30,22 +31,22 @@ export const conquistasTab: Tab = {
 
     root.innerHTML = `
       <div class="ph">
-        <h2>Conquistas</h2>
-        <div class="ph-title">Consistência, sem punição</div>
-        <div class="ph-sub">Um dia falhado nunca apaga o que já construíste</div>
+        <h2>${t('conquistas.title')}</h2>
+        <div class="ph-title">${t('conquistas.subtitle')}</div>
+        <div class="ph-sub">${t('conquistas.description')}</div>
       </div>
 
       <div class="stat-row">
-        <div class="stat"><strong class="${streakRose ? 'pulse' : ''}">${current}</strong><small>sequência atual</small></div>
-        <div class="stat"><strong>${longest}</strong><small>melhor sequência</small></div>
-        <div class="stat"><strong>${daysDone}</strong><small>dias nos últimos ${WINDOW_DAYS}</small></div>
+        <div class="stat"><strong class="${streakRose ? 'pulse' : ''}">${current}</strong><small>${t('conquistas.currentStreak')}</small></div>
+        <div class="stat"><strong>${longest}</strong><small>${t('conquistas.bestStreak')}</small></div>
+        <div class="stat"><strong>${daysDone}</strong><small>${t('conquistas.daysInLast', { days: WINDOW_DAYS })}</small></div>
       </div>
 
       <div class="alert">
-        <span>Sequência = dias seguidos (até hoje) com os Essenciais cumpridos (água + treino). Falhar um dia não apaga a sua melhor sequência nem o seu histórico, só recomeça a contagem atual.</span>
+        <span>${t('conquistas.alert')}</span>
       </div>
 
-      <div class="sec-title">Marcos</div>
+      <div class="sec-title">${t('conquistas.milestonesTitle')}</div>
       <div class="milestone-grid">
         ${milestones.map((m) => `<span class="pill ${m.reached ? 'earned' : ''}">${m.reached ? '✓ ' : ''}${m.label}</span>`).join('')}
       </div>

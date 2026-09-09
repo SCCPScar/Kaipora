@@ -66,6 +66,10 @@ export interface DayRecord {
 
 export type ThemePreference = 'system' | 'dark' | 'light';
 
+/** Supported UI languages — see src/i18n/index.ts. Kept here (not imported
+ * from i18n) so lib/types.ts has no dependency on the i18n module. */
+export type Locale = 'pt-BR' | 'pt-PT' | 'es' | 'en' | 'fr' | 'zh';
+
 export interface Settings {
   /** Shown in greetings (Hoje, Progresso) instead of a hardcoded name — empty
    * means no name is inserted at all. */
@@ -90,6 +94,9 @@ export interface Settings {
   /** Recompensas (Habilidades) is opt-in and fully hideable — off by default
    * so it never intrudes until the user deliberately turns it on. */
   rewardsEnabled: boolean;
+  /** UI language — see src/i18n. Defaults to pt-BR (also the fallback used
+   * for any key missing from another locale). */
+  language: Locale;
 }
 
 // carbGoal/fatGoal derived from the average carbs/fat across all options of
@@ -109,5 +116,6 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   wakeTime: '07:00',
   sleepTime: '23:00',
-  rewardsEnabled: false
+  rewardsEnabled: false,
+  language: 'pt-BR'
 };

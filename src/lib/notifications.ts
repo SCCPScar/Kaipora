@@ -1,6 +1,7 @@
 import { getSettings, getDay, getSnoozedReminderDate } from './storage';
 import { todayISO } from './dates';
 import { MASCOT_LINES } from '../data/mascot';
+import { t } from '../i18n';
 
 let checkInterval: ReturnType<typeof setInterval> | undefined;
 const firedToday = new Set<string>();
@@ -59,11 +60,11 @@ export function startReminderLoop(): void {
 
     if (settings.reminderTimes.meals.includes(hhmm) && !firedToday.has(`meal_${todayKey}`)) {
       firedToday.add(`meal_${todayKey}`);
-      notify('Kaipora', 'Hora de uma refeição, sem pressa. Registre o que comer.');
+      notify('Kaipora', t('notifications.mealReminder'));
     }
     if (settings.reminderTimes.training.includes(hhmm) && !firedToday.has(`train_${todayKey}`)) {
       firedToday.add(`train_${todayKey}`);
-      notify('Kaipora', MASCOT_LINES.reminderTraining);
+      notify('Kaipora', MASCOT_LINES.reminderTraining());
     }
   }, 30_000);
 }

@@ -17,6 +17,7 @@ import { todayISO } from '../../lib/dates';
 import { refreshActive, switchTab } from '../nav';
 import { showToast } from '../components/toast';
 import { escapeHtml } from '../../lib/sanitize';
+import { t } from '../../i18n';
 
 /** skill id currently showing its "log session" mini-form, or null. */
 let loggingToSkill: string | null = null;
@@ -26,7 +27,7 @@ let addingReward = false;
 let justClaimedRewardId: string | null = null;
 
 function hoursLabel(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 60) return `${minutes} ${t('habilidades.minutesShort')}`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return m ? `${h}h${m.toString().padStart(2, '0')}` : `${h}h`;
@@ -34,7 +35,7 @@ function hoursLabel(minutes: number): string {
 
 export const habilidadesTab: Tab = {
   id: 'habilidades',
-  label: 'Habilidades',
+  label: 'nav.tab.habilidades',
   icon: '',
   group: 'Desenvolvimento',
   render(root: HTMLElement) {
@@ -44,19 +45,19 @@ export const habilidadesTab: Tab = {
 
     root.innerHTML = `
       <div class="ph">
-        <h2>Habilidades</h2>
-        <div class="ph-title">Tempo investido e frequência</div>
-        <div class="ph-sub">Qualquer habilidade que esteja desenvolvendo, sem categorias fixas</div>
+        <h2>${t('habilidades.title')}</h2>
+        <div class="ph-title">${t('habilidades.subtitle')}</div>
+        <div class="ph-sub">${t('habilidades.description')}</div>
       </div>
 
       <section>
-        <div class="sec-title">As Minhas Habilidades</div>
+        <div class="sec-title">${t('habilidades.mySkills')}</div>
         <div id="skill-list"></div>
         <div id="skill-add-form"></div>
       </section>
 
       <section>
-        <div class="sec-title">Recompensas</div>
+        <div class="sec-title">${t('habilidades.rewardsTitle')}</div>
         <div id="rewards-section"></div>
       </section>
     `;
@@ -71,7 +72,7 @@ export const habilidadesTab: Tab = {
 function renderSkills(root: HTMLElement, skills: ReturnType<typeof getSkills>, sessions: ReturnType<typeof getSkillSessions>) {
   const el = root.querySelector('#skill-list') as HTMLElement;
   if (!skills.length) {
-    el.innerHTML = '<div class="empty">Ainda sem habilidades. Adicione a primeira abaixo</div>';
+    el.innerHTML = `<div class="empty">${t('habilidades.empty')}</div>`;
     return;
   }
   el.innerHTML = skills
@@ -80,14 +81,15 @@ function renderSkills(root: HTMLElement, skills: ReturnType<typeof getSkills>, s
       const days = daysPracticed(sessions, skill.id);
       const last = lastPracticedDate(sessions, skill.id);
       const isLogging = loggingToSkill === skill.id;
+      const daysText = days === 1 ? t('habilidades.daysPracticedOne', { days }) : t('habilidades.daysPracticedOther', { days });
       return `
       <div class="day-card open">
         <div class="day-head" style="cursor:default">
           <div class="day-info">
             <div class="day-nm">${escapeHtml(skill.name)}</div>
-            <div class="day-focus">${hoursLabel(total)} · ${days} dia${days === 1 ? '' : 's'} praticados${last ? ` · última vez ${last}` : ''}</div>
+            <div class="day-focus">${hoursLabel(total)} · ${daysText}${last ? ` ${t('habilidades.lastPracticedSuffix', { date: last })}` : ''}</div>
           </div>
-          <button class="log-del" data-del-skill="${i}" aria-label="Remover">✕</button>
+          <button class="log-del" data-del-skill="${i}" aria-label="${t('common.remove')}">✕</button>
         </div>
         <div class="day-body">
           ${
@@ -95,15 +97,15 @@ function renderSkills(root: HTMLElement, skills: ReturnType<typeof getSkills>, s
               ? `
           <div class="form-row">
             <input class="finp" id="sess-date-${skill.id}" type="date" value="${todayISO()}" style="flex:1" />
-            <input class="finp" id="sess-minutes-${skill.id}" type="number" min="1" placeholder="minutos" style="flex:1" />
+            <input class="finp" id="sess-minutes-${skill.id}" type="number" min="1" placeholder="${t('habilidades.sessionMinutesPlaceholder')}" style="flex:1" />
           </div>
           <div class="form-row" style="padding-top:0">
-            <input class="finp" id="sess-note-${skill.id}" type="text" placeholder="Nota (opcional)" style="flex:1" />
+            <input class="finp" id="sess-note-${skill.id}" type="text" placeholder="${t('habilidades.sessionNotePlaceholder')}" style="flex:1" />
           </div>
           <div class="form-row" style="padding-top:0">
-            <button class="btn block" data-save-session="${skill.id}">Salvar sessão</button>
+            <button class="btn block" data-save-session="${skill.id}">${t('habilidades.saveSession')}</button>
           </div>`
-              : `<div class="form-row" style="padding-top:0"><button class="btn block" data-toggle-log="${skill.id}">+ Registrar sessão</button></div>`
+              : `<div class="form-row" style="padding-top:0"><button class="btn block" data-toggle-log="${skill.id}">${t('habilidades.logSession')}</button></div>`
           }
         </div>
       </div>`;
@@ -116,12 +118,12 @@ function renderSkillAddForm(root: HTMLElement) {
   el.innerHTML = addingSkill
     ? `
     <div class="form-row">
-      <input class="finp" id="skill-name" type="text" placeholder="Nome da habilidade (ex: Piano, Mandarim)" style="flex:1" />
+      <input class="finp" id="skill-name" type="text" placeholder="${t('habilidades.skillNamePlaceholder')}" style="flex:1" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="skill-save">Salvar habilidade</button>
+      <button class="btn block" id="skill-save">${t('habilidades.saveSkill')}</button>
     </div>`
-    : `<div class="form-row" style="padding-top:0"><button class="btn block" id="skill-toggle">+ Nova habilidade</button></div>`;
+    : `<div class="form-row" style="padding-top:0"><button class="btn block" id="skill-toggle">${t('habilidades.newSkill')}</button></div>`;
 }
 
 function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType<typeof getSkillSessions>) {
@@ -129,7 +131,7 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
   if (!enabled) {
     el.innerHTML = `
       <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-        Sistema de recompensas desativado. Ative em <a href="#" data-goto-settings style="color:var(--primary);font-weight:700">Ajustes</a> se quiser definir marcos para o seu tempo de prática.
+        ${t('habilidades.rewardsDisabledPrefix')} <a href="#" data-goto-settings style="color:var(--primary);font-weight:700">${t('nav.tab.ajustes')}</a> ${t('habilidades.rewardsDisabledSuffix')}
       </div>`;
     return;
   }
@@ -137,7 +139,7 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
   const total = totalMinutesAllSkills(sessions);
   const rewards = getRewards();
   el.innerHTML =
-    `<div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim)">Total praticado em todas as habilidades: <strong>${hoursLabel(total)}</strong></div>` +
+    `<div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim)">${t('habilidades.totalPracticed')} <strong>${hoursLabel(total)}</strong></div>` +
     (rewards.length
       ? rewards
           .map((r, i) => {
@@ -148,29 +150,29 @@ function renderRewards(root: HTMLElement, enabled: boolean, sessions: ReturnType
       <div class="row reward-claim-burst ${justClaimed ? 'animate' : ''}" style="cursor:default">
         ${justClaimed ? sparksHTML() : ''}
         <div class="rtxt">
-          <strong>${escapeHtml(r.title)}${r.claimed ? ' · conquistada' : ''}</strong>
+          <strong>${escapeHtml(r.title)}${r.claimed ? ` ${t('habilidades.rewardAchievedSuffix')}` : ''}</strong>
           <small>${hoursLabel(Math.min(total, r.targetMinutes))} / ${hoursLabel(r.targetMinutes)} (${pct}%)</small>
         </div>
         ${
           r.claimed
-            ? '<span class="pill">Conquistada</span>'
-            : `<button class="btn sm ${canClaim ? '' : 'ghost'}" data-claim-reward="${r.id}" ${canClaim ? '' : 'disabled'}>Resgatar</button>`
+            ? `<span class="pill">${t('habilidades.rewardAchievedPill')}</span>`
+            : `<button class="btn sm ${canClaim ? '' : 'ghost'}" data-claim-reward="${r.id}" ${canClaim ? '' : 'disabled'}>${t('habilidades.rewardClaim')}</button>`
         }
-        <button class="log-del" data-del-reward="${i}" aria-label="Remover">✕</button>
+        <button class="log-del" data-del-reward="${i}" aria-label="${t('common.remove')}">✕</button>
       </div>`;
           })
           .join('')
-      : '<div class="empty">Ainda sem recompensas definidas</div>') +
+      : `<div class="empty">${t('habilidades.rewardsEmpty')}</div>`) +
     (addingReward
       ? `
       <div class="form-row">
-        <input class="finp" id="reward-title" type="text" placeholder="Recompensa (ex: Ver um filme)" style="flex:2" />
-        <input class="finp" id="reward-minutes" type="number" min="1" placeholder="minutos alvo" style="flex:1;min-width:110px" />
+        <input class="finp" id="reward-title" type="text" placeholder="${t('habilidades.rewardTitlePlaceholder')}" style="flex:2" />
+        <input class="finp" id="reward-minutes" type="number" min="1" placeholder="${t('habilidades.rewardMinutesPlaceholder')}" style="flex:1;min-width:110px" />
       </div>
       <div class="form-row" style="padding-top:0">
-        <button class="btn block" id="reward-save">Salvar recompensa</button>
+        <button class="btn block" id="reward-save">${t('habilidades.rewardSave')}</button>
       </div>`
-      : `<div class="form-row" style="padding-top:0"><button class="btn block" id="reward-toggle">+ Nova recompensa</button></div>`);
+      : `<div class="form-row" style="padding-top:0"><button class="btn block" id="reward-toggle">${t('habilidades.rewardAdd')}</button></div>`);
 
   justClaimedRewardId = null;
 }
@@ -192,7 +194,7 @@ function wireEvents(root: HTMLElement) {
 
     const delBtn = target.closest<HTMLElement>('[data-del-skill]');
     if (delBtn) {
-      if (!confirm('Remover esta habilidade? O tempo já registrado continua salvo.')) return;
+      if (!confirm(t('habilidades.confirmRemoveSkill'))) return;
       deleteSkill(Number(delBtn.dataset.delSkill));
       refreshActive();
       return;
@@ -213,12 +215,12 @@ function wireEvents(root: HTMLElement) {
       const minutes = Number((root.querySelector(`#sess-minutes-${skillId}`) as HTMLInputElement).value);
       const note = (root.querySelector(`#sess-note-${skillId}`) as HTMLInputElement).value.trim();
       if (!minutes || minutes <= 0) {
-        showToast('Indique quantos minutos praticou');
+        showToast(t('habilidades.toastLogMinutes'));
         return;
       }
       logSkillSession({ skillId, date, minutes, note: note || undefined });
       loggingToSkill = null;
-      showToast('Sessão registrada');
+      showToast(t('habilidades.toastSessionSaved'));
       refreshActive();
     }
   });
@@ -231,12 +233,12 @@ function wireEvents(root: HTMLElement) {
   root.querySelector('#skill-save')?.addEventListener('click', () => {
     const name = (root.querySelector('#skill-name') as HTMLInputElement).value.trim();
     if (!name) {
-      showToast('Dê um nome à habilidade');
+      showToast(t('habilidades.toastNameSkill'));
       return;
     }
     addSkill({ id: `sk_${Date.now()}`, name });
     addingSkill = false;
-    showToast('Habilidade adicionada');
+    showToast(t('habilidades.toastSkillAdded'));
     refreshActive();
   });
 
@@ -255,14 +257,14 @@ function wireEvents(root: HTMLElement) {
       const rewardId = claimBtn.dataset.claimReward as string;
       claimReward(rewardId, todayISO());
       justClaimedRewardId = rewardId;
-      showToast('Recompensa conquistada!');
+      showToast(t('habilidades.toastRewardClaimed'));
       refreshActive();
       return;
     }
 
     const delRewardBtn = target.closest<HTMLElement>('[data-del-reward]');
     if (delRewardBtn) {
-      if (!confirm('Remover esta recompensa?')) return;
+      if (!confirm(t('habilidades.confirmRemoveReward'))) return;
       deleteReward(Number(delRewardBtn.dataset.delReward));
       refreshActive();
       return;
@@ -280,12 +282,12 @@ function wireEvents(root: HTMLElement) {
       const title = (root.querySelector('#reward-title') as HTMLInputElement).value.trim();
       const targetMinutes = Number((root.querySelector('#reward-minutes') as HTMLInputElement).value);
       if (!title || !targetMinutes || targetMinutes <= 0) {
-        showToast('Preencha o nome e os minutos alvo');
+        showToast(t('habilidades.toastFillTitleMinutes'));
         return;
       }
       addReward({ id: `rw_${Date.now()}`, title, targetMinutes });
       addingReward = false;
-      showToast('Recompensa criada');
+      showToast(t('habilidades.toastRewardCreated'));
       refreshActive();
     }
   });

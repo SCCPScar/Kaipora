@@ -1,3 +1,5 @@
+import { t } from '../../i18n';
+
 /** Renders one mascot moment (reminder, celebration, regresso após falha).
  * `text` is always app-authored copy (see data/mascot.ts), never user
  * input, so it does not need escaping here. `image` picks the pose for
@@ -6,13 +8,14 @@
  * click on `[data-mascot-dismiss]` in the caller. */
 export function mascotCardHTML(text: string, image: string, opts?: { dismissible?: boolean }): string {
   const src = `${import.meta.env.BASE_URL}${image}`;
+  const name = t('mascot.name');
   return `
     <div class="mascot-card">
-      <img src="${src}" alt="Kaipora" />
+      <img src="${src}" alt="${name}" />
       <div>
-        <span class="mascot-name">Kaipora</span>
+        <span class="mascot-name">${name}</span>
         <span>${text}</span>
-        ${opts?.dismissible ? '<button class="mascot-dismiss" type="button" data-mascot-dismiss>Não me lembre hoje</button>' : ''}
+        ${opts?.dismissible ? `<button class="mascot-dismiss" type="button" data-mascot-dismiss>${t('mascot.dismissToday')}</button>` : ''}
       </div>
     </div>`;
 }

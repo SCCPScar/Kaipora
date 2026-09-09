@@ -20,6 +20,7 @@ import { todayISO, toISO, addDays } from '../../lib/dates';
 import { refreshActive } from '../nav';
 import { showToast } from '../components/toast';
 import { escapeHtml } from '../../lib/sanitize';
+import { t } from '../../i18n';
 
 type DietView = 'plano' | 'diario';
 let view: DietView = 'plano';
@@ -38,7 +39,7 @@ let offSearchDebounce: ReturnType<typeof setTimeout> | undefined;
 
 export const dietTab: Tab = {
   id: 'dieta',
-  label: 'Alimentação',
+  label: 'common.nutrition',
   icon: '',
   group: 'Corpo',
   render(root: HTMLElement) {
@@ -51,27 +52,27 @@ export const dietTab: Tab = {
 
     root.innerHTML = `
       <div class="ph">
-        <h2>Alimentação</h2>
-        <div class="ph-title">Plano, diário livre e contador de calorias</div>
-        <div class="ph-sub">Sem carne vermelha · Alimentos de supermercado no Brasil · Variedade</div>
+        <h2>${t('common.nutrition')}</h2>
+        <div class="ph-title">${t('dieta.subtitle')}</div>
+        <div class="ph-sub">${t('dieta.description')}</div>
       </div>
 
       <div class="stat-row">
-        <div class="stat"><strong>${totals.kcal}</strong><small>consumido</small></div>
-        <div class="stat"><strong>${settings.calorieGoal}</strong><small>meta kcal</small></div>
-        <div class="stat"><strong>${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? 'restante' : 'acima da meta'}</small></div>
+        <div class="stat"><strong>${totals.kcal}</strong><small>${t('dieta.stat.consumed')}</small></div>
+        <div class="stat"><strong>${settings.calorieGoal}</strong><small>${t('dieta.stat.goal')}</small></div>
+        <div class="stat"><strong>${remaining >= 0 ? remaining : `+${Math.abs(remaining)}`}</strong><small>${remaining >= 0 ? t('dieta.stat.remaining') : t('dieta.stat.over')}</small></div>
       </div>
-      <div class="macro-line" style="padding:0 14px 12px">P ${totals.protein}g / ${settings.proteinGoal}g &middot; HC ${totals.carbs}g / ${settings.carbGoal}g &middot; G ${totals.fat}g / ${settings.fatGoal}g</div>
+      <div class="macro-line" style="padding:0 14px 12px">${t('common.abbr.protein')} ${totals.protein}g / ${settings.proteinGoal}g &middot; ${t('common.abbr.carbs')} ${totals.carbs}g / ${settings.carbGoal}g &middot; ${t('common.abbr.fat')} ${totals.fat}g / ${settings.fatGoal}g</div>
 
       <div class="modality-switch">
-        <button class="modality-btn ${view === 'plano' ? 'active' : ''}" data-view="plano">Meu Plano</button>
-        <button class="modality-btn ${view === 'diario' ? 'active' : ''}" data-view="diario">Diário Livre</button>
+        <button class="modality-btn ${view === 'plano' ? 'active' : ''}" data-view="plano">${t('dieta.view.plan')}</button>
+        <button class="modality-btn ${view === 'diario' ? 'active' : ''}" data-view="diario">${t('dieta.view.diary')}</button>
       </div>
 
       <div id="diet-content"></div>
 
       <section>
-        <div class="sec-title">Histórico (últimos 7 dias)</div>
+        <div class="sec-title">${t('dieta.history.title')}</div>
         <div id="diet-history"></div>
       </section>
     `;
@@ -89,7 +90,7 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
   const allCustom = getCustomFoodOptions();
 
   el.innerHTML =
-    `<div class="alert"><span>Não beba durante as refeições (30 min antes e depois). As opções de cada refeição são substituições equivalentes. Oculte as que não usa e adicione as suas próprias.</span></div>` +
+    `<div class="alert"><span>${t('dieta.plan.alert')}</span></div>` +
     MEALS.map((meal) => {
       const options = allMealOptions(meal.id);
       const totalKcal = options.reduce((s, o) => (day.meals[o.id] ? s + o.kcal : s), 0);
@@ -108,44 +109,44 @@ function renderPlano(root: HTMLElement, date: string, day: ReturnType<typeof get
             <div class="rtxt">
               <strong>${escapeHtml(o.label)}</strong>
               <small>${escapeHtml(o.desc)}</small>
-              <small>P: ${o.protein}g · HC: ${o.carbs}g · G: ${o.fat}g</small>
+              <small>${t('common.abbr.protein')}: ${o.protein}g · ${t('common.abbr.carbs')}: ${o.carbs}g · ${t('common.abbr.fat')}: ${o.fat}g</small>
             </div>
             <span class="kcal">${o.kcal} kcal</span>
-            ${isCustom ? `<button class="log-del" data-del-custom="${allCustom.indexOf(allCustom.find((c) => c.id === o.id)!)}" aria-label="Remover">✕</button>` : `<button class="log-del" data-hide-option="${o.id}" style="font-size:11px">${isHidden ? 'Mostrar' : 'Ocultar'}</button>`}
+            ${isCustom ? `<button class="log-del" data-del-custom="${allCustom.indexOf(allCustom.find((c) => c.id === o.id)!)}" aria-label="${t('common.remove')}">✕</button>` : `<button class="log-del" data-hide-option="${o.id}" style="font-size:11px">${isHidden ? t('dieta.plan.show') : t('dieta.plan.hide')}</button>`}
           </div>`;
           })
           .join('')}
         <div class="sub-row">
-          <span class="macro-line">${totalKcal} kcal &middot; P ${totalP}g</span>
+          <span class="macro-line">${totalKcal} kcal &middot; ${t('common.abbr.protein')} ${totalP}g</span>
         </div>
         ${
           isAdding
             ? `
         <div class="form-row" style="flex-wrap:wrap">
-          <input class="finp custom-label" type="text" placeholder="Nome do alimento" style="flex:2;min-width:140px" />
-          <input class="finp custom-desc" type="text" placeholder="Composição (opcional)" style="flex:2;min-width:140px" />
+          <input class="finp custom-label" type="text" placeholder="${t('dieta.plan.customName')}" style="flex:2;min-width:140px" />
+          <input class="finp custom-desc" type="text" placeholder="${t('dieta.plan.customDesc')}" style="flex:2;min-width:140px" />
         </div>
         <div class="form-row" style="padding-top:0;flex-wrap:wrap">
-          <input class="finp custom-kcal" type="number" min="0" placeholder="kcal" style="flex:1;min-width:70px" />
-          <input class="finp custom-protein" type="number" min="0" placeholder="prot g" style="flex:1;min-width:70px" />
-          <input class="finp custom-carbs" type="number" min="0" placeholder="HC g" style="flex:1;min-width:70px" />
-          <input class="finp custom-fat" type="number" min="0" placeholder="gord g" style="flex:1;min-width:70px" />
+          <input class="finp custom-kcal" type="number" min="0" placeholder="${t('dieta.plan.kcal')}" style="flex:1;min-width:70px" />
+          <input class="finp custom-protein" type="number" min="0" placeholder="${t('dieta.plan.proteinG')}" style="flex:1;min-width:70px" />
+          <input class="finp custom-carbs" type="number" min="0" placeholder="${t('dieta.plan.carbsG')}" style="flex:1;min-width:70px" />
+          <input class="finp custom-fat" type="number" min="0" placeholder="${t('dieta.plan.fatG')}" style="flex:1;min-width:70px" />
         </div>
         <div class="form-row" style="padding-top:0">
-          <button class="btn block" data-save-custom="${meal.id}">Salvar alimento</button>
+          <button class="btn block" data-save-custom="${meal.id}">${t('dieta.plan.saveCustom')}</button>
         </div>`
-            : `<div class="form-row" style="padding-top:0"><button class="btn block" data-toggle-add-custom="${meal.id}">+ Adicionar alimento a ${meal.name}</button></div>`
+            : `<div class="form-row" style="padding-top:0"><button class="btn block" data-toggle-add-custom="${meal.id}">${t('dieta.plan.addCustom', { meal: meal.name })}</button></div>`
         }
       </section>`;
     }).join('') +
     `
       <section>
-        <div class="sec-title">Suplementos</div>
+        <div class="sec-title">${t('dieta.plan.supplements')}</div>
         ${SUPPLEMENTS.map((s) => `<div class="row" style="cursor:default"><div class="rtxt"><strong>${s.name}</strong><small>${s.note}</small></div></div>`).join('')}
       </section>
 
       <section>
-        <div class="sec-title">Notas sobre o plano</div>
+        <div class="sec-title">${t('dieta.plan.notes')}</div>
         <div style="padding:12px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.7">
           ${DIET_NOTES.map((n) => `• ${n}`).join('<br>')}
         </div>
@@ -158,35 +159,35 @@ function renderDiario(root: HTMLElement, date: string) {
   const todays = allLog.filter((e) => e.date === date);
 
   el.innerHTML = `
-    <div class="alert"><span>Registre aqui o que comeu fora do plano: pesquise um alimento (valores por 100g) ou adicione manualmente. A pesquisa cruza a base de dados local com o Open Food Facts quando há conexão.</span></div>
+    <div class="alert"><span>${t('dieta.diary.alert')}</span></div>
 
     <section>
-      <div class="sec-title">Contador de Calorias</div>
+      <div class="sec-title">${t('dieta.diary.counterTitle')}</div>
       <div class="form-row">
-        <input class="finp" id="food-search" type="text" placeholder="Pesquisar alimento (ex: frango, arroz, iogurte)" style="flex:1" />
+        <input class="finp" id="food-search" type="text" placeholder="${t('dieta.diary.searchPlaceholder')}" style="flex:1" />
       </div>
       <div id="food-search-results"></div>
       <div id="off-search-results"></div>
     </section>
 
     <section>
-      <div class="sec-title">Adicionar manualmente</div>
+      <div class="sec-title">${t('dieta.diary.manualTitle')}</div>
       <div class="form-row">
-        <input class="finp" id="manual-label" type="text" placeholder="Nome" style="flex:2" />
+        <input class="finp" id="manual-label" type="text" placeholder="${t('dieta.diary.manualName')}" style="flex:2" />
       </div>
       <div class="form-row" style="padding-top:0;flex-wrap:wrap">
-        <input class="finp" id="manual-kcal" type="number" min="0" placeholder="kcal" style="flex:1;min-width:70px" />
-        <input class="finp" id="manual-protein" type="number" min="0" placeholder="prot g" style="flex:1;min-width:70px" />
-        <input class="finp" id="manual-carbs" type="number" min="0" placeholder="HC g" style="flex:1;min-width:70px" />
-        <input class="finp" id="manual-fat" type="number" min="0" placeholder="gord g" style="flex:1;min-width:70px" />
+        <input class="finp" id="manual-kcal" type="number" min="0" placeholder="${t('dieta.plan.kcal')}" style="flex:1;min-width:70px" />
+        <input class="finp" id="manual-protein" type="number" min="0" placeholder="${t('dieta.plan.proteinG')}" style="flex:1;min-width:70px" />
+        <input class="finp" id="manual-carbs" type="number" min="0" placeholder="${t('dieta.plan.carbsG')}" style="flex:1;min-width:70px" />
+        <input class="finp" id="manual-fat" type="number" min="0" placeholder="${t('dieta.plan.fatG')}" style="flex:1;min-width:70px" />
       </div>
       <div class="form-row" style="padding-top:0">
-        <button class="btn block" id="manual-add">+ Adicionar ao diário</button>
+        <button class="btn block" id="manual-add">${t('dieta.diary.manualAdd')}</button>
       </div>
     </section>
 
     <section>
-      <div class="sec-title">Hoje no diário livre</div>
+      <div class="sec-title">${t('dieta.diary.todayTitle')}</div>
       <div id="food-log-list"></div>
     </section>
   `;
@@ -200,12 +201,12 @@ function renderDiario(root: HTMLElement, date: string) {
         .map(
           (entry) => `
       <div class="log-item">
-        <div class="log-txt"><strong>${escapeHtml(entry.label)}</strong><div class="log-date">${entry.kcal} kcal · P:${entry.protein}g HC:${entry.carbs}g G:${entry.fat}g${entry.grams ? ` · ${entry.grams}g` : ''}</div></div>
-        <button class="log-del" data-del-log="${allLog.indexOf(entry)}" aria-label="Remover">✕</button>
+        <div class="log-txt"><strong>${escapeHtml(entry.label)}</strong><div class="log-date">${entry.kcal} kcal · ${t('common.abbr.protein')}:${entry.protein}g ${t('common.abbr.carbs')}:${entry.carbs}g ${t('common.abbr.fat')}:${entry.fat}g${entry.grams ? ` · ${entry.grams}g` : ''}</div></div>
+        <button class="log-del" data-del-log="${allLog.indexOf(entry)}" aria-label="${t('common.remove')}">✕</button>
       </div>`
         )
         .join('')
-    : '<div class="empty">Sem entradas livres hoje</div>';
+    : `<div class="empty">${t('dieta.diary.empty')}</div>`;
 }
 
 function renderFoodResults(root: HTMLElement, query: string) {
@@ -221,13 +222,13 @@ function renderFoodResults(root: HTMLElement, query: string) {
         .map(
           (item) => `
       <div class="row" style="cursor:default" data-food-row="${item.id}">
-        <div class="rtxt"><strong>${item.label}</strong><small>${item.kcal} kcal / 100g · P:${item.protein}g HC:${item.carbs}g G:${item.fat}g</small></div>
+        <div class="rtxt"><strong>${item.label}</strong><small>${item.kcal} kcal / 100g · ${t('common.abbr.protein')}:${item.protein}g ${t('common.abbr.carbs')}:${item.carbs}g ${t('common.abbr.fat')}:${item.fat}g</small></div>
         <input class="finp food-grams" type="number" min="1" value="100" style="width:64px;flex:none;padding:8px 6px" />
         <button class="btn" data-add-food="${item.id}" style="flex:none;padding:8px 12px">+</button>
       </div>`
         )
         .join('')
-    : '<div class="empty">Nenhum alimento encontrado</div>';
+    : `<div class="empty">${t('dieta.diary.noResults')}</div>`;
 }
 
 /**
@@ -248,25 +249,25 @@ async function renderOpenFoodFactsResults(root: HTMLElement, query: string): Pro
   }
 
   const token = ++offSearchToken;
-  el.innerHTML = '<div class="sec-title" style="margin-top:6px">Open Food Facts (online)</div><div class="empty">Pesquisando…</div>';
+  el.innerHTML = `<div class="sec-title" style="margin-top:6px">${t('dieta.diary.offTitle')}</div><div class="empty">${t('dieta.diary.offSearching')}</div>`;
   const results = await searchOpenFoodFacts(query);
   if (token !== offSearchToken) return; // a newer search already superseded this one
 
   offResultsCache = results;
   el.innerHTML =
-    '<div class="sec-title" style="margin-top:6px">Open Food Facts (online)</div>' +
+    `<div class="sec-title" style="margin-top:6px">${t('dieta.diary.offTitle')}</div>` +
     (results.length
       ? results
           .map(
             (item) => `
       <div class="row" style="cursor:default" data-off-row="${item.id}">
-        <div class="rtxt"><strong>${escapeHtml(item.label)}</strong><small>${item.kcal} kcal / 100g · P:${item.protein}g HC:${item.carbs}g G:${item.fat}g</small></div>
+        <div class="rtxt"><strong>${escapeHtml(item.label)}</strong><small>${item.kcal} kcal / 100g · ${t('common.abbr.protein')}:${item.protein}g ${t('common.abbr.carbs')}:${item.carbs}g ${t('common.abbr.fat')}:${item.fat}g</small></div>
         <input class="finp off-grams" type="number" min="1" value="100" style="width:64px;flex:none;padding:8px 6px" />
         <button class="btn" data-add-off="${item.id}" style="flex:none;padding:8px 12px">+</button>
       </div>`
           )
           .join('')
-      : '<div class="empty">Sem resultados online (ou sem conexão)</div>');
+      : `<div class="empty">${t('dieta.diary.offNoResults')}</div>`);
 }
 
 function renderHistory(root: HTMLElement, date: string) {
@@ -281,7 +282,7 @@ function renderHistory(root: HTMLElement, date: string) {
     const anyMarked = MEALS.some((m) => m.options.some((o) => rec.meals[o.id])) || getFoodLog(iso).length > 0;
     rows.push(`
       <div class="log-item">
-        <div class="log-txt"><strong>${iso}</strong><div class="log-date">${anyMarked ? `${kcal} kcal registradas` : 'Sem registro'}</div></div>
+        <div class="log-txt"><strong>${iso}</strong><div class="log-date">${anyMarked ? t('dieta.history.kcalRegistered', { kcal }) : t('dieta.history.noRecord')}</div></div>
       </div>`);
   }
   el.innerHTML = rows.join('');
@@ -307,7 +308,7 @@ function wireEvents(root: HTMLElement, date: string) {
 
     const delCustomBtn = target.closest<HTMLElement>('[data-del-custom]');
     if (delCustomBtn) {
-      if (!confirm('Remover este alimento personalizado?')) return;
+      if (!confirm(t('dieta.plan.confirmRemoveCustom'))) return;
       deleteCustomFoodOption(Number(delCustomBtn.dataset.delCustom));
       refreshActive();
       return;
@@ -332,12 +333,12 @@ function wireEvents(root: HTMLElement, date: string) {
       const carbs = Number((section.querySelector('.custom-carbs') as HTMLInputElement).value) || 0;
       const fat = Number((section.querySelector('.custom-fat') as HTMLInputElement).value) || 0;
       if (!label || !kcal) {
-        showToast('Preencha pelo menos o nome e as kcal');
+        showToast(t('dieta.plan.toastFillNameKcal'));
         return;
       }
       addCustomFoodOption({ id: `cf_${Date.now()}`, mealId, label, desc, kcal, protein, carbs, fat });
       addingCustomToMeal = null;
-      showToast('Alimento adicionado à Minha Dieta');
+      showToast(t('dieta.plan.toastAdded'));
       refreshActive();
       return;
     }
@@ -367,7 +368,7 @@ function wireEvents(root: HTMLElement, date: string) {
     const grams = Number((row.querySelector('.food-grams') as HTMLInputElement).value) || 100;
     const scaled = scaleFood(item, grams);
     addFoodLogEntry({ date, label: item.label, grams, ...scaled });
-    showToast(`${item.label} adicionado ao diário`);
+    showToast(t('dieta.diary.toastFoodAdded', { label: item.label }));
     refreshActive();
   });
 
@@ -380,7 +381,7 @@ function wireEvents(root: HTMLElement, date: string) {
     const grams = Number((row.querySelector('.off-grams') as HTMLInputElement).value) || 100;
     const scaled = scaleFood(item, grams);
     addFoodLogEntry({ date, label: item.label, grams, ...scaled });
-    showToast(`${item.label} adicionado ao diário`);
+    showToast(t('dieta.diary.toastFoodAdded', { label: item.label }));
     refreshActive();
   });
 
@@ -391,18 +392,18 @@ function wireEvents(root: HTMLElement, date: string) {
     const carbs = Number((root.querySelector('#manual-carbs') as HTMLInputElement).value) || 0;
     const fat = Number((root.querySelector('#manual-fat') as HTMLInputElement).value) || 0;
     if (!label || !kcal) {
-      showToast('Preenche pelo menos o nome e as kcal');
+      showToast(t('dieta.diary.toastFillNameKcal'));
       return;
     }
     addFoodLogEntry({ date, label, kcal, protein, carbs, fat });
-    showToast('Adicionado ao diário');
+    showToast(t('dieta.diary.toastAdded'));
     refreshActive();
   });
 
   root.querySelector('#food-log-list')?.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-del-log]');
     if (!btn) return;
-    if (!confirm('Remover esta entrada?')) return;
+    if (!confirm(t('dieta.diary.confirmRemoveEntry'))) return;
     deleteFoodLogEntry(Number(btn.dataset.delLog));
     refreshActive();
   });

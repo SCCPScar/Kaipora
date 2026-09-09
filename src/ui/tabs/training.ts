@@ -23,6 +23,7 @@ import { openExerciseModal } from '../components/exerciseModal';
 import { escapeHtml } from '../../lib/sanitize';
 import { showToast } from '../components/toast';
 import { infoIcon, timerIcon } from '../components/icons';
+import { t } from '../../i18n';
 
 const expanded = new Set<string>();
 const modalityByDay: Record<string, BuiltInModality> = {};
@@ -47,7 +48,7 @@ const PILL_COLORS: Record<string, string> = {
 
 export const trainingTab: Tab = {
   id: 'treino',
-  label: 'Treino',
+  label: 'nav.tab.treino',
   icon: '',
   group: 'Corpo',
   render(root: HTMLElement) {
@@ -61,26 +62,26 @@ export const trainingTab: Tab = {
     root.innerHTML = `
       <div id="treino-content">
         <div class="ph">
-          <h2>Treino</h2>
-          <div class="ph-title">Academia + Casa</div>
-          <div class="ph-sub">Toque no dia para abrir · relógio = descanso · info = como fazer</div>
+          <h2>${t('treino.title')}</h2>
+          <div class="ph-title">${t('treino.subtitle')}</div>
+          <div class="ph-sub">${t('treino.description')}</div>
         </div>
-        <div class="alert"><span>Cada dia tem sempre as duas versões: escolha Academia ou Casa consoante o que fizer.</span></div>
+        <div class="alert"><span>${t('treino.alert')}</span></div>
         <div id="week-days"></div>
 
         <section>
-          <div class="sec-title"><span>Os Meus Exercícios</span></div>
+          <div class="sec-title"><span>${t('treino.myExercises.title')}</span></div>
           <div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-            Exercícios que a biblioteca não tem, como algo que seu personal trainer ensinou. Ficam disponíveis para qualquer treino seu.
+            ${t('treino.myExercises.desc')}
           </div>
           <div id="custom-exercise-list"></div>
           <div id="custom-exercise-form"></div>
         </section>
 
         <section>
-          <div class="sec-title"><span>Os Meus Treinos</span></div>
+          <div class="sec-title"><span>${t('treino.myWorkouts.title')}</span></div>
           <div style="padding:0 16px 8px;font-size:12.5px;color:var(--text-dim);line-height:1.6">
-            Crie os seus próprios treinos (academia, casa, calistenia, personal trainer ou o que fizer sentido) sem mexer no plano acima.
+            ${t('treino.myWorkouts.desc')}
           </div>
           <div id="custom-workout-list"></div>
           <div id="custom-workout-form"></div>
@@ -118,13 +119,13 @@ function dayCardHTML(day: TrainingDay, date: string): string {
       </div>
       <div class="day-body">
         <div class="modality-switch">
-          <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-set-modality="${day.weekday}:academia">Academia</button>
-          <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-set-modality="${day.weekday}:casa">Casa</button>
+          <button class="modality-btn ${modality === 'academia' ? 'active' : ''}" data-set-modality="${day.weekday}:academia">${t('common.academia')}</button>
+          <button class="modality-btn ${modality === 'casa' ? 'active' : ''}" data-set-modality="${day.weekday}:casa">${t('common.casa')}</button>
         </div>
         ${exerciseListHTML(workout, date)}
         <div class="sub-row" style="justify-content:flex-end">
           <button class="btn sm ${isTodayDone ? 'ghost' : ''}" data-complete="${day.weekday}:${workout.id}:${modality}">
-            ${isTodayDone ? 'Treino concluído hoje' : 'Marcar como treino de hoje'}
+            ${isTodayDone ? t('treino.doneToday') : t('treino.markDone')}
           </button>
         </div>
       </div>
@@ -143,12 +144,12 @@ function exerciseListHTML(workout: Workout, date: string): string {
       <div class="ex-row ${isDone ? 'done' : ''}" data-exercise="${we.exerciseId}">
         <div class="ex-main" data-select="${workout.id}:${we.exerciseId}">
           <strong>${ex.name}</strong>
-          <small>${we.sets}x ${we.reps} · descanso ${we.restSeconds}s${we.note ? ' · ' + we.note : ''}</small>
-          ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
+          <small>${we.sets}x ${we.reps} · ${t('treino.exerciseRest', { seconds: we.restSeconds })}${we.note ? ' · ' + we.note : ''}</small>
+          ${ex.gluteFocus ? `<span class="gluteo-tag">${t('treino.gluteTag')}</span>` : ''}
         </div>
         <div class="ex-actions">
-          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar" aria-label="Como executar">${infoIcon()}</button>
-          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador" aria-label="Temporizador">${timerIcon()}</button>
+          <button class="icon-btn" data-info="${we.exerciseId}" title="${t('common.howToExecute')}" aria-label="${t('common.howToExecute')}">${infoIcon()}</button>
+          <button class="icon-btn" data-timer="${we.restSeconds}" title="${t('common.timer')}" aria-label="${t('common.timer')}">${timerIcon()}</button>
         </div>
       </div>`;
     })
@@ -165,43 +166,43 @@ function renderCustomExercises(root: HTMLElement) {
       <div class="log-item">
         <div class="log-txt">
           <strong>${escapeHtml(ex.name)}</strong>
-          <div class="log-date">${escapeHtml([ex.muscles.join(', '), ex.desc].filter(Boolean).join(' · ')) || 'Sem detalhes adicionais'}</div>
+          <div class="log-date">${escapeHtml([ex.muscles.join(', '), ex.desc].filter(Boolean).join(' · ')) || t('treino.customExercise.noDetails')}</div>
         </div>
-        <button class="log-del" data-del-exercise="${i}" aria-label="Remover">✕</button>
+        <button class="log-del" data-del-exercise="${i}" aria-label="${t('common.remove')}">✕</button>
       </div>`
         )
         .join('')
-    : '<div class="empty">Ainda sem exercícios personalizados</div>';
+    : `<div class="empty">${t('treino.customExercise.empty')}</div>`;
 
   const formEl = root.querySelector('#custom-exercise-form') as HTMLElement;
   formEl.innerHTML = addingCustomExercise
     ? `
     <div class="form-row">
-      <input class="finp" id="cex-name" type="text" placeholder="Nome do exercício" style="flex:2" />
-      <input class="finp" id="cex-muscles" type="text" placeholder="Músculos (ex: Glúteos, Core)" style="flex:2" />
+      <input class="finp" id="cex-name" type="text" placeholder="${t('treino.customExercise.namePlaceholder')}" style="flex:2" />
+      <input class="finp" id="cex-muscles" type="text" placeholder="${t('treino.customExercise.musclesPlaceholder')}" style="flex:2" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <input class="finp" id="cex-desc" type="text" placeholder="Como executar (opcional)" style="flex:1" />
+      <input class="finp" id="cex-desc" type="text" placeholder="${t('treino.customExercise.descPlaceholder')}" style="flex:1" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <input class="finp" id="cex-tip" type="text" placeholder="Dica (opcional)" style="flex:1" />
+      <input class="finp" id="cex-tip" type="text" placeholder="${t('treino.customExercise.tipPlaceholder')}" style="flex:1" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="cex-save">Salvar exercício</button>
+      <button class="btn block" id="cex-save">${t('treino.customExercise.save')}</button>
     </div>`
-    : `<div class="form-row" style="padding-top:0"><button class="btn block" id="cex-toggle">+ Novo exercício</button></div>`;
+    : `<div class="form-row" style="padding-top:0"><button class="btn block" id="cex-toggle">${t('treino.customExercise.add')}</button></div>`;
 }
 
 function exerciseOptionsHTML(): string {
   const builtIn = Object.values(EXERCISES).sort((a, b) => a.name.localeCompare(b.name));
   const custom = getCustomExercises();
   return `
-    <optgroup label="Biblioteca">
+    <optgroup label="${t('treino.exerciseOptions.library')}">
       ${builtIn.map((ex) => `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`).join('')}
     </optgroup>
     ${
       custom.length
-        ? `<optgroup label="Meus exercícios">${custom.map((ex) => `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`).join('')}</optgroup>`
+        ? `<optgroup label="${t('treino.exerciseOptions.mine')}">${custom.map((ex) => `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`).join('')}</optgroup>`
         : ''
     }
   `;
@@ -218,13 +219,13 @@ function customWorkoutExerciseListHTML(workout: CustomWorkout, date: string): st
       <div class="ex-row ${isDone ? 'done' : ''}" data-exercise="${we.exerciseId}">
         <div class="ex-main" data-select="${workout.id}:${we.exerciseId}">
           <strong>${escapeHtml(ex.name)}</strong>
-          <small>${we.sets}x ${escapeHtml(we.reps)} · descanso ${we.restSeconds}s${we.note ? ' · ' + escapeHtml(we.note) : ''}</small>
-          ${ex.gluteFocus ? '<span class="gluteo-tag">Glúteos</span>' : ''}
+          <small>${we.sets}x ${escapeHtml(we.reps)} · ${t('treino.exerciseRest', { seconds: we.restSeconds })}${we.note ? ' · ' + escapeHtml(we.note) : ''}</small>
+          ${ex.gluteFocus ? `<span class="gluteo-tag">${t('treino.gluteTag')}</span>` : ''}
         </div>
         <div class="ex-actions">
-          <button class="icon-btn" data-info="${we.exerciseId}" title="Como executar" aria-label="Como executar">${infoIcon()}</button>
-          <button class="icon-btn" data-timer="${we.restSeconds}" title="Temporizador" aria-label="Temporizador">${timerIcon()}</button>
-          <button class="log-del" data-remove-exercise="${workout.id}:${idx}" aria-label="Remover">✕</button>
+          <button class="icon-btn" data-info="${we.exerciseId}" title="${t('common.howToExecute')}" aria-label="${t('common.howToExecute')}">${infoIcon()}</button>
+          <button class="icon-btn" data-timer="${we.restSeconds}" title="${t('common.timer')}" aria-label="${t('common.timer')}">${timerIcon()}</button>
+          <button class="log-del" data-remove-exercise="${workout.id}:${idx}" aria-label="${t('common.remove')}">✕</button>
         </div>
       </div>`;
     })
@@ -249,10 +250,10 @@ function renderCustomWorkouts(root: HTMLElement, date: string) {
             <div class="day-nm">${escapeHtml(w.title)}</div>
             <div class="day-focus">${escapeHtml(w.focus || w.category)}</div>
           </div>
-          <button class="log-del" data-del-workout="${i}" aria-label="Remover">✕</button>
+          <button class="log-del" data-del-workout="${i}" aria-label="${t('common.remove')}">✕</button>
         </div>
         <div class="day-body">
-          ${customWorkoutExerciseListHTML(w, date) || '<div class="empty">Ainda sem exercícios neste treino</div>'}
+          ${customWorkoutExerciseListHTML(w, date) || `<div class="empty">${t('treino.customWorkout.noExercises')}</div>`}
           ${
             isAddingExercise
               ? `
@@ -260,32 +261,32 @@ function renderCustomWorkouts(root: HTMLElement, date: string) {
             <select class="finp" id="new-ex-select-${w.id}" style="flex:2;min-width:160px">${exerciseOptionsHTML()}</select>
           </div>
           <div class="form-row" style="padding-top:0;flex-wrap:wrap">
-            <input class="finp" id="new-ex-sets-${w.id}" type="number" min="1" placeholder="séries" value="3" style="flex:1;min-width:70px" />
-            <input class="finp" id="new-ex-reps-${w.id}" type="text" placeholder="reps (ex: 12)" value="12" style="flex:1;min-width:70px" />
-            <input class="finp" id="new-ex-rest-${w.id}" type="number" min="0" placeholder="descanso s" value="60" style="flex:1;min-width:80px" />
+            <input class="finp" id="new-ex-sets-${w.id}" type="number" min="1" placeholder="${t('treino.customWorkout.setsPlaceholder')}" value="3" style="flex:1;min-width:70px" />
+            <input class="finp" id="new-ex-reps-${w.id}" type="text" placeholder="${t('treino.customWorkout.repsPlaceholder')}" value="12" style="flex:1;min-width:70px" />
+            <input class="finp" id="new-ex-rest-${w.id}" type="number" min="0" placeholder="${t('treino.customWorkout.restPlaceholder')}" value="60" style="flex:1;min-width:80px" />
           </div>
           <div class="form-row" style="padding-top:0">
-            <button class="btn block" data-save-exercise="${w.id}">Adicionar ao treino</button>
+            <button class="btn block" data-save-exercise="${w.id}">${t('treino.customWorkout.saveExercise')}</button>
           </div>`
-              : `<div class="form-row" style="padding-top:0"><button class="btn block" data-toggle-add-exercise="${w.id}">+ Adicionar exercício</button></div>`
+              : `<div class="form-row" style="padding-top:0"><button class="btn block" data-toggle-add-exercise="${w.id}">${t('treino.customWorkout.addExercise')}</button></div>`
           }
           <div class="sub-row" style="justify-content:flex-end">
             <button class="btn sm ${isTodayDone ? 'ghost' : ''}" data-complete-custom="${w.id}" data-category="${w.category}">
-              ${isTodayDone ? 'Treino concluído hoje' : 'Marcar como treino de hoje'}
+              ${isTodayDone ? t('treino.doneToday') : t('treino.markDone')}
             </button>
           </div>
         </div>
       </div>`;
         })
         .join('')
-    : '<div class="empty">Ainda sem treinos personalizados</div>';
+    : `<div class="empty">${t('treino.customWorkout.empty')}</div>`;
 
   const formEl = root.querySelector('#custom-workout-form') as HTMLElement;
   formEl.innerHTML = addingCustomWorkout
     ? `
     <div class="form-row">
-      <input class="finp" id="cw-title" type="text" placeholder="Nome do treino" style="flex:2" />
-      <input class="finp" id="cw-category" type="text" list="cw-category-suggestions" placeholder="Categoria (ex: Calistenia)" style="flex:1;min-width:140px" />
+      <input class="finp" id="cw-title" type="text" placeholder="${t('treino.customWorkout.titlePlaceholder')}" style="flex:2" />
+      <input class="finp" id="cw-category" type="text" list="cw-category-suggestions" placeholder="${t('treino.customWorkout.categoryPlaceholder')}" style="flex:1;min-width:140px" />
       <datalist id="cw-category-suggestions">
         <option value="Academia"></option>
         <option value="Casa"></option>
@@ -294,12 +295,12 @@ function renderCustomWorkouts(root: HTMLElement, date: string) {
       </datalist>
     </div>
     <div class="form-row" style="padding-top:0">
-      <input class="finp" id="cw-focus" type="text" placeholder="Foco (ex: Peito e Costas)" style="flex:1" />
+      <input class="finp" id="cw-focus" type="text" placeholder="${t('treino.customWorkout.focusPlaceholder')}" style="flex:1" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="cw-save">Salvar treino</button>
+      <button class="btn block" id="cw-save">${t('treino.customWorkout.save')}</button>
     </div>`
-    : `<div class="form-row" style="padding-top:0"><button class="btn block" id="cw-toggle">+ Criar treino</button></div>`;
+    : `<div class="form-row" style="padding-top:0"><button class="btn block" id="cw-toggle">${t('treino.customWorkout.add')}</button></div>`;
 }
 
 function wireEvents(root: HTMLElement, date: string) {
@@ -351,7 +352,7 @@ function wireEvents(root: HTMLElement, date: string) {
       const marker = getDay(date).training;
       const alreadyDone = marker?.workoutId === workoutId && marker.done;
       setTrainingDone(date, modality, workoutId, !alreadyDone);
-      if (!alreadyDone) showToast('Treino de hoje registrado!');
+      if (!alreadyDone) showToast(t('treino.toast.registered'));
       refreshActive();
       return;
     }
@@ -363,14 +364,14 @@ function wireEvents(root: HTMLElement, date: string) {
       const marker = getDay(date).training;
       const alreadyDone = marker?.workoutId === workoutId && marker.done;
       setTrainingDone(date, category, workoutId, !alreadyDone);
-      if (!alreadyDone) showToast('Treino de hoje registrado!');
+      if (!alreadyDone) showToast(t('treino.toast.registered'));
       refreshActive();
       return;
     }
 
     const delExerciseBtn = target.closest<HTMLElement>('[data-del-exercise]');
     if (delExerciseBtn) {
-      if (!confirm('Remover este exercício personalizado?')) return;
+      if (!confirm(t('treino.customExercise.confirmRemove'))) return;
       deleteCustomExercise(Number(delExerciseBtn.dataset.delExercise));
       refreshActive();
       return;
@@ -390,7 +391,7 @@ function wireEvents(root: HTMLElement, date: string) {
       const desc = (root.querySelector('#cex-desc') as HTMLInputElement).value.trim();
       const tip = (root.querySelector('#cex-tip') as HTMLInputElement).value.trim();
       if (!name) {
-        showToast('Preencha pelo menos o nome');
+        showToast(t('treino.customExercise.toastFillName'));
         return;
       }
       const muscles = musclesRaw
@@ -398,14 +399,14 @@ function wireEvents(root: HTMLElement, date: string) {
         : [];
       addCustomExercise({ id: `cex_${Date.now()}`, name, muscles, gluteFocus: false, desc, tip });
       addingCustomExercise = false;
-      showToast('Exercício adicionado');
+      showToast(t('treino.customExercise.toastAdded'));
       refreshActive();
       return;
     }
 
     const delWorkoutBtn = target.closest<HTMLElement>('[data-del-workout]');
     if (delWorkoutBtn) {
-      if (!confirm('Remover este treino?')) return;
+      if (!confirm(t('treino.customWorkout.confirmRemove'))) return;
       deleteCustomWorkout(Number(delWorkoutBtn.dataset.delWorkout));
       refreshActive();
       return;
@@ -424,12 +425,12 @@ function wireEvents(root: HTMLElement, date: string) {
       const category = (root.querySelector('#cw-category') as HTMLInputElement).value.trim();
       const focus = (root.querySelector('#cw-focus') as HTMLInputElement).value.trim();
       if (!title || !category) {
-        showToast('Preencha pelo menos o nome e a categoria');
+        showToast(t('treino.customWorkout.toastFillNameCategory'));
         return;
       }
       addCustomWorkout({ id: `cw_${Date.now()}`, title, category, focus, exercises: [] });
       addingCustomWorkout = false;
-      showToast('Treino criado. Adicione exercícios abaixo');
+      showToast(t('treino.customWorkout.toastCreated'));
       refreshActive();
       return;
     }
@@ -454,13 +455,13 @@ function wireEvents(root: HTMLElement, date: string) {
       const reps = repsInput.value.trim() || '12';
       const restSeconds = Number(restInput.value) || 0;
       if (!exerciseId) {
-        showToast('Escolha um exercício');
+        showToast(t('treino.customWorkout.toastChooseExercise'));
         return;
       }
       const entry: WorkoutExercise = { exerciseId, sets, reps, restSeconds };
       addExerciseToCustomWorkout(workoutId, entry);
       addingExerciseToWorkout = null;
-      showToast('Exercício adicionado ao treino');
+      showToast(t('treino.customWorkout.toastExerciseAdded'));
       refreshActive();
       return;
     }
@@ -468,7 +469,7 @@ function wireEvents(root: HTMLElement, date: string) {
     const removeExBtn = target.closest<HTMLElement>('[data-remove-exercise]');
     if (removeExBtn) {
       const [workoutId, idx] = (removeExBtn.dataset.removeExercise as string).split(':');
-      if (!confirm('Remover este exercício do treino?')) return;
+      if (!confirm(t('treino.customWorkout.confirmRemoveExercise'))) return;
       removeExerciseFromCustomWorkout(workoutId, Number(idx));
       refreshActive();
     }

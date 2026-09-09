@@ -7,22 +7,23 @@ import { drawLineChart } from './chart';
 import { showToast } from './toast';
 import { EXERCISE_DIAGRAMS } from '../../data/exerciseDiagrams';
 import { escapeHtml } from '../../lib/sanitize';
+import { t } from '../../i18n';
 
 export function openExerciseModal(ex: ExerciseLike): void {
   const diagram = EXERCISE_DIAGRAMS[ex.id];
   let close: () => void;
   close = openModal(
     `
-    <button class="modal-close" data-close aria-label="Fechar"></button>
+    <button class="modal-close" data-close aria-label="${t('common.close')}"></button>
     <h3>${escapeHtml(ex.name)}</h3>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
       ${ex.muscles.map((m) => `<span class="pill">${escapeHtml(m)}</span>`).join('')}
-      ${ex.gluteFocus ? '<span class="pill" style="color:var(--burgundy-glow)">Glúteos</span>' : ''}
+      ${ex.gluteFocus ? `<span class="pill" style="color:var(--burgundy-glow)">${t('treino.gluteTag')}</span>` : ''}
     </div>
     ${
       diagram
         ? `<div style="border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)">${diagram}</div>
-           <div style="font-size:10.5px;color:var(--text-faint);margin:6px 0 14px;text-align:center">Diagrama esquemático simplificado. A descrição abaixo é a referência principal.</div>`
+           <div style="font-size:10.5px;color:var(--text-faint);margin:6px 0 14px;text-align:center">${t('exerciseModal.diagramCaption')}</div>`
         : ''
     }
     <p style="font-size:14px;line-height:1.6;color:var(--text)">${escapeHtml(ex.desc)}</p>
@@ -30,21 +31,21 @@ export function openExerciseModal(ex: ExerciseLike): void {
       <span>${escapeHtml(ex.tip)}</span>
     </div>
 
-    <div class="sec-title" style="margin:18px -20px 0;border-radius:0">Carga e progressão</div>
+    <div class="sec-title" style="margin:18px -20px 0;border-radius:0">${t('exerciseModal.progressionTitle')}</div>
     <div id="load-compare"></div>
     <canvas id="load-chart" style="width:100%;display:none;margin-top:10px"></canvas>
-    <div id="load-empty" class="empty" style="display:none">Registre pelo menos 2 vezes com carga para ver o gráfico de evolução</div>
-    <div style="padding:12px 0 0;font-size:10.5px;color:var(--text-faint)">Preencha só o que fizer sentido: carga para exercícios de academia, repetições/duração/variação para calistenia.</div>
+    <div id="load-empty" class="empty" style="display:none">${t('exerciseModal.chartEmpty')}</div>
+    <div style="padding:12px 0 0;font-size:10.5px;color:var(--text-faint)">${t('exerciseModal.fillHint')}</div>
     <div class="form-row" style="padding:8px 0 0">
-      <input class="finp" id="load-kg" type="number" step="0.5" min="0" placeholder="Carga (kg)" />
-      <input class="finp" id="load-reps" type="number" step="1" min="0" placeholder="Reps" style="max-width:80px" />
+      <input class="finp" id="load-kg" type="number" step="0.5" min="0" placeholder="${t('exerciseModal.weightPlaceholder')}" />
+      <input class="finp" id="load-reps" type="number" step="1" min="0" placeholder="${t('exerciseModal.repsPlaceholder')}" style="max-width:80px" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <input class="finp" id="load-seconds" type="number" step="5" min="0" placeholder="Duração (s)" style="max-width:110px" />
-      <input class="finp" id="load-note" type="text" placeholder="Variação (ex: joelhos, elástico vermelho)" />
+      <input class="finp" id="load-seconds" type="number" step="5" min="0" placeholder="${t('exerciseModal.durationPlaceholder')}" style="max-width:110px" />
+      <input class="finp" id="load-note" type="text" placeholder="${t('exerciseModal.variationPlaceholder')}" />
     </div>
     <div class="form-row" style="padding-top:0">
-      <button class="btn block" id="load-save">+ Registrar esta sessão</button>
+      <button class="btn block" id="load-save">${t('exerciseModal.registerSession')}</button>
     </div>
     <div id="load-log"></div>
   `,
@@ -68,7 +69,7 @@ export function openExerciseModal(ex: ExerciseLike): void {
         repsInput.value = '';
         secondsInput.value = '';
         noteInput.value = '';
-        showToast('Sessão registrada');
+        showToast(t('exerciseModal.toastSessionSaved'));
         renderLoads(modal, ex.id);
       });
 
@@ -85,13 +86,13 @@ export function openExerciseModal(ex: ExerciseLike): void {
 function summarize(l: ExerciseLogEntry): string {
   return (
     [
-      l.weightKg !== undefined ? `${l.weightKg} kg` : null,
-      l.reps !== undefined ? `${l.reps} reps` : null,
-      l.seconds !== undefined ? `${l.seconds}s` : null,
+      l.weightKg !== undefined ? `${l.weightKg} ${t('exerciseModal.kg')}` : null,
+      l.reps !== undefined ? `${l.reps} ${t('exerciseModal.reps')}` : null,
+      l.seconds !== undefined ? `${l.seconds}${t('exerciseModal.seconds')}` : null,
       l.note ? escapeHtml(l.note) : null
     ]
       .filter(Boolean)
-      .join(' · ') || '(sem detalhes)'
+      .join(' · ') || t('exerciseModal.noDetails')
   );
 }
 
@@ -129,7 +130,7 @@ function renderLoads(modal: HTMLElement, exerciseId: string): void {
     }
     compare.innerHTML = `
       <div class="alert" style="margin:10px 0">
-        <span>Última vez (${previous.date}): <strong>${summarize(previous)}</strong> → Agora (${latest.date}): <strong>${summarize(latest)}</strong>${delta}</span>
+        <span>${t('exerciseModal.compareText', { prevDate: previous.date, prevSummary: `<strong>${summarize(previous)}</strong>`, lastDate: latest.date, lastSummary: `<strong>${summarize(latest)}</strong>` })}${delta}</span>
       </div>`;
   } else {
     compare.innerHTML = '';
@@ -146,7 +147,7 @@ function renderLoads(modal: HTMLElement, exerciseId: string): void {
       (l, i) => `
       <div class="log-item">
         <div class="log-txt"><strong>${summarize(l)}</strong><div class="log-date">${l.date}</div></div>
-        <button class="log-del" data-del-load="${i}" aria-label="Remover">✕</button>
+        <button class="log-del" data-del-load="${i}" aria-label="${t('common.remove')}">✕</button>
       </div>`
     )
     .join('');

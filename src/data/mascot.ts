@@ -1,3 +1,5 @@
+import { t } from '../i18n';
+
 /**
  * The Kaipora — mentor + companheiro + amigo divertido. Ensina, lembra,
  * incentiva, comemora pequenas vitórias, é descontraído. Nunca julga,
@@ -34,12 +36,14 @@ export const MASCOT_IMAGES = {
   greeting: 'mascot/kaipora-greeting.png'
 };
 
+/** All lines are functions (not plain strings) so they re-resolve to the
+ * active locale on every call instead of being baked in at module load —
+ * see src/i18n. */
 export const MASCOT_LINES = {
-  reminderWater: (remainingMl: number) => `Ainda faltam ${remainingMl}ml para a sua meta de água hoje.`,
-  reminderTraining: 'Ainda não treinou hoje. Ainda dá tempo de fazer uma sessão curta.',
-  comeBack: 'Hoje não deu. Tudo bem. Amanhã é um novo dia.',
+  reminderWater: (remainingMl: number) => t('mascot.reminderWater', { ml: remainingMl }),
+  reminderTraining: () => t('mascot.reminderTraining'),
+  comeBack: () => t('mascot.comeBack'),
   /** Used instead of comeBack once shouldUseAdaptiveTone() is true — two or
    * more difficult days in a row, never a single one. */
-  comeBackSoft:
-    'Têm sido uns dias mais difíceis. Não precisa recuperar tudo de uma vez, só o próximo copo de água ou o próximo treino já conta.'
+  comeBackSoft: () => t('mascot.comeBackSoft')
 };

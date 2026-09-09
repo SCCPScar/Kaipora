@@ -1,18 +1,19 @@
 import type { Tab } from '../nav';
 import { getDay, getSettings } from '../../lib/storage';
-import { toISO, DAY_ABBR, MONTH_NAMES } from '../../lib/dates';
+import { toISO, dayAbbr, monthNames } from '../../lib/dates';
 import { MEALS } from '../../data/diet';
 import { getWorkoutById } from '../../data/training';
 import { EXERCISES } from '../../data/exercises';
 import { openModal } from '../components/modal';
 import { refreshActive } from '../nav';
+import { t } from '../../i18n';
 
 let viewYear = new Date().getFullYear();
 let viewMonth = new Date().getMonth();
 
 export const calendarTab: Tab = {
   id: 'calendario',
-  label: 'Calendário',
+  label: 'nav.tab.calendario',
   icon: '',
   group: 'Acompanhamento',
   render(root: HTMLElement) {
@@ -45,18 +46,18 @@ export const calendarTab: Tab = {
 
     root.innerHTML = `
       <div class="ph">
-        <h2>Calendário</h2>
-        <div class="ph-title">${MONTH_NAMES[viewMonth]} ${viewYear}</div>
-        <div class="ph-sub">água · alimentação · treino</div>
+        <h2>${t('calendario.title')}</h2>
+        <div class="ph-title">${monthNames()[viewMonth]} ${viewYear}</div>
+        <div class="ph-sub">${t('calendario.subtitle')}</div>
       </div>
       <section>
         <div class="cal-head">
-          <button class="cal-nav" id="cal-prev" aria-label="Mês anterior">‹</button>
-          <span class="pill">${MONTH_NAMES[viewMonth]} de ${viewYear}</span>
-          <button class="cal-nav" id="cal-next" aria-label="Mês seguinte">›</button>
+          <button class="cal-nav" id="cal-prev" aria-label="${t('common.prevMonth')}">‹</button>
+          <span class="pill">${t('calendario.monthYear', { month: monthNames()[viewMonth], year: viewYear })}</span>
+          <button class="cal-nav" id="cal-next" aria-label="${t('common.nextMonth')}">›</button>
         </div>
         <div class="cal-grid">
-          ${DAY_ABBR.map((a) => `<div class="cal-dow">${a}</div>`).join('')}
+          ${dayAbbr().map((a) => `<div class="cal-dow">${a}</div>`).join('')}
           ${cells.join('')}
         </div>
       </section>
@@ -97,11 +98,11 @@ function openDayDetail(iso: string) {
   let close: () => void;
   close = openModal(
     `
-    <button class="modal-close" data-close aria-label="Fechar"></button>
+    <button class="modal-close" data-close aria-label="${t('common.close')}"></button>
     <h3>${iso}</h3>
-    <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px">Água: ${rec.water} copo(s)${rec.training?.done ? ` · Treino: ${rec.training.modality === 'academia' ? 'Academia' : 'Casa'}` : ''}</div>
-    ${mealNames.length ? `<p style="font-size:13px"><strong>Refeições:</strong><br>${mealNames.join('<br>')}</p>` : '<p style="font-size:13px;color:var(--text-faint)">Sem refeições registradas.</p>'}
-    ${exerciseNames.length ? `<p style="font-size:13px"><strong>Exercícios:</strong><br>${exerciseNames.join('<br>')}</p>` : ''}
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px">${t('calendario.detailWater', { count: rec.water })}${rec.training?.done ? t('calendario.detailTraining', { modality: rec.training.modality === 'academia' ? t('common.academia') : t('common.casa') }) : ''}</div>
+    ${mealNames.length ? `<p style="font-size:13px"><strong>${t('calendario.mealsTitle')}</strong><br>${mealNames.join('<br>')}</p>` : `<p style="font-size:13px;color:var(--text-faint)">${t('calendario.mealsEmpty')}</p>`}
+    ${exerciseNames.length ? `<p style="font-size:13px"><strong>${t('calendario.exercisesTitle')}</strong><br>${exerciseNames.join('<br>')}</p>` : ''}
   `,
     (modal) => {
       modal.querySelector('[data-close]')?.addEventListener('click', () => close());

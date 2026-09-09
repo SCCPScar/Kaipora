@@ -1,14 +1,25 @@
+import { t } from '../i18n';
+
 export interface Habit {
   id: string;
   label: string;
 }
 
-export const HABITS: Habit[] = [
-  { id: 'agua', label: 'Bebi a meta de água' },
-  { id: 'sem_agua_refeicao', label: 'Não bebi água nas refeições' },
-  { id: 'suplementos', label: 'Tomei os suplementos' },
-  { id: 'treino', label: 'Fiz o treino do dia' },
-  { id: 'sono', label: 'Dormi 7h ou mais' },
-  { id: 'alimentacao', label: 'Comi bem hoje' },
-  { id: 'pesagem', label: 'Pesei os alimentos' }
-];
+/** Stable ids in display order — used by migrate.ts to resolve a legacy
+ * by-index habit reference without depending on the (locale-dependent)
+ * display labels below. */
+export const HABIT_IDS = ['agua', 'sem_agua_refeicao', 'suplementos', 'treino', 'sono', 'alimentacao', 'pesagem'];
+
+/** A function (not a static array) so the labels re-resolve to the active
+ * locale on every call — see src/i18n. */
+export function getHabits(): Habit[] {
+  return [
+    { id: 'agua', label: t('habits.agua') },
+    { id: 'sem_agua_refeicao', label: t('habits.semAguaRefeicao') },
+    { id: 'suplementos', label: t('habits.suplementos') },
+    { id: 'treino', label: t('habits.treino') },
+    { id: 'sono', label: t('habits.sono') },
+    { id: 'alimentacao', label: t('habits.alimentacao') },
+    { id: 'pesagem', label: t('habits.pesagem') }
+  ];
+}

@@ -18,6 +18,7 @@ import { calendarTab } from './ui/tabs/calendar';
 import { conquistasTab } from './ui/tabs/conquistas';
 import { settingsTab } from './ui/tabs/settings';
 import { showToast } from './ui/components/toast';
+import { t } from './i18n';
 
 /** Shown instead of a blank white screen if migration or the initial render
  * throws — the underlying data in localStorage is untouched either way, so
@@ -27,12 +28,11 @@ function renderBootError(): void {
   app.innerHTML = `
     <div style="max-width:420px;margin:15vh auto 0;padding:0 20px;text-align:center;font-family:'Manrope',-apple-system,sans-serif">
       <img class="boot-mark" src="${import.meta.env.BASE_URL}icons/icon-192.png?v=2" alt="Kaipora" style="width:64px;height:64px;margin-bottom:18px" />
-      <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Algo deu errado ao abrir o app</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">${t('main.bootError.title')}</div>
       <div style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:20px">
-        Seus dados continuam salvos neste aparelho. Tente recarregar a página; se continuar
-        acontecendo, exporte um backup em Ajustes assim que conseguir voltar a entrar.
+        ${t('main.bootError.body')}
       </div>
-      <button class="btn" id="boot-reload">Recarregar</button>
+      <button class="btn" id="boot-reload">${t('main.bootError.reload')}</button>
     </div>
   `;
   document.getElementById('boot-reload')?.addEventListener('click', () => location.reload());
@@ -67,7 +67,7 @@ startBackgroundSync((result) => {
   if (!result.ok) return;
   if (result.pushed > 0 || result.pulled > 0) {
     refreshActive();
-    showToast('Dados sincronizados');
+    showToast(t('main.toast.synced'));
   }
 });
 
@@ -90,13 +90,13 @@ onAuthChange((signedIn) => {
   if (justSignedIn) {
     void fullSync().then((result) => {
       refreshActive();
-      showToast(result.ok ? 'Sessão iniciada e sincronizada' : 'Sessão iniciada. Sincronização falhou, tentando novamente em breve.');
+      showToast(result.ok ? t('main.toast.signedInSynced') : t('main.toast.signedInSyncFailed'));
     });
   } else if (justSignedOut) {
-    showToast('Sessão terminada.');
+    showToast(t('main.toast.signedOut'));
   }
 });
 
 if (migrated) {
-  showToast('Dados antigos migrados para o Kaipora');
+  showToast(t('main.toast.migrated'));
 }
